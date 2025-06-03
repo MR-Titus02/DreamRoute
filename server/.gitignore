@@ -1,0 +1,4 @@
+# Server (Express)
+node_modules/
+.env
+
