@@ -1,15 +1,10 @@
+// routes/courseRoutes.js
 import express from 'express';
-import pool from '../config/db.js';
+import { getAllCourses, getCourseById } from '../controllers/course.controller.js';
 
 const router = express.Router();
 
-router.get('/', async (req, res) => {
-  try {
-    const [rows] = await pool.query('SELECT * FROM courses');
-    res.json(rows);
-  } catch (err) {
-    res.status(500).json({ error: 'Failed to fetch courses', details: err.message });
-  }
-});
+router.get('/', getAllCourses);       // GET /api/courses
+router.get('/:id', getCourseById);    // GET /api/courses/:id
 
 export default router;
