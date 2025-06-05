@@ -1,15 +1,10 @@
+// routes/institutionRoutes.js
 import express from 'express';
-import pool from '../config/db.js';
+import { getAllInstitutions, getInstitutionById } from '../controllers/institution.controller.js';
 
 const router = express.Router();
 
-router.get('/', async (req, res) => {
-  try {
-    const [rows] = await pool.query('SELECT * FROM institutions');
-    res.json(rows);
-  } catch (err) {
-    res.status(500).json({ error: 'Failed to fetch institutions', details: err.message });
-  }
-});
+router.get('/', getAllInstitutions);         // GET /api/institutions
+router.get('/:id', getInstitutionById);      // GET /api/institutions/:id
 
 export default router;
