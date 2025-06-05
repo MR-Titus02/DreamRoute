@@ -12,7 +12,7 @@ export const verifyToken = (req, res, next) => {
 
   try {
     // Verify the token using JWT secret key
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your_jwt_secret_key');
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
     // Attach decoded token data to request object (e.g., userId, email, role)
     req.user = decoded;
