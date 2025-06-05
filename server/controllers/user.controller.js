@@ -1,17 +1,35 @@
+// controllers/userController.js
 import pool from '../config/db.js';
 
-export const getAllUsers = async (req, res) => {
+// Get all users (excluding passwords)
+export async function getAllUsers(req, res) {
   try {
-    // Exclude sensitive fields like password_hash
+    const [users] = await pool.query(
+      'SELECT id, email, role, name, created_at FROM users'
+    );
+    res.json(users);
+  } catch (err) {
+    console.error('Error fetching users:', err);
+    res.status(500).json({ message: 'Server error' });
+  }
+}
+
+// Get user by ID
+export async function getUserById(req, res) {
+  const userId = req.params.id;
+  try {
     const [rows] = await pool.query(
-      'SELECT id, name, email, role, created_at FROM users ORDER BY created_at DESC'
+      'SELECT id, email, role, name, created_at FROM users WHERE id = ?',
+      [userId]
     );
 
-    res.status(200).json({ users: rows });
+    if (rows.length === 0) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    res.json(rows[0]);
   } catch (err) {
-    res.status(500).json({
-      error: 'Failed to fetch users',
-      details: err.message,
-    });
+    console.error('Error fetching user by ID:', err);
+    res.status(500).json({ message: 'Server error' });
   }
-};
+}
