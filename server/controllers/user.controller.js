@@ -1,35 +1,23 @@
 // controllers/userController.js
-import pool from '../config/db.js';
+import * as UserModel from '../models/userModel.js';
 
-// Get all users (excluding passwords)
 export async function getAllUsers(req, res) {
   try {
-    const [users] = await pool.query(
-      'SELECT id, email, role, name, created_at FROM users'
-    );
+    const users = await UserModel.getAllUsers();
     res.json(users);
-  } catch (err) {
-    console.error('Error fetching users:', err);
+  } catch (error) {
+    console.error('Error in getAllUsers:', error);
     res.status(500).json({ message: 'Server error' });
   }
 }
 
-// Get user by ID
 export async function getUserById(req, res) {
-  const userId = req.params.id;
   try {
-    const [rows] = await pool.query(
-      'SELECT id, email, role, name, created_at FROM users WHERE id = ?',
-      [userId]
-    );
-
-    if (rows.length === 0) {
-      return res.status(404).json({ message: 'User not found' });
-    }
-
-    res.json(rows[0]);
-  } catch (err) {
-    console.error('Error fetching user by ID:', err);
+    const user = await UserModel.getUserById(req.params.id);
+    if (!user) return res.status(404).json({ message: 'User not found' });
+    res.json(user);
+  } catch (error) {
+    console.error('Error in getUserById:', error);
     res.status(500).json({ message: 'Server error' });
   }
 }

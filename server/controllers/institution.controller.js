@@ -1,10 +1,9 @@
 // controllers/institutionController.js
-import pool from '../config/db.js';
+import * as InstitutionModel from '../models/institutionModel.js';
 
-// Get all institutions
 export async function getAllInstitutions(req, res) {
   try {
-    const [institutions] = await pool.query('SELECT * FROM institutions');
+    const institutions = await InstitutionModel.getAllInstitutions();
     res.json(institutions);
   } catch (error) {
     console.error('Error fetching institutions:', error);
@@ -12,17 +11,24 @@ export async function getAllInstitutions(req, res) {
   }
 }
 
-// Get institution by ID
 export async function getInstitutionById(req, res) {
-  const institutionId = req.params.id;
-
   try {
-    const [rows] = await pool.query('SELECT * FROM institutions WHERE id = ?', [institutionId]);
-    if (rows.length === 0) return res.status(404).json({ message: 'Institution not found' });
-
-    res.json(rows[0]);
+    const institution = await InstitutionModel.getInstitutionById(req.params.id);
+    if (!institution) return res.status(404).json({ message: 'Institution not found' });
+    res.json(institution);
   } catch (error) {
-    console.error('Error fetching institution:', error);
+    console.error('Error fetching institution by ID:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+}
+
+export async function createInstitution(req, res) {
+  try {
+    const { name, email, phone, latitude, longitude } = req.body;
+    const result = await InstitutionModel.createInstitution({ name, email, phone, latitude, longitude });
+    res.status(201).json({ message: 'Institution created', id: result.id });
+  } catch (error) {
+    console.error('Error creating institution:', error);
     res.status(500).json({ message: 'Server error' });
   }
 }

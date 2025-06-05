@@ -1,14 +1,12 @@
 // models/userModel.js
-import db from '../config/db.js';
+import pool from '../config/db.js';
 
-export async function createUser(name, email, passwordHash, role) {
-  const sql = 'INSERT INTO users (email, password_hash, role) VALUES (?, ?, ?, ?)';
-  const [result] = await db.execute(sql, [name, email, passwordHash, role]);
-  return result;
+export async function getAllUsers() {
+  const [rows] = await pool.query('SELECT id, email, role, name, created_at FROM users');
+  return rows;
 }
 
-export async function findUserByEmail(email) {
-  const sql = 'SELECT * FROM users WHERE email = ?';
-  const [rows] = await db.execute(sql, [email]);
-  return rows[0]; // return first user found or undefined
+export async function getUserById(id) {
+  const [rows] = await pool.query('SELECT id, email, role, name, created_at FROM users WHERE id = ?', [id]);
+  return rows[0];
 }
