@@ -1,7 +1,7 @@
 // controllers/userController.js
 import * as UserModel from '../models/userModel.js';
 import pool from '../config/db.js';
-
+//GetAllUsers
 export async function getAllUsers(req, res) {
   try {
     const users = await UserModel.getAllUsers();
@@ -11,7 +11,7 @@ export async function getAllUsers(req, res) {
     res.status(500).json({ message: 'Server error' });
   }
 }
-
+// GET user by ID
 export async function getUserById(req, res) {
   try {
     const user = await UserModel.getUserById(req.params.id);
@@ -24,6 +24,7 @@ export async function getUserById(req, res) {
 }
 
 
+// updateUser
 // PUT /api/users/:id
 export async function updateUser(req, res) {
   const userId = parseInt(req.params.id);
