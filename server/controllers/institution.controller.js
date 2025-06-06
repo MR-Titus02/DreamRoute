@@ -32,3 +32,37 @@ export async function createInstitution(req, res) {
     res.status(500).json({ message: 'Server error' });
   }
 }
+
+export async function updateInstitution(req, res) {
+  try {
+    const institutionId = req.params.id;
+    const { name, email, phone, latitude, longitude } = req.body;
+
+    const result = await InstitutionModel.updateInstitution(institutionId, { name, email, phone, latitude, longitude });
+    
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: 'Institution not found' });
+    }
+    
+    res.json({ message: 'Institution updated successfully' });
+  } catch (error) {
+    console.error('Error updating institution:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+}
+
+export async function deleteInstitution(req, res) {
+  try {
+    const institutionId = req.params.id;
+    const result = await InstitutionModel.deleteInstitution(institutionId);
+    
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: 'Institution not found' });
+    }
+    
+    res.json({ message: 'Institution deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting institution:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+}

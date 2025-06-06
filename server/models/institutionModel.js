@@ -20,3 +20,17 @@ export async function getAllInstitutions() {
     return { id: result.insertId };
   }
   
+export async function updateInstitution(id, { name, email, phone, latitude, longitude }) {
+    const [result] = await pool.query(
+      `UPDATE institutions
+       SET name = ?, email = ?, phone = ?, latitude = ?, longitude = ?
+       WHERE id = ?`,
+      [name, email, phone, latitude, longitude, id]
+    );
+    return result;
+  }
+
+export async function deleteInstitution(id) {
+    const [result] = await pool.query('DELETE FROM institutions WHERE id = ?', [id]);
+    return result;
+  }
