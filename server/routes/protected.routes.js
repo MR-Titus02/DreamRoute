@@ -14,5 +14,3 @@ router.post('/institution-only', verifyToken, checkRole('institution'), (req, re
 });
 
 export default router;
-
-

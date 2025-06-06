@@ -3,9 +3,9 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import authRoutes from './routes/auth.routes.js';
 import mysql from 'mysql2/promise';
-import protectedRoutes from './routes/protectedRoutes.js';
+import protectedRoutes from './routes/protected.routes.js';
 import userRoutes from './routes/user.routes.js';
-import logger from './utils/logger.js';
+// import logger from './utils/logger.js';
 import courseRoutes from './routes/course.routes.js';
 import institutionRoutes from './routes/institution.routes.js';
 
