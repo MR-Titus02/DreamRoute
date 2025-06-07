@@ -1,10 +1,15 @@
 // routes/courseRoutes.js
 import express from 'express';
-import { getAllCourses, getCourseById } from '../controllers/course.controller.js';
+import { createCourse, getAllCourses, getCourse, updateCourse, deleteCourse } from '../controllers/course.controller.js';
+import { checkInstitutionOrAdmin, verifyToken } from '../middlewares/authMiddleware.js';
 
 const router = express.Router();
 
-router.get('/', getAllCourses);       // GET /api/courses
-router.get('/:id', getCourseById);    // GET /api/courses/:id
+router.get('/', getAllCourses); // public
+router.get('/:id', getCourse); // public
+
+router.post('/', verifyToken, createCourse); // institution or admin
+router.put('/:id', verifyToken, checkInstitutionOrAdmin, updateCourse);
+router.delete('/:id', verifyToken, checkInstitutionOrAdmin, deleteCourse);
 
 export default router;

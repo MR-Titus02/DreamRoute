@@ -1,11 +1,32 @@
 import pool from '../config/db.js';
 
-export async function getAllCourses() {
+export const createCourse = async (title, description, institution_id) => {
+  const [result] = await pool.query(
+    'INSERT INTO courses (title, description, institution_id) VALUES (?, ?, ?)',
+    [title, description, institution_id]
+  );
+  return result.insertId;
+};
+
+export const getAllCourses = async () => {
   const [rows] = await pool.query('SELECT * FROM courses');
   return rows;
-}
+};
 
-export async function getCourseById(id) {
+export const getCourseById = async (id) => {
   const [rows] = await pool.query('SELECT * FROM courses WHERE id = ?', [id]);
   return rows[0];
-}
+};
+
+export const updateCourse = async (id, title, description) => {
+  await pool.query('UPDATE courses SET title = ?, description = ? WHERE id = ?', [title, description, id]);
+};
+
+export const deleteCourse = async (id) => {
+  await pool.query('DELETE FROM courses WHERE id = ?', [id]);
+};
+
+export const getCourseInstitutionId = async (id) => {
+  const [rows] = await pool.query('SELECT institution_id FROM courses WHERE id = ?', [id]);
+  return rows[0]?.institution_id;
+};

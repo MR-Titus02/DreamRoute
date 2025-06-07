@@ -26,7 +26,7 @@ export async function createInstitution(req, res) {
   try {
     const { name, email, phone, latitude, longitude } = req.body;
     const result = await InstitutionModel.createInstitution({ name, email, phone, latitude, longitude });
-    res.status(201).json({ message: 'Institution created', id: result.id });
+    res.status(201).json({ message: 'Institution created', id: result.id, name: name, email: email, phone: phone });
   } catch (error) {
     console.error('Error creating institution:', error);
     res.status(500).json({ message: 'Server error' });

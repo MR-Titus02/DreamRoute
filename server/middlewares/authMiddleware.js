@@ -30,3 +30,19 @@ export const checkRole = (role) => {
   };
 };
 
+
+export const checkInstitutionOrAdmin = async (req, res, next) => {
+  const courseId = req.params.id;
+  const userRole = req.user.role;
+  const userInstitutionId = req.user.institution_id; // Make sure this is in the JWT
+
+  const course = await getCourseById(courseId);
+  if (!course) return res.status(404).json({ error: 'Course not found' });
+
+  if (userRole === 'admin' || course.institution_id === userInstitutionId) {
+    next();
+  } else {
+    return res.status(403).json({ error: 'Access denied' });
+  }
+};
+

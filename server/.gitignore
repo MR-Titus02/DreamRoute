@@ -1,6 +1,6 @@
 # Server (Express)
 node_modules/
 .env
-
+requests.rest
 logs/
 *.log

@@ -49,14 +49,20 @@ export async function login(req, res) {
     if (!isPasswordCorrect) return res.status(401).json({ message: 'Invalid password' });
 
     const token = jwt.sign(
-      { userId: user.id, email: user.email, role: user.role },
+      { userId: user.id, email: user.email, role: user.role, institution_id: user.institution_id },
       JWT_SECRET,
       // { expiresIn: '2h' }
     );
 
-    res.json({ message: 'Login successful', token });
+    res.json({ message: 'Login successful', token : token });
   } catch (error) {
     console.error('Login Error:', error);
     res.status(500).json({ message: 'Server error during login' });
   }
 }
+
+// const token = jwt.sign(
+//   { userId: user.id, email: user.email, role: user.role, institution_id: user.institution_id },
+//   JWT_SECRET,
+//   // { expiresIn: '1h' }
+// );
