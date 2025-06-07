@@ -10,4 +10,3 @@ export default function roleMiddleware(req, res, next) {
   
     return res.status(403).json({ error: 'Access forbidden: Not authorized' });
   }
-  

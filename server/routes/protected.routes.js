@@ -8,6 +8,4 @@ router.get('/dashboard', verifyToken, (req, res) => {
   res.send('Access granted to user dashboard');
 });
 
-
-
 export default router;
