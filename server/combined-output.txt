@@ -1,0 +1,535 @@
+
+
+// ===== controllers/auth.controller.js =====
+
+// controllers/authController.js
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
+import pool from '../config/db.js'; 
+import dotenv from 'dotenv';
+
+
+dotenv.config();
+
+const JWT_SECRET = process.env.JWT_SECRET;
+
+// Register a new user
+export async function register(req, res) {
+  try {
+    const { email, password, role, name, institution_id } = req.body;
+
+    const [existingUser] = await pool.query('SELECT * FROM users WHERE email = ?', [email]);
+
+    if (existingUser.length > 0) {
+      return res.status(400).json({ message: 'Email already exists' });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const [result] = await pool.query(
+      'INSERT INTO users (email, password_hash, role, name, institution_id) VALUES (?, ?, ?, ?, ?)',
+      [email, hashedPassword, role, name, institution_id || null] // null for students/admins
+    );
+
+    res.status(201).json({ message: 'User registered successfully', userId: result.insertId });
+  } catch (error) {
+    console.error('Register Error:', error);
+    res.status(500).json({ message: 'Server error during registration' });
+  }
+}
+
+// Login user
+export async function login(req, res) {
+  try {
+    const { email, password } = req.body;
+
+    const [userRows] = await pool.query('SELECT * FROM users WHERE email = ?', [email]);
+    const user = userRows[0];
+
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    const isPasswordCorrect = await bcrypt.compare(password, user.password_hash);
+
+    if (!isPasswordCorrect) return res.status(401).json({ message: 'Invalid password' });
+
+    const token = jwt.sign(
+      { userId: user.id, email: user.email, role: user.role, institution_id: user.institution_id },
+      JWT_SECRET,
+      // { expiresIn: '2h' }
+    );
+
+    res.json({ message: 'Login successful', token : token });
+  } catch (error) {
+    console.error('Login Error:', error);
+    res.status(500).json({ message: 'Server error during login' });
+  }
+}
+
+// const token = jwt.sign(
+//   { userId: user.id, email: user.email, role: user.role, institution_id: user.institution_id },
+//   JWT_SECRET,
+//   // { expiresIn: '1h' }
+// );
+
+// ===== controllers/course.controller.js =====
+
+import * as Course from '../models/courseModel.js';
+
+export const createCourse = async (req, res) => {
+  const { title, description } = req.body;
+  const institution_id = req.user.institution_id;
+
+  try {
+    const id = await Course.createCourse(title, description, institution_id);
+    res.status(201).json({ message: 'Course created', courseId: id });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+export const getAllCourses = async (req, res) => {
+  const courses = await Course.getAllCourses();
+  res.json(courses);
+};
+
+export const getCourse = async (req, res) => {
+  const course = await Course.getCourseById(req.params.id);
+  if (!course) return res.status(404).json({ error: 'Not found' });
+  res.json(course);
+};
+
+export const updateCourse = async (req, res) => {
+  const { title, description } = req.body;
+  await Course.updateCourse(req.params.id, title, description);
+  res.json({ message: 'Course updated' });
+};
+
+export const deleteCourse = async (req, res) => {
+  await Course.deleteCourse(req.params.id);
+  res.json({ message: 'Course deleted' });
+};
+
+
+// ===== controllers/institution.controller.js =====
+
+// controllers/institutionController.js
+import * as InstitutionModel from '../models/institutionModel.js';
+
+export async function getAllInstitutions(req, res) {
+  try {
+    const institutions = await InstitutionModel.getAllInstitutions();
+    res.json(institutions);
+  } catch (error) {
+    console.error('Error fetching institutions:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+}
+
+export async function getInstitutionById(req, res) {
+  try {
+    const institution = await InstitutionModel.getInstitutionById(req.params.id);
+    if (!institution) return res.status(404).json({ message: 'Institution not found' });
+    res.json(institution);
+  } catch (error) {
+    console.error('Error fetching institution by ID:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+}
+
+export async function createInstitution(req, res) {
+  try {
+    console.log('Full req.body:', req.body);
+    const { name, email, phone, latitude, longitude } = req.body;
+    const result = await InstitutionModel.createInstitution({ name, email, phone, latitude, longitude });
+    res.status(201).json({ message: 'Institution created', id: result.id, name: name, email: email, phone: phone });
+  } catch (error) {
+    console.error('Error creating institution:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+}
+
+export async function updateInstitution(req, res) {
+  try {
+    const institutionId = req.params.id;
+    const { name, email, phone, latitude, longitude } = req.body;
+
+    const result = await InstitutionModel.updateInstitution(institutionId, { name, email, phone, latitude, longitude });
+    
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: 'Institution not found' });
+    }
+    
+    res.json({ message: 'Institution updated successfully', id: result.id, name: name, email: email, phone: phone, latitude: latitude, longitude: longitude });
+  } catch (error) {
+    console.error('Error updating institution:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+}
+
+export async function deleteInstitution(req, res) {
+  try {
+    const institutionId = req.params.id;
+    const result = await InstitutionModel.deleteInstitution(institutionId);
+    
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: 'Institution not found' });
+    }
+    
+    res.json({ message: 'Institution deleted successfully', id: result.id });
+  } catch (error) {
+    console.error('Error deleting institution:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+}
+
+// ===== controllers/user.controller.js =====
+
+// controllers/userController.js
+import * as UserModel from '../models/userModel.js';
+import pool from '../config/db.js';
+//GetAllUsers
+export async function getAllUsers(req, res) {
+  try {
+    const users = await UserModel.getAllUsers();
+    res.json(users);
+  } catch (error) {
+    console.error('Error in getAllUsers:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+}
+// GET user by ID
+export async function getUserById(req, res) {
+  try {
+    const user = await UserModel.getUserById(req.params.id);
+    if (!user) return res.status(404).json({ message: 'User not found' });
+    res.json(user);
+  } catch (error) {
+    console.error('Error in getUserById:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+}
+
+
+// updateUser
+// PUT /api/users/:id
+export async function updateUser(req, res) {
+  const userId = parseInt(req.params.id);
+  const { name, email, role } = req.body;
+
+  try {
+    await pool.query(
+      'UPDATE users SET name = ?, email = ?, role = ? WHERE id = ?',
+      [name, email, role, userId]
+    );
+    res.json({ message: 'User updated successfully' });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to update user', details: err.message });
+  }
+}
+
+// DELETE /api/users/:id
+export async function deleteUser(req, res) {
+  const userId = parseInt(req.params.id);
+
+  try {
+    const [result] = await pool.query('DELETE FROM users WHERE id = ?', [userId]);
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+    res.json({ message: 'User deleted successfully' });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to delete user', details: err.message });
+  }
+}
+
+// ===== models/courseModel.js =====
+
+import pool from '../config/db.js';
+
+export const createCourse = async (title, description, institution_id) => {
+  const [result] = await pool.query(
+    'INSERT INTO courses (title, description, institution_id) VALUES (?, ?, ?)',
+    [title, description, institution_id]
+  );
+  return result.insertId;
+};
+
+export const getAllCourses = async () => {
+  const [rows] = await pool.query('SELECT * FROM courses');
+  return rows;
+};
+
+export const getCourseById = async (id) => {
+  const [rows] = await pool.query('SELECT * FROM courses WHERE id = ?', [id]);
+  return rows[0];
+};
+
+export const updateCourse = async (id, title, description) => {
+  await pool.query('UPDATE courses SET title = ?, description = ? WHERE id = ?', [title, description, id]);
+};
+
+export const deleteCourse = async (id) => {
+  await pool.query('DELETE FROM courses WHERE id = ?', [id]);
+};
+
+export const getCourseInstitutionId = async (id) => {
+  const [rows] = await pool.query('SELECT institution_id FROM courses WHERE id = ?', [id]);
+  return rows[0]?.institution_id;
+};
+
+
+// ===== models/institutionModel.js =====
+
+// models/institutionModel.js
+import pool from '../config/db.js';
+
+export async function getAllInstitutions() {
+    const [rows] = await pool.query('SELECT * FROM institutions');
+    return rows;
+  }
+  
+  export async function getInstitutionById(id) {
+    const [rows] = await pool.query('SELECT * FROM institutions WHERE id = ?', [id]);
+    return rows[0];
+  }
+  
+  export async function createInstitution({ name, email, phone, latitude, longitude }) {
+    const [result] = await pool.query(
+      `INSERT INTO institutions (name, email, phone, latitude, longitude)
+       VALUES (?, ?, ?, ?, ?)`,
+      [name, email, phone, latitude, longitude]
+    );
+    return { id: result.insertId };
+  }
+  
+export async function updateInstitution(id, { name, email, phone, latitude, longitude }) {
+    const [result] = await pool.query(
+      `UPDATE institutions
+       SET name = ?, email = ?, phone = ?, latitude = ?, longitude = ?
+       WHERE id = ?`,
+      [name, email, phone, latitude, longitude, id]
+    );
+    return result;
+  }
+
+export async function deleteInstitution(id) {
+    const [result] = await pool.query('DELETE FROM institutions WHERE id = ?', [id]);
+    return result;
+  }
+
+// ===== models/userModel.js =====
+
+// models/userModel.js
+import pool from '../config/db.js';
+
+export async function getAllUsers() {
+  const [rows] = await pool.query('SELECT id, email, role, name, created_at FROM users');
+  return rows;
+}
+
+export async function getUserById(id) {
+  const [rows] = await pool.query('SELECT id, email, role, name, created_at FROM users WHERE id = ?', [id]);
+  return rows[0];
+}
+
+
+// ===== routes/auth.routes.js =====
+
+// routes/authRoutes.js
+import express from 'express';
+import { body } from 'express-validator';
+import { register, login } from '../controllers/auth.controller.js';
+import { validateRequest } from '../middlewares/validateRequest.js';
+
+const router = express.Router();
+
+router.post(
+    '/register',
+    [
+        body('name').notEmpty().withMessage('Name is required'),
+        body('email').isEmail().withMessage('Enter a valid email'),
+        body('password').isLength({ min: 6 }).withMessage('Password must be at least 6 characters'),
+        body('role').isIn(['student', 'institution', 'admin']).withMessage('Invalid role'),
+        validateRequest
+      ],
+    register
+    );
+
+router.post(
+    '/login',
+    [
+        body('email').isEmail().withMessage('Valid email is required'),
+        body('password').notEmpty().withMessage('Password is required'),
+        validateRequest
+    ],
+    login);
+
+export default router;
+
+
+// ===== routes/course.routes.js =====
+
+// routes/courseRoutes.js
+import express from 'express';
+import { createCourse, getAllCourses, getCourse, updateCourse, deleteCourse } from '../controllers/course.controller.js';
+import { checkInstitutionOrAdmin, verifyToken } from '../middlewares/authMiddleware.js';
+
+const router = express.Router();
+
+router.get('/', getAllCourses); // public
+router.get('/:id', getCourse); // public
+
+router.post('/', verifyToken, createCourse); // institution or admin
+router.put('/:id', verifyToken, checkInstitutionOrAdmin, updateCourse);
+router.delete('/:id', verifyToken, checkInstitutionOrAdmin, deleteCourse);
+
+export default router;
+
+
+// ===== routes/institution.routes.js =====
+
+// routes/institutionRoutes.js
+import express from 'express';
+import { getAllInstitutions, getInstitutionById } from '../controllers/institution.controller.js';
+import adminOnly from '../middlewares/adminOnlyMiddleware.js';
+import { verifyToken, checkRole } from '../middlewares/authMiddleware.js';
+import { body } from 'express-validator';
+// import { createCourse, deleteCourse, updateCourse } from '../models/courseModel.js';
+import { createInstitution, updateInstitution, deleteInstitution } from '../models/institutionModel.js';
+
+const router = express.Router();
+
+router.get('/',verifyToken, adminOnly, getAllInstitutions);         // GET /api/institutions
+router.get('/:id', getInstitutionById);       // GET /api/institutions/:id
+
+// Only accessible by users with the role "institution"
+router.post('/only', verifyToken, checkRole('institution')); 
+
+  // Logic to create a new institution only done by admin
+router.post('/new-ins',
+    [
+        body('name').notEmpty().withMessage('Name is required'),
+        body('email').isEmail().withMessage('Enter a valid email'),
+        body('address').notEmpty().withMessage('Address is required'),
+        body('phone').notEmpty().withMessage('Phone number is required')
+    ],
+    verifyToken, checkRole('admin'), createInstitution);
+
+// Logic to update institution only done by admin
+router.put('/:id',
+    [
+        body('name').notEmpty().withMessage('Name is required'),
+        body('email').isEmail().withMessage('Enter a valid email'),
+        body('address').notEmpty().withMessage('Address is required'),
+        body('phone').notEmpty().withMessage('Phone number is required')
+    ],
+    verifyToken, checkRole('admin'), updateInstitution);
+
+//logic to delete institution only done by admin
+router.delete('/:id', verifyToken, checkRole('admin'), deleteInstitution);
+
+export default router;
+
+// ===== routes/protected.routes.js =====
+
+import express from 'express';
+import { verifyToken, checkRole } from '../middlewares/authMiddleware.js';
+
+const router = express.Router();
+
+// Protected route for all logged-in users
+router.get('/dashboard', verifyToken, (req, res) => {
+  res.send('Access granted to user dashboard');
+});
+
+export default router;
+
+// ===== routes/user.routes.js =====
+
+// routes/userRoutes.js
+import express from 'express';
+import { verifyToken } from '../middlewares/authMiddleware.js';
+import roleMiddleware from '../middlewares/roleMiddlware.js';
+import adminOnly from '../middlewares/adminOnlyMiddleware.js';
+import {
+    getAllUsers,
+     getUserById,
+     updateUser,
+    deleteUser,
+} from '../controllers/user.controller.js';
+
+const router = express.Router();
+
+// GET All users /api/users
+router.get('/', verifyToken, roleMiddleware, getAllUsers);
+
+// GET /api/users/:id
+router.get('/:id', verifyToken, roleMiddleware, getUserById);
+//// PUT /api/users/:id
+router.put('/:id', verifyToken, roleMiddleware, updateUser);
+//delete /api/users/:id
+router.delete('/:id', verifyToken, adminOnly, deleteUser);
+
+export default router;
+
+
+
+
+
+
+
+// ===== config/db.js =====
+
+import mysql from 'mysql2/promise';
+
+const pool = mysql.createPool({
+  host: 'localhost',
+  user: 'root',
+  password: 'Titus@1234',
+  database: 'DB',
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0
+});
+
+export default pool;
+
+
+// ===== server.js =====
+
+import express from 'express';
+import cors from 'cors';
+import dotenv from 'dotenv';
+import authRoutes from './routes/auth.routes.js';
+import mysql from 'mysql2/promise';
+import protectedRoutes from './routes/protected.routes.js';
+import userRoutes from './routes/user.routes.js';
+// import logger from './utils/logger.js';
+import courseRoutes from './routes/course.routes.js';
+import institutionRoutes from './routes/institution.routes.js';
+import errorHandler from './middlewares/errorHandler.js';
+import notFound from './middlewares/notFound.js';
+
+dotenv.config();
+const app = express();
+
+app.use(cors());
+app.use(express.json());
+app.use('/api/auth', authRoutes);
+app.use('/api/protected', protectedRoutes);
+app.use('/api/users', userRoutes);
+app.use('/api/courses', courseRoutes);
+app.use('/api/institutions', institutionRoutes);
+
+
+app.use(notFound);
+app.use(errorHandler);
+
+const connection = await mysql.createConnection(process.env.DATABASE_URL);
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+
+
+// logger.info('Server started');
+// logger.error('Something went wrong');
+

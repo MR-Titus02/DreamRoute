@@ -1,9 +1,10 @@
 // routes/institutionRoutes.js
 import express from 'express';
-import { getAllInstitutions, getInstitutionById } from '../controllers/institution.controller.js';
+import { getAllInstitutions, getInstitutionById, createInstitution, updateInstitution, deleteInstitution } from '../controllers/institution.controller.js';
 import adminOnly from '../middlewares/adminOnlyMiddleware.js';
 import { verifyToken, checkRole } from '../middlewares/authMiddleware.js';
 import { body } from 'express-validator';
+
 
 const router = express.Router();
 
@@ -11,9 +12,7 @@ router.get('/',verifyToken, adminOnly, getAllInstitutions);         // GET /api/
 router.get('/:id', getInstitutionById);       // GET /api/institutions/:id
 
 // Only accessible by users with the role "institution"
-router.post('/only', verifyToken, checkRole('institution'), (req, res) => {
-    res.send('Access granted to institution');
-  }); 
+router.post('/only', verifyToken, checkRole('institution')); 
 
   // Logic to create a new institution only done by admin
 router.post('/new-ins',
@@ -23,9 +22,7 @@ router.post('/new-ins',
         body('address').notEmpty().withMessage('Address is required'),
         body('phone').notEmpty().withMessage('Phone number is required')
     ],
-    verifyToken, checkRole('admin'), (req, res) => {
-    res.send('New institution created');
-});
+    verifyToken, checkRole('admin'), createInstitution);
 
 // Logic to update institution only done by admin
 router.put('/:id',
@@ -35,14 +32,9 @@ router.put('/:id',
         body('address').notEmpty().withMessage('Address is required'),
         body('phone').notEmpty().withMessage('Phone number is required')
     ],
-    verifyToken, checkRole('admin'), (req, res) => {
-    res.send(`Institution with ID ${req.params.id} updated`);
-});
+    verifyToken, checkRole('admin'), updateInstitution);
 
 //logic to delete institution only done by admin
-router.delete('/:id', verifyToken, checkRole('admin'), (req, res) => {
-    res.send(`Institution with ID ${req.params.id} deleted`);
-});
+router.delete('/:id', verifyToken, checkRole('admin'), deleteInstitution);
 
 export default router;
-
