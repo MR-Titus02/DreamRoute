@@ -12,7 +12,7 @@ const JWT_SECRET = process.env.JWT_SECRET;
 // Register a new user
 export async function register(req, res) {
   try {
-    const { email, password, role, name, institution_id } = req.body;
+    const { email, password, role, name } = req.body;
 
     const [existingUser] = await pool.query('SELECT * FROM users WHERE email = ?', [email]);
 
@@ -23,8 +23,8 @@ export async function register(req, res) {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const [result] = await pool.query(
-      'INSERT INTO users (email, password_hash, role, name, institution_id) VALUES (?, ?, ?, ?, ?)',
-      [email, hashedPassword, role, name, institution_id || null] // null for students/admins
+      'INSERT INTO users (email, password, role, name) VALUES (?, ?, ?, ?)',
+      [email, hashedPassword, role, name]
     );
 
     res.status(201).json({ message: 'User registered successfully', userId: result.insertId });
@@ -44,7 +44,7 @@ export async function login(req, res) {
 
     if (!user) return res.status(404).json({ message: 'User not found' });
 
-    const isPasswordCorrect = await bcrypt.compare(password, user.password_hash);
+    const isPasswordCorrect = await bcrypt.compare(password, user.password);
 
     if (!isPasswordCorrect) return res.status(401).json({ message: 'Invalid password' });
 

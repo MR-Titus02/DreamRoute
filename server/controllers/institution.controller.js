@@ -34,23 +34,28 @@ export async function createInstitution(req, res) {
   }
 }
 
-export async function updateInstitution(req, res) {
-  try {
-    const institutionId = req.params.id;
-    const { name, email, phone, latitude, longitude } = req.body;
+export const updateInstitution = async (req, res) => {
+  const userId = req.user.id;
+  const { name, description, location, contact_email } = req.body;
 
-    const result = await InstitutionModel.updateInstitution(institutionId, { name, email, phone, latitude, longitude });
-    
-    if (result.affectedRows === 0) {
-      return res.status(404).json({ message: 'Institution not found' });
+  try {
+    const [institution] = await db.query('SELECT * FROM institutions WHERE user_id = ?', [userId]);
+
+    if (institution.length === 0) {
+      return res.status(404).json({ error: 'Institution not found' });
     }
-    
-    res.json({ message: 'Institution updated successfully'});
+
+    await db.query(
+      `UPDATE institutions SET name = ?, description = ?, location = ?, contact_email = ? WHERE user_id = ?`,
+      [name, description, location, contact_email, userId]
+    );
+
+    res.status(200).json({ message: 'Institution details updated successfully' });
   } catch (error) {
-    console.error('Error updating institution:', error);
-    res.status(500).json({ message: 'Server error' });
+    console.error(error);
+    res.status(500).json({ error: 'Failed to update institution details' });
   }
-}
+};
 
 export async function deleteInstitution(req, res) {
   try {
