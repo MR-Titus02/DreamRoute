@@ -9,8 +9,10 @@ import userRoutes from './routes/user.routes.js';
 import courseRoutes from './routes/course.routes.js';
 import institutionRoutes from './routes/institution.routes.js';
 import adminRoutes from './routes/admin.route.js';
+import feedbackRoutes from './routes/feedback.routes.js';
 import errorHandler from './middlewares/errorHandler.js';
 import notFound from './middlewares/notFound.js';
+
 
 dotenv.config();
 const app = express();
@@ -23,7 +25,7 @@ app.use('/api/users', userRoutes);
 app.use('/api/courses', courseRoutes);
 app.use('/api/institutions', institutionRoutes);
 app.use('/api/admin', adminRoutes);
-
+app.use('/api/feedbacks', feedbackRoutes);
 
 app.use(notFound);
 app.use(errorHandler);
