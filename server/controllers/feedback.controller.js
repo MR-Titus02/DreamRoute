@@ -1,74 +1,57 @@
-import {
-    createFeedback,
-    getAllFeedbacks,
-    getFeedbackById,
-    updateFeedback,
-    deleteFeedback,
-  } from '../models/feedbackModel.js';
-  
-  export const postFeedback = async (req, res) => {
-    try {
-      const userId = req.user.id; // From auth middleware
-      const { message, rating } = req.body;
-  
-      if (!message) return res.status(400).json({ message: 'Message is required' });
-  
-      const feedback = await createFeedback(userId, message, rating || null);
-      res.status(201).json({ message: 'Feedback submitted', feedback });
-    } catch (err) {
-      res.status(500).json({ message: err.message });
+// feedbackController.js
+import * as feedbackModel from '../models/feedbackModel.js';
+
+export async function getAllFeedbacks(req, res) {
+  try {
+    const feedbacks = await feedbackModel.getAllFeedbacksFromDb();
+    res.json(feedbacks);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+}
+
+export async function getFeedbackById(req, res) {
+  try {
+    const feedback = await feedbackModel.getFeedbackByIdFromDb(req.params.id);
+    if (!feedback) return res.status(404).json({ message: 'Feedback not found' });
+    res.json(feedback);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+}
+
+export async function createFeedback(req, res) {
+  try {
+    const user_id = req.user.userId;
+    const {  course_id, institution_id, message, rating } = req.body;
+    
+
+    if (!message || !rating || (!course_id && !institution_id)) {
+      return res.status(400).json({ message: 'Missing required fields' });
     }
-  };
-  
-  export const getFeedbacks = async (req, res) => {
-    try {
-      const feedbacks = await getAllFeedbacks();
-      res.json(feedbacks);
-    } catch (err) {
-      res.status(500).json({ message: err.message });
-    }
-  };
-  
-  export const getFeedback = async (req, res) => {
-    try {
-      const feedback = await getFeedbackById(req.params.id);
-      if (!feedback) return res.status(404).json({ message: 'Feedback not found' });
-      res.json(feedback);
-    } catch (err) {
-      res.status(500).json({ message: err.message });
-    }
-  };
-  
-  export const putFeedback = async (req, res) => {
-    try {
-      const feedback = await getFeedbackById(req.params.id);
-      if (!feedback) return res.status(404).json({ message: 'Feedback not found' });
-  
-      if (req.user.id !== feedback.user_id && req.user.role !== 'admin') {
-        return res.status(403).json({ message: 'Not authorized to update this feedback' });
-      }
-  
-      const { message, rating } = req.body;
-      await updateFeedback(req.params.id, message, rating);
-      res.json({ message: 'Feedback updated' });
-    } catch (err) {
-      res.status(500).json({ message: err.message });
-    }
-  };
-  
-  export const deleteFeedbackById = async (req, res) => {
-    try {
-      const feedback = await getFeedbackById(req.params.id);
-      if (!feedback) return res.status(404).json({ message: 'Feedback not found' });
-  
-      if (req.user.id !== feedback.user_id && req.user.role !== 'admin') {
-        return res.status(403).json({ message: 'Not authorized to delete this feedback' });
-      }
-  
-      await deleteFeedback(req.params.id);
-      res.json({ message: 'Feedback deleted' });
-    } catch (err) {
-      res.status(500).json({ message: err.message });
-    }
-  };
-  
+
+    const feedbackId = await feedbackModel.createFeedbackInDb({ user_id, course_id, institution_id, message, rating });
+    res.status(201).json({ id: feedbackId, message: 'Feedback created' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+    // console.log('User from token:', req.user);
+  }
+}
+
+export async function updateFeedback(req, res) {
+  try {
+    await feedbackModel.updateFeedbackInDb(req.params.id, req.body);
+    res.json({ message: 'Feedback updated' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+}
+
+export async function deleteFeedback(req, res) {
+  try {
+    await feedbackModel.deleteFeedbackFromDb(req.params.id);
+    res.json({ message: 'Feedback deleted' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+}

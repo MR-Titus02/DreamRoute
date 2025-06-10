@@ -1,22 +1,20 @@
+// feedback.routes.js
 import express from 'express';
-import {
-  postFeedback,
-  getFeedbacks,
-  getFeedback,
-  putFeedback,
-  deleteFeedbackById,
-} from '../controllers/feedback.controller.js';
 import { verifyToken } from '../middlewares/authMiddleware.js';
+import {
+  getAllFeedbacks,
+  getFeedbackById,
+  createFeedback,
+  updateFeedback,
+  deleteFeedback
+} from '../controllers/feedback.controller.js';
 
 const router = express.Router();
 
-// Public - Read feedbacks
-router.get('/', getFeedbacks);
-router.get('/:id', getFeedback);
-
-// Protected - Create, Update, Delete
-router.post('/', verifyToken, postFeedback);
-router.put('/:id', verifyToken, putFeedback);
-router.delete('/:id', verifyToken, deleteFeedbackById);
+router.get('/', getAllFeedbacks);
+router.get('/:id', getFeedbackById);
+router.post('/', verifyToken, createFeedback);
+router.put('/:id', verifyToken, updateFeedback);
+router.delete('/:id', verifyToken, deleteFeedback);
 
 export default router;

@@ -1,5 +1,38 @@
 
 
+// ===== controllers/admin.controller.js =====
+
+import pool from '../config/db.js';
+
+export const changeUserRole = async (req, res) => {
+  const { id } = req.params;
+  const { role } = req.body;
+
+  try {
+    const [user] = await pool.query('SELECT * FROM users WHERE id = ?', [id]);
+    if (!user.length) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // Update user role
+    await pool.query('UPDATE users SET role = ? WHERE id = ?', [role, id]);
+
+    // If role changed to institution and not already in institutions table
+    if (role === 'institution') {
+      const [institution] = await pool.query('SELECT * FROM institutions WHERE user_id = ?', [id]);
+      if (!institution.length) {
+        await pool.query('INSERT INTO institutions (user_id) VALUES (?)', [id]);
+      }
+    }
+
+    res.status(200).json({ message: 'User role updated successfully' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Server error while updating user role' });
+  }
+};
+
+
 // ===== controllers/auth.controller.js =====
 
 // controllers/authController.js
@@ -16,7 +49,7 @@ const JWT_SECRET = process.env.JWT_SECRET;
 // Register a new user
 export async function register(req, res) {
   try {
-    const { email, password, role, name, institution_id } = req.body;
+    const { email, password, role, name } = req.body;
 
     const [existingUser] = await pool.query('SELECT * FROM users WHERE email = ?', [email]);
 
@@ -27,8 +60,8 @@ export async function register(req, res) {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const [result] = await pool.query(
-      'INSERT INTO users (email, password_hash, role, name, institution_id) VALUES (?, ?, ?, ?, ?)',
-      [email, hashedPassword, role, name, institution_id || null] // null for students/admins
+      'INSERT INTO users (email, password, role, name) VALUES (?, ?, ?, ?)',
+      [email, hashedPassword, role, name]
     );
 
     res.status(201).json({ message: 'User registered successfully', userId: result.insertId });
@@ -48,7 +81,7 @@ export async function login(req, res) {
 
     if (!user) return res.status(404).json({ message: 'User not found' });
 
-    const isPasswordCorrect = await bcrypt.compare(password, user.password_hash);
+    const isPasswordCorrect = await bcrypt.compare(password, user.password);
 
     if (!isPasswordCorrect) return res.status(401).json({ message: 'Invalid password' });
 
@@ -64,37 +97,6 @@ export async function login(req, res) {
     res.status(500).json({ message: 'Server error during login' });
   }
 }
-
-const registerInstitution = async (req, res) => {
-  const { name, email, password, institutionName } = req.body;
-
-  try {
-    // 1. Hash password
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    // 2. Create user
-    const [userResult] = await pool.query(
-      'INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)',
-      [name, email, hashedPassword, 'institution']
-    );
-
-    const userId = userResult.insertId;
-
-    // 3. Create institution linked to user
-    await pool.query(
-      'INSERT INTO institutions (name, user_id) VALUES (?, ?)',
-      [institutionName, userId]
-    );
-
-    res.status(201).json({ message: 'Institution registered successfully' });
-  } catch (err) {
-    console.error('Error registering institution:', err);
-    res.status(500).json({ error: 'Server error during registration' });
-  }
-};
-
-
-
 
 // const token = jwt.sign(
 //   { userId: user.id, email: user.email, role: user.role, institution_id: user.institution_id },
@@ -187,6 +189,70 @@ export const deleteCourse = async (req, res) => {
 };
 
 
+// ===== controllers/feedback.controller.js =====
+
+// feedbackController.js
+import {
+  getAllFeedbacksFromDb,
+  getFeedbackByIdFromDb,
+  createFeedbackInDb,
+  updateFeedbackInDb,
+  deleteFeedbackFromDb
+} from '../models/feedbackModel.js';
+
+export async function getAllFeedbacks(req, res) {
+  try {
+    const feedbacks = await getAllFeedbacksFromDb();
+    res.json(feedbacks);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+}
+
+export async function getFeedbackById(req, res) {
+  try {
+    const feedback = await getFeedbackByIdFromDb(req.params.id);
+    if (!feedback) return res.status(404).json({ message: 'Feedback not found' });
+    res.json(feedback);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+}
+
+export async function createFeedback(req, res) {
+  try {
+    const { course_id, institution_id, message, rating } = req.body;
+    const user_id = req.user.id;
+
+    if (!message || !rating || (!course_id && !institution_id)) {
+      return res.status(400).json({ message: 'Missing required fields' });
+    }
+
+    const feedbackId = await createFeedbackInDb({ user_id, course_id, institution_id, message, rating });
+    res.status(201).json({ id: feedbackId, message: 'Feedback created' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+}
+
+export async function updateFeedback(req, res) {
+  try {
+    await updateFeedbackInDb(req.params.id, req.body);
+    res.json({ message: 'Feedback updated' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+}
+
+export async function deleteFeedback(req, res) {
+  try {
+    await deleteFeedbackFromDb(req.params.id);
+    res.json({ message: 'Feedback deleted' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+}
+
 // ===== controllers/institution.controller.js =====
 
 // controllers/institutionController.js
@@ -225,23 +291,28 @@ export async function createInstitution(req, res) {
   }
 }
 
-export async function updateInstitution(req, res) {
-  try {
-    const institutionId = req.params.id;
-    const { name, email, phone, latitude, longitude } = req.body;
+export const updateInstitution = async (req, res) => {
+  const userId = req.user.id;
+  const { name, description, location, contact_email } = req.body;
 
-    const result = await InstitutionModel.updateInstitution(institutionId, { name, email, phone, latitude, longitude });
-    
-    if (result.affectedRows === 0) {
-      return res.status(404).json({ message: 'Institution not found' });
+  try {
+    const [institution] = await db.query('SELECT * FROM institutions WHERE user_id = ?', [userId]);
+
+    if (institution.length === 0) {
+      return res.status(404).json({ error: 'Institution not found' });
     }
-    
-    res.json({ message: 'Institution updated successfully'});
+
+    await db.query(
+      `UPDATE institutions SET name = ?, description = ?, location = ?, contact_email = ? WHERE user_id = ?`,
+      [name, description, location, contact_email, userId]
+    );
+
+    res.status(200).json({ message: 'Institution details updated successfully' });
   } catch (error) {
-    console.error('Error updating institution:', error);
-    res.status(500).json({ message: 'Server error' });
+    console.error(error);
+    res.status(500).json({ error: 'Failed to update institution details' });
   }
-}
+};
 
 export async function deleteInstitution(req, res) {
   try {
@@ -355,6 +426,39 @@ export const getCourseInstitutionId = async (id) => {
 };
 
 
+// ===== models/feedbackModel.js =====
+
+import pool from '../config/db.js';
+
+export async function getAllFeedbacksFromDb() {
+  const [rows] = await pool.query('SELECT * FROM feedbacks');
+  return rows;
+}
+
+export async function getFeedbackByIdFromDb(id) {
+  const [rows] = await pool.query('SELECT * FROM feedbacks WHERE id = ?', [id]);
+  return rows[0];
+}
+
+export async function createFeedbackInDb({ user_id, course_id, institution_id, message, rating }) {
+  const [result] = await pool.query(
+    'INSERT INTO feedbacks (user_id, course_id, institution_id, message, rating) VALUES (?, ?, ?, ?, ?)',
+    [user_id, course_id || null, institution_id || null, message, rating]
+  );
+  return result.insertId;
+}
+
+export async function updateFeedbackInDb(id, { message, rating }) {
+  await pool.query(
+    'UPDATE feedbacks SET message = ?, rating = ? WHERE id = ?',
+    [message, rating, id]
+  );
+}
+
+export async function deleteFeedbackFromDb(id) {
+  await pool.query('DELETE FROM feedbacks WHERE id = ?', [id]);
+}
+
 // ===== models/institutionModel.js =====
 
 // models/institutionModel.js
@@ -408,6 +512,21 @@ export async function getUserById(id) {
   const [rows] = await pool.query('SELECT id, email, role, name, created_at FROM users WHERE id = ?', [id]);
   return rows[0];
 }
+
+
+// ===== routes/admin.route.js =====
+
+import express from 'express';
+import { changeUserRole } from '../controllers/admin.controller.js';
+import { verifyToken } from '../middlewares/authMiddleware.js';
+import adminOnly from '../middlewares/adminOnlyMiddleware.js';
+
+const router = express.Router();
+
+// Admin route to change user role
+router.put('/change/:id', verifyToken, adminOnly, changeUserRole);
+
+export default router;
 
 
 // ===== routes/auth.routes.js =====
@@ -471,13 +590,36 @@ router.delete('/:id', verifyToken, deleteCourse); // Only owner institution or a
 export default router;
 
 
+// ===== routes/feedback.routes.js =====
+
+// feedback.routes.js
+import express from 'express';
+import { verifyToken } from '../middlewares/authMiddleware.js';
+import {
+  getAllFeedbacks,
+  getFeedbackById,
+  createFeedback,
+  updateFeedback,
+  deleteFeedback
+} from '../controllers/feedback.controller.js';
+
+const router = express.Router();
+
+router.get('/', getAllFeedbacks);
+router.get('/:id', getFeedbackById);
+router.post('/', verifyToken, createFeedback);
+router.put('/:id', verifyToken, updateFeedback);
+router.delete('/:id', verifyToken, deleteFeedback);
+
+export default router;
+
 // ===== routes/institution.routes.js =====
 
 // routes/institutionRoutes.js
 import express from 'express';
 import { getAllInstitutions, getInstitutionById, createInstitution, updateInstitution, deleteInstitution } from '../controllers/institution.controller.js';
 import adminOnly from '../middlewares/adminOnlyMiddleware.js';
-import { verifyToken, checkRole } from '../middlewares/authMiddleware.js';
+import { verifyToken, checkRole, isInstitution } from '../middlewares/authMiddleware.js';
 import { body } from 'express-validator';
 
 
@@ -511,6 +653,9 @@ router.put('/:id',
 
 //logic to delete institution only done by admin
 router.delete('/:id', verifyToken, checkRole('admin'), deleteInstitution);
+
+router.put('/update', verifyToken, isInstitution, updateInstitution);
+
 
 export default router;
 
@@ -570,7 +715,7 @@ const pool = mysql.createPool({
   host: 'localhost',
   user: 'root',
   password: 'Titus@1234',
-  database: 'DB',
+  database: 'career_guidance_app',
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0
@@ -591,8 +736,11 @@ import userRoutes from './routes/user.routes.js';
 // import logger from './utils/logger.js';
 import courseRoutes from './routes/course.routes.js';
 import institutionRoutes from './routes/institution.routes.js';
+import adminRoutes from './routes/admin.route.js';
+import feedbackRoutes from './routes/feedback.routes.js';
 import errorHandler from './middlewares/errorHandler.js';
 import notFound from './middlewares/notFound.js';
+
 
 dotenv.config();
 const app = express();
@@ -604,7 +752,8 @@ app.use('/api/protected', protectedRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/courses', courseRoutes);
 app.use('/api/institutions', institutionRoutes);
-
+app.use('/api/admin', adminRoutes);
+app.use('/api/feedbacks', feedbackRoutes);
 
 app.use(notFound);
 app.use(errorHandler);

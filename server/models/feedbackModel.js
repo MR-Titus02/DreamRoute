@@ -1,32 +1,30 @@
-import db from '../config/db.js';
+import pool from '../config/db.js';
 
-export const createFeedback = async (userId, message, rating) => {
-  const [result] = await db.query(
-    'INSERT INTO feedbacks (user_id, message, rating) VALUES (?, ?, ?)',
-    [userId, message, rating]
-  );
-  return { id: result.insertId, user_id: userId, message, rating };
-};
-
-export const getAllFeedbacks = async () => {
-  const [rows] = await db.query(
-    'SELECT f.*, u.name AS user_name FROM feedbacks f JOIN users u ON f.user_id = u.id ORDER BY f.created_at DESC'
-  );
+export async function getAllFeedbacksFromDb() {
+  const [rows] = await pool.query('SELECT * FROM feedbacks');
   return rows;
-};
+}
 
-export const getFeedbackById = async (id) => {
-  const [rows] = await db.query('SELECT * FROM feedbacks WHERE id = ?', [id]);
+export async function getFeedbackByIdFromDb(id) {
+  const [rows] = await pool.query('SELECT * FROM feedbacks WHERE id = ?', [id]);
   return rows[0];
-};
+}
 
-export const updateFeedback = async (id, message, rating) => {
-  await db.query(
+export async function createFeedbackInDb({ user_id, course_id, institution_id, message, rating }) {
+  const [result] = await pool.query(
+    'INSERT INTO feedbacks (user_id, course_id, institution_id, message, rating) VALUES (?, ?, ?, ?, ?)',
+    [user_id, course_id || null, institution_id || null, message, rating]
+  );
+  return result.insertId;
+}
+
+export async function updateFeedbackInDb(id, { message, rating }) {
+  await pool.query(
     'UPDATE feedbacks SET message = ?, rating = ? WHERE id = ?',
     [message, rating, id]
   );
-};
+}
 
-export const deleteFeedback = async (id) => {
-  await db.query('DELETE FROM feedbacks WHERE id = ?', [id]);
-};
+export async function deleteFeedbackFromDb(id) {
+  await pool.query('DELETE FROM feedbacks WHERE id = ?', [id]);
+}

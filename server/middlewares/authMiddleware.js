@@ -1,26 +1,21 @@
 import jwt from 'jsonwebtoken';
+import pool from '../config/db.js';
 
-export const verifyToken = (req, res, next) => {
-  const authHeader = req.headers.authorization;
+export const verifyToken = async (req, res, next) => {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1]; // Format: "Bearer <token>"
 
-  // Check if Authorization header is missing or doesn't start with Bearer
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    return res.status(401).json({ error: 'No token provided' });
+  if (!token) {
+    return res.status(401).json({ message: 'Missing token' });
   }
 
-  const token = authHeader.split(' ')[1];
+  jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
+    if (err) return res.status(403).json({ message: 'Invalid token' });
 
-  try {
-    // Verify the token using JWT secret key
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
-    // Attach decoded token data to request object (e.g., userId, email, role)
-    req.user = decoded;
+    req.user = user; // This must contain user.id and user.role
     next();
-  } catch (err) {
-    return res.status(403).json({ error: 'Invalid or expired token' });
-  }
-};
+  });
+}
 export const checkRole = (role) => {
   return (req, res, next) => {
     if (req.user.role !== role) {
