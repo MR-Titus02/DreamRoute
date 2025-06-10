@@ -47,7 +47,7 @@ export const getCourseById = async (req, res) => {
 
 export const updateCourse = async (req, res) => {
   const courseId = req.params.id;
-  const { title, description } = req.body;
+  const { title, description, duration, price } = req.body;
 
   try {
     const courseInstitutionId = await getCourseInstitutionId(courseId);
@@ -56,7 +56,7 @@ export const updateCourse = async (req, res) => {
       return res.status(403).json({ error: 'Not authorized to update this course' });
     }
 
-    await CourseModel.updateCourse(courseId, title, description);
+    await CourseModel.updateCourse(courseId, title, description, duration, price);
     res.json({ message: 'Course updated successfully' });
   } catch (err) {
     res.status(500).json({ error: 'Server error while updating course' });

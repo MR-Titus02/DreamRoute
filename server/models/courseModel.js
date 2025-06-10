@@ -18,8 +18,8 @@ export const getCourseById = async (id) => {
   return rows[0];
 };
 
-export const updateCourse = async (id, title, description) => {
-  await pool.query('UPDATE courses SET title = ?, description = ? WHERE id = ?', [title, description, id]);
+export const updateCourse = async (id, title, description, duration, price) => {
+  await pool.query('UPDATE courses SET title = ?, description = ?, duration = ?, price = ? WHERE id = ?', [title, description, duration, price, id]);
 };
 
 export const deleteCourse = async (id) => {
