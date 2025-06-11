@@ -7,7 +7,7 @@ import {
   deleteCourse
 } from '../controllers/course.controller.js';
 
-import { checkInstitutionOrAdmin, verifyToken } from '../middlewares/authMiddleware.js';
+import { verifyToken } from '../middlewares/authMiddleware.js';
 
 const router = express.Router();
 

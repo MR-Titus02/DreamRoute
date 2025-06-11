@@ -1,14 +1,14 @@
 // routes/institutionRoutes.js
 import express from 'express';
 import { getAllInstitutions, getInstitutionById, createInstitution, updateInstitution, deleteInstitution } from '../controllers/institution.controller.js';
-import adminOnly from '../middlewares/adminOnlyMiddleware.js';
-import { verifyToken, checkRole, isInstitution } from '../middlewares/authMiddleware.js';
+
+import { verifyToken, checkRole } from '../middlewares/authMiddleware.js';
 import { body } from 'express-validator';
 
 
 const router = express.Router();
 
-router.get('/',verifyToken, adminOnly, getAllInstitutions);         // GET /api/institutions
+router.get('/',verifyToken, checkRole('admin'), getAllInstitutions);         // GET /api/institutions
 router.get('/:id', getInstitutionById);       // GET /api/institutions/:id
 
 // Only accessible by users with the role "institution"
@@ -36,7 +36,7 @@ router.put('/:id',
 //logic to delete institution only done by admin
 router.delete('/:id', verifyToken, checkRole('admin'), deleteInstitution);
 
-router.put('/update', verifyToken, isInstitution, updateInstitution);
+router.put('/update', verifyToken, updateInstitution);
 
 
 export default router;
