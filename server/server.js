@@ -11,6 +11,8 @@ import adminRoutes from './routes/admin.route.js';
 import feedbackRoutes from './routes/feedback.routes.js';
 import errorHandler from './middlewares/errorHandler.js';
 import notFound from './middlewares/notFound.js';
+import AI from './routes/ai.route.js';
+import profileRoutes from './routes/profile.routes.js';
 
 
 dotenv.config();
@@ -24,6 +26,8 @@ app.use('/api/courses', courseRoutes);
 app.use('/api/institutions', institutionRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/feedbacks', feedbackRoutes);
+app.use('/api/ai', AI);
+app.use('/api/profile', profileRoutes);
 
 app.use(notFound);
 app.use(errorHandler);
