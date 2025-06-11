@@ -2,7 +2,6 @@
 import express from 'express';
 import { verifyToken } from '../middlewares/authMiddleware.js';
 import roleMiddleware from '../middlewares/roleMiddlware.js';
-import adminOnly from '../middlewares/adminOnlyMiddleware.js';
 import {
     getAllUsers,
      getUserById,
@@ -20,7 +19,7 @@ router.get('/:id', verifyToken, roleMiddleware, getUserById);
 //// PUT /api/users/:id
 router.put('/:id', verifyToken, roleMiddleware, updateUser);
 //delete /api/users/:id
-router.delete('/:id', verifyToken, adminOnly, deleteUser);
+router.delete('/:id', verifyToken, roleMiddleware, deleteUser);
 
 export default router;
 

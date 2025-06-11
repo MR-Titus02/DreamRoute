@@ -26,27 +26,27 @@ export const checkRole = (role) => {
 };
 
 
-export const checkInstitutionOrAdmin = async (req, res, next) => {
-  const courseId = req.params.id;
-  const userRole = req.user.role;
-  const userInstitutionId = req.user.institution_id; // Make sure this is in the JWT
+// export const checkInstitutionOrAdmin = async (req, res, next) => {
+//   const courseId = req.params.id;
+//   const userRole = req.user.role;
+//   const userInstitutionId = req.user.institution_id; // Make sure this is in the JWT
 
-  const course = await getCourseById(courseId);
-  if (!course) return res.status(404).json({ error: 'Course not found' });
+//   const course = await getCourseById(courseId);
+//   if (!course) return res.status(404).json({ error: 'Course not found' });
 
-  if (userRole === 'admin' || course.institution_id === userInstitutionId) {
-    next();
-  } else {
-    return res.status(403).json({ error: 'Access denied' });
-  }
-};
+//   if (userRole === 'admin' || course.institution_id === userInstitutionId) {
+//     next();
+//   } else {
+//     return res.status(403).json({ error: 'Access denied' });
+//   }
+// };
 
-export const isInstitution = (req, res, next) => {
-  if (req.user.role === 'institution') {
-    return next();
-  }
-  return res.status(403).json({ error: 'Access denied. Not an institution.' });
-};
+// export const isInstitution = (req, res, next) => {
+//   if (req.user.role === 'institution') {
+//     return next();
+//   }
+//   return res.status(403).json({ error: 'Access denied. Not an institution.' });
+// };
 
 // export const isAdmin = (req, res, next) => {
 //   if (req.user.role === 'admin') {
