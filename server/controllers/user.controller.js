@@ -28,12 +28,12 @@ export async function getUserById(req, res) {
 // PUT /api/users/:id
 export async function updateUser(req, res) {
   const userId = parseInt(req.params.id);
-  const { name, email, role } = req.body;
+  const { name, email } = req.body;
 
   try {
     await pool.query(
-      'UPDATE users SET name = ?, email = ?, role = ? WHERE id = ?',
-      [name, email, role, userId]
+      'UPDATE users SET name = ?, email = ? WHERE id = ?',
+      [name, email, userId]
     );
     res.json({ message: 'User updated successfully' });
   } catch (err) {

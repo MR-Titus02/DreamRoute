@@ -11,24 +11,26 @@ export async function getAllInstitutions() {
     return rows[0];
   }
   
-  export async function createInstitution({ name, email, phone, latitude, longitude }) {
+  export async function createInstitution({ user_id, name, email, description, address }) {
+    // const user_id = req.user.user_id;
     const [result] = await pool.query(
-      `INSERT INTO institutions (name, email, phone, latitude, longitude)
+      `INSERT INTO institutions ( user_id ,name, email, description, address)
        VALUES (?, ?, ?, ?, ?)`,
-      [name, email, phone, latitude, longitude]
+      [ user_id ,name, email, description, address]
     );
     return { id: result.insertId };
   }
   
-export async function updateInstitution(id, { name, email, phone, latitude, longitude }) {
+  export async function updateInstitution({ id, user_id, name, email, description, address }) {
     const [result] = await pool.query(
       `UPDATE institutions
-       SET name = ?, email = ?, phone = ?, latitude = ?, longitude = ?
+       SET user_id = ?, name = ?, email = ?, description = ?, address = ?
        WHERE id = ?`,
-      [name, email, phone, latitude, longitude, id]
+      [user_id, name, email, description, address, id]
     );
     return result;
   }
+  
 
 export async function deleteInstitution(id) {
     const [result] = await pool.query('DELETE FROM institutions WHERE id = ?', [id]);

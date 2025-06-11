@@ -27,6 +27,7 @@ app.use('/api/feedbacks', feedbackRoutes);
 
 app.use(notFound);
 app.use(errorHandler);
+app.use(express.urlencoded({ extended: true }));
 
 const connection = await mysql.createConnection(process.env.DATABASE_URL);
 const PORT = process.env.PORT || 5000;

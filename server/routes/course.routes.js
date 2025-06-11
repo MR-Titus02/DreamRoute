@@ -16,8 +16,8 @@ router.get('/', getAllCourses);
 router.get('/:id', getCourseById);
 
 // Protected Routes
-router.post('/', verifyToken, createCourse); // institution or admin
-router.put('/:id', verifyToken, updateCourse); // Only owner institution or admin
-router.delete('/:id', verifyToken, deleteCourse); // Only owner institution or admin
+router.post('/', verifyToken, createCourse); 
+router.put('/:id', verifyToken, updateCourse); 
+router.delete('/:id', verifyToken, deleteCourse); 
 
 export default router;

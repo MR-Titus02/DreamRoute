@@ -1,5 +1,6 @@
 // controllers/institutionController.js
 import * as InstitutionModel from '../models/institutionModel.js';
+import db from '../config/db.js';
 
 export async function getAllInstitutions(req, res) {
   try {
@@ -24,38 +25,51 @@ export async function getInstitutionById(req, res) {
 
 export async function createInstitution(req, res) {
   try {
-    console.log('Full req.body:', req.body);
-    const { name, email, phone, latitude, longitude } = req.body;
-    const result = await InstitutionModel.createInstitution({ name, email, phone, latitude, longitude });
-    res.status(201).json({ message: 'Institution created', id: result.id, name: name, email: email, phone: phone });
+    // console.log('Full req.body:', req.body);
+    const user_id = req.user.userId;
+    const {name, email, description, address } = req.body;
+    const result = await InstitutionModel.createInstitution({user_id ,name, email, description, address});
+    res.status(201).json({ message: 'Institution created', id: result.id, name: name, email: email, description: description, address: address });
   } catch (error) {
     console.error('Error creating institution:', error);
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: 'Server error', error: error.message });
   }
 }
 
-export const updateInstitution = async (req, res) => {
-  const userId = req.user.id;
-  const { name, description, location, contact_email } = req.body;
-
+export async function updateInstitution(req, res) {
   try {
-    const [institution] = await db.query('SELECT * FROM institutions WHERE user_id = ?', [userId]);
+    const user_id = req.user.userId;
+    const { name, email, description, address } = req.body;
+
+    // Optional: You can also pass `id` as param if needed (e.g., from req.params.id)
+    const [institution] = await db.query('SELECT * FROM institutions WHERE user_id = ?', [user_id]);
 
     if (institution.length === 0) {
       return res.status(404).json({ error: 'Institution not found' });
     }
 
-    await db.query(
-      `UPDATE institutions SET name = ?, description = ?, location = ?, contact_email = ? WHERE user_id = ?`,
-      [name, description, location, contact_email, userId]
-    );
+    // Use the model function for update
+    await InstitutionModel.updateInstitution({
+      id: institution[0].id,
+      user_id,
+      name,
+      email,
+      description,
+      address
+    });
 
-    res.status(200).json({ message: 'Institution details updated successfully' });
+    res.status(200).json({
+      message: 'Institution updated successfully',
+      name,
+      email,
+      description,
+      address
+    });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Failed to update institution details' });
+    console.error('Error updating institution:', error);
+    res.status(500).json({ message: 'Server error', error: error.message });
   }
-};
+}
 
 export async function deleteInstitution(req, res) {
   try {

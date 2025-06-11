@@ -12,15 +12,14 @@ router.get('/',verifyToken, adminOnly, getAllInstitutions);         // GET /api/
 router.get('/:id', getInstitutionById);       // GET /api/institutions/:id
 
 // Only accessible by users with the role "institution"
-router.post('/only', verifyToken, checkRole('institution')); 
+// router.post('/only', verifyToken, checkRole('institution')); 
 
   // Logic to create a new institution only done by admin
 router.post('/new-ins',
     [
         body('name').notEmpty().withMessage('Name is required'),
         body('email').isEmail().withMessage('Enter a valid email'),
-        body('address').notEmpty().withMessage('Address is required'),
-        body('phone').notEmpty().withMessage('Phone number is required')
+        body('address').notEmpty().withMessage('Address is required')
     ],
     verifyToken, checkRole('admin'), createInstitution);
 
