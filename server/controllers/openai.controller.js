@@ -1,5 +1,5 @@
 // controllers/openaiController.js
-import openai from '../config/aiClient.js';
+import openai from '../config/aiClient.js'; // ✅ Make sure this line is present
 
 export const generateResponse = async (req, res) => {
   try {
@@ -12,7 +12,7 @@ export const generateResponse = async (req, res) => {
 
     res.json({ reply: completion.choices[0].message.content });
   } catch (error) {
-    console.error('OpenAI Error:', error);
-    res.status(500).json({ error: 'Something went wrong with OpenAI' });
+    console.error('OpenAI Error Details:', error);
+    res.status(500).json({ error: error.message || 'OpenAI request failed' });
   }
 };

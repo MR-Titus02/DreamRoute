@@ -8,6 +8,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 const JWT_SECRET = process.env.JWT_SECRET;
+const REFRESH_TOKEN = process.env.REFRESH_TOKEN;
 
 // Register a new user
 export async function register(req, res) {
@@ -35,6 +36,8 @@ export async function register(req, res) {
 }
 
 // Login user
+// Main login function
+
 export async function login(req, res) {
   try {
     const { email, password } = req.body;
@@ -45,24 +48,119 @@ export async function login(req, res) {
     if (!user) return res.status(404).json({ message: 'User not found' });
 
     const isPasswordCorrect = await bcrypt.compare(password, user.password);
-
     if (!isPasswordCorrect) return res.status(401).json({ message: 'Invalid password' });
 
-    const token = jwt.sign(
-      { userId: user.id, email: user.email, role: user.role, institution_id: user.institution_id },
+    // Generate Access Token
+    const accessToken = jwt.sign(
+      {
+        userId: user.id,
+        email: user.email,
+        role: user.role,
+        institution_id: user.institution_id,
+      },
       JWT_SECRET,
-      // { expiresIn: '2h' }
+      { expiresIn: '1m' } // Short-lived token
     );
 
-    res.json({ message: 'Login successful', token : token });
+    // Generate Refresh Token
+    const refreshToken = jwt.sign(
+      { userId: user.id },
+      REFRESH_TOKEN,
+      { expiresIn: '7d' } // Long-lived token
+    );
+
+    // OPTIONAL: Store refresh token in database if you want to support backend logout
+    await pool.query(
+      'UPDATE users SET refresh_token = ? WHERE id = ?',
+      [refreshToken, user.id]
+    );
+
+    // Send refresh token as HTTP-Only cookie
+    res.cookie('refreshToken', refreshToken, {
+      httpOnly: true,
+      secure: true, // Set to true in production (requires HTTPS)
+      sameSite: 'Strict',
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    });
+
+    res.json({
+      message: 'Login successful',
+      token: accessToken,
+    });
   } catch (error) {
     console.error('Login Error:', error);
     res.status(500).json({ message: 'Server error during login' });
   }
 }
 
-// const token = jwt.sign(
-//   { userId: user.id, email: user.email, role: user.role, institution_id: user.institution_id },
-//   JWT_SECRET,
-//   // { expiresIn: '1h' }
-// );
+
+
+
+
+export const refreshAccessToken = async (req, res) => {
+  try {
+    const refreshToken = req.cookies.refreshToken;
+
+    if (!refreshToken) {
+      return res.status(401).json({ message: 'Refresh token missing' });
+    }
+
+    // Verify refresh token
+    const decoded = jwt.verify(refreshToken, REFRESH_TOKEN);
+    const userId = decoded.userId;
+
+    // Check if token matches what's stored in DB
+    const [userRows] = await pool.query('SELECT * FROM users WHERE id = ?', [userId]);
+    const user = userRows[0];
+
+    if (!user || user.refresh_token !== refreshToken) {
+      return res.status(403).json({ message: 'Invalid refresh token' });
+    }
+
+    // Generate new access token
+    const newAccessToken = jwt.sign(
+      {
+        userId: user.id,
+        email: user.email,
+        role: user.role,
+        institution_id: user.institution_id,
+      },
+      JWT_SECRET,
+      { expiresIn: '15m' }
+    );
+
+    res.json({ token: newAccessToken });
+  } catch (error) {
+    console.error('Refresh error:', error);
+    res.status(403).json({ message: 'Invalid or expired refresh token' });
+  }
+};
+
+
+
+
+// Logout user
+
+export const logout = async (req, res) => {
+  try {
+    const refreshToken = req.cookies.refreshToken;
+    if (!refreshToken) {
+      return res.sendStatus(204); // No content
+    }
+
+    // Clear from DB
+    await pool.query('UPDATE users SET refresh_token = NULL WHERE refresh_token = ?', [refreshToken]);
+
+    // Clear cookie
+    res.clearCookie('refreshToken', {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'Strict',
+    });
+
+    res.status(200).json({ message: 'Logged out successfully' });
+  } catch (error) {
+    console.error('Logout error:', error);
+    res.status(500).json({ message: 'Failed to log out' });
+  }
+};

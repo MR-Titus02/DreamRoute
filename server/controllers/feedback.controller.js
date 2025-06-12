@@ -34,7 +34,7 @@ export async function createFeedback(req, res) {
     res.status(201).json({ id: feedbackId, message: 'Feedback created' });
   } catch (err) {
     res.status(500).json({ error: err.message });
-    // console.log('User from token:', req.user);
+
   }
 }
 
