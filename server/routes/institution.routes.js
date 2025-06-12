@@ -11,9 +11,6 @@ const router = express.Router();
 router.get('/',verifyToken, checkRole('admin'), getAllInstitutions);         // GET /api/institutions
 router.get('/:id', getInstitutionById);       // GET /api/institutions/:id
 
-// Only accessible by users with the role "institution"
-// router.post('/only', verifyToken, checkRole('institution')); 
-
   // Logic to create a new institution only done by admin
 router.post('/new-ins',
     [

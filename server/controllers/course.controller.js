@@ -1,6 +1,9 @@
 import * as CourseModel from '../models/courseModel.js';
 import { getCourseInstitutionId } from '../models/courseModel.js';
 
+
+// Here if an institution creates a Course it will be linked to the institution_id of the user 
+// If an admin creates a Course it will be linked to the institution_id provided in the request body
 export const createCourse = async (req, res) => {
   const { title, description, institution_id: bodyInstitutionId } = req.body;
   let institution_id;

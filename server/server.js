@@ -16,10 +16,12 @@ import profileRoutes from './routes/profile.routes.js';
 
 import groqRoutes from './routes/groq.routes.js';
 
+import cookieParser from 'cookie-parser';
+
 
 dotenv.config();
 const app = express();
-
+app.use(cookieParser());
 app.use(cors());
 app.use(express.json());
 app.use('/api/auth', authRoutes);

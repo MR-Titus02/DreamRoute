@@ -3,6 +3,9 @@ import express from 'express';
 import { body } from 'express-validator';
 import { register, login } from '../controllers/auth.controller.js';
 import { validateRequest } from '../middlewares/validateRequest.js';
+import { refreshAccessToken, logout } from '../controllers/auth.controller.js';
+import roleMiddleware, { sameUser } from '../middlewares/roleMiddlware.js';
+import { verifyToken } from '../middlewares/authMiddleware.js';
 
 const router = express.Router();
 
@@ -26,5 +29,8 @@ router.post(
         validateRequest
     ],
     login);
+
+router.post('/refresh', verifyToken, refreshAccessToken);
+router.post('/logout',roleMiddleware, logout);
 
 export default router;
