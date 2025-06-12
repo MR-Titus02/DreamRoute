@@ -4,7 +4,7 @@ import { getAllInstitutions, getInstitutionById, createInstitution, updateInstit
 
 import { verifyToken, checkRole } from '../middlewares/authMiddleware.js';
 import { body } from 'express-validator';
-
+import { logUserAction } from '../utils/logger.js';
 
 const router = express.Router();
 
@@ -34,6 +34,7 @@ router.put('/:id',
 router.delete('/:id', verifyToken, checkRole('admin'), deleteInstitution);
 
 router.put('/update', verifyToken, updateInstitution);
+
 
 
 export default router;

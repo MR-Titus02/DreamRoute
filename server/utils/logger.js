@@ -1,22 +1,12 @@
-// server/utils/logger.js
-import winston from 'winston';
+import pool from '../config/db.js';
 
-const logger = winston.createLogger({
-  level: 'info',
-  format: winston.format.combine(
-    winston.format.timestamp(),
-    winston.format.printf(
-      ({ level, message, timestamp }) => `${timestamp} ${level}: ${message}`
-    )
-  ),
-  transports: [
-    new winston.transports.File({ filename: 'logs/error.log', level: 'error' }),
-    new winston.transports.File({ filename: 'logs/combined.log' }),
-  ],
-});
-
-if (process.env.NODE_ENV !== 'production') {
-  logger.add(new winston.transports.Console({ format: winston.format.simple() }));
+export async function logUserAction(user_id, action, details = '') {
+  try {
+    await pool.query(
+      'INSERT INTO user_actions (user_id, action, details) VALUES (?, ?, ?)',
+      [user_id, action, details]
+    );
+  } catch (err) {
+    console.error('Error logging user action:', err);
+  }
 }
-
-export default logger;

@@ -6,6 +6,7 @@ import {
   deleteProfile
 } from '../controllers/profile.controller.js';
 import { verifyToken } from '../middlewares/authMiddleware.js';
+import { logUserAction } from '../utils/logger.js';
 
 const router = express.Router();
 

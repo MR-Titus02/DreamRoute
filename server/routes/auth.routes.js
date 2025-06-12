@@ -7,7 +7,7 @@ import { refreshAccessToken, logout } from '../controllers/auth.controller.js';
 import roleMiddleware, { sameUser } from '../middlewares/roleMiddlware.js';
 import { verifyToken } from '../middlewares/authMiddleware.js';
 import { loginLimiter } from '../middlewares/rateLimiter.js'; 
-
+import { logUserAction } from '../utils/logger.js';
 
 const router = express.Router();
 
