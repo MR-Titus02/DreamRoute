@@ -41,14 +41,27 @@ export async function register(req, res) {
 export async function login(req, res) {
   try {
     const { email, password } = req.body;
-
+    const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+    const userAgent = req.headers['user-agent'];
     const [userRows] = await pool.query('SELECT * FROM users WHERE email = ?', [email]);
     const user = userRows[0];
 
-    if (!user) return res.status(404).json({ message: 'User not found' });
+    if (!user) {
+      await pool.query(
+        'INSERT INTO login_logs (user_id, ip_address, user_agent, status) VALUES (?, ?, ?, ?)',
+        [null, ip, userAgent, 'failure']
+      );
+      return res.status(404).json({ message: 'User not found' });
+    }
 
     const isPasswordCorrect = await bcrypt.compare(password, user.password);
-    if (!isPasswordCorrect) return res.status(401).json({ message: 'Invalid password' });
+    if (!isPasswordCorrect) {
+      await pool.query(
+        'INSERT INTO login_logs (user_id, ip_address, user_agent, status) VALUES (?, ?, ?, ?)',
+        [user.id, ip, userAgent, 'failure']
+      );
+      return res.status(401).json({ message: 'Invalid password' });
+    }
 
     // Generate Access Token
     const accessToken = jwt.sign(
@@ -73,6 +86,11 @@ export async function login(req, res) {
     await pool.query(
       'UPDATE users SET refresh_token = ? WHERE id = ?',
       [refreshToken, user.id]
+    );
+
+    await pool.query(
+      'INSERT INTO login_logs (user_id, ip_address, user_agent, status) VALUES (?, ?, ?, ?)',
+      [user.id, ip, userAgent, 'success']
     );
 
     // Send refresh token as HTTP-Only cookie

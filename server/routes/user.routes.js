@@ -8,6 +8,7 @@ import {
      updateUser,
     deleteUser,
 } from '../controllers/user.controller.js';
+import { logUserAction } from '../utils/logger.js';
 
 const router = express.Router();
 

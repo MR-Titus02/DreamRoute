@@ -5,6 +5,8 @@ export async function createProfile(req, res) {
     const user_id = req.user.userId;
     const result = await Profile.createUserProfile({ user_id, ...req.body });
     res.status(201).json({ message: 'Profile created', id: result.id });
+    await logUserAction(user_id, 'Created profile', JSON.stringify(req.body));
+
   } catch (err) {
     res.status(500).json({ message: 'Server error', error: err.message });
   }
@@ -25,6 +27,7 @@ export async function updateProfile(req, res) {
   try {
     const user_id = req.user.userId;
     await Profile.updateUserProfile(user_id, req.body);
+    await logUserAction(user_id, 'Updated profile', JSON.stringify(req.body));
     res.json({ message: 'Profile updated successfully' });
   } catch (err) {
     res.status(500).json({ message: 'Server error', error: err.message });
