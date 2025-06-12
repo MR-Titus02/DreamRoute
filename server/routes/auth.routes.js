@@ -6,6 +6,8 @@ import { validateRequest } from '../middlewares/validateRequest.js';
 import { refreshAccessToken, logout } from '../controllers/auth.controller.js';
 import roleMiddleware, { sameUser } from '../middlewares/roleMiddlware.js';
 import { verifyToken } from '../middlewares/authMiddleware.js';
+import { loginLimiter } from '../middlewares/rateLimiter.js'; 
+
 
 const router = express.Router();
 
@@ -28,7 +30,7 @@ router.post(
         body('password').notEmpty().withMessage('Password is required'),
         validateRequest
     ],
-    login);
+    loginLimiter, login);
 
 router.post('/refresh', verifyToken, refreshAccessToken);
 router.post('/logout',roleMiddleware, logout);
