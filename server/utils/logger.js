@@ -53,9 +53,7 @@ const logger = winston.createLogger({
 });
 
 export default logger;
-
-
-
+// Function to log user actions to the database
 export async function logUserAction(user_id, action, details = '') {
   try {
     await pool.query(
