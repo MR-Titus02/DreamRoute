@@ -1,5 +1,6 @@
 // feedbackController.js
 import * as feedbackModel from '../models/feedbackModel.js';
+import { logErrorToFile } from '../utils/logger.js';
 
 export async function getAllFeedbacks(req, res) {
   try {
@@ -7,6 +8,7 @@ export async function getAllFeedbacks(req, res) {
     res.json(feedbacks);
   } catch (err) {
     res.status(500).json({ error: err.message });
+    logErrorToFile(`getAllFeedbacks error for ${req.body.email}: ${err.message}`);
   }
 }
 
@@ -17,6 +19,7 @@ export async function getFeedbackById(req, res) {
     res.json(feedback);
   } catch (err) {
     res.status(500).json({ error: err.message });
+    logErrorToFile(`getFeedbackById error for ${req.body.email}: ${err.message}`);
   }
 }
 
@@ -34,6 +37,7 @@ export async function createFeedback(req, res) {
     res.status(201).json({ id: feedbackId, message: 'Feedback created' });
   } catch (err) {
     res.status(500).json({ error: err.message });
+    logErrorToFile(`createFeedback error for ${req.body.email}: ${err.message}`);
 
   }
 }
@@ -44,6 +48,7 @@ export async function updateFeedback(req, res) {
     res.json({ message: 'Feedback updated' });
   } catch (err) {
     res.status(500).json({ error: err.message });
+    logErrorToFile(`updateFeedback error for ${req.body.email}: ${err.message}`);
   }
 }
 
@@ -53,5 +58,6 @@ export async function deleteFeedback(req, res) {
     res.json({ message: 'Feedback deleted' });
   } catch (err) {
     res.status(500).json({ error: err.message });
+    logErrorToFile(`deleteFeedback error for ${req.body.email}: ${err.message}`);
   }
 }

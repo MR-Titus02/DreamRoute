@@ -3,6 +3,7 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import pool from '../config/db.js'; 
 import dotenv from 'dotenv';
+import { logErrorToFile } from '../utils/logger.js';
 
 
 dotenv.config();
@@ -32,6 +33,7 @@ export async function register(req, res) {
   } catch (error) {
     console.error('Register Error:', error);
     res.status(500).json({ message: 'Server error during registration' });
+    logErrorToFile(`Register error for ${req.body.email}: ${err.message}`);
   }
 }
 
@@ -108,9 +110,9 @@ export async function login(req, res) {
   } catch (error) {
     console.error('Login Error:', error);
     res.status(500).json({ message: 'Server error during login' });
+    logErrorToFile(`LoginError error for ${req.body.email}: ${err.message}`);
   }
 }
-
 
 
 
@@ -151,6 +153,7 @@ export const refreshAccessToken = async (req, res) => {
   } catch (error) {
     console.error('Refresh error:', error);
     res.status(403).json({ message: 'Invalid or expired refresh token' });
+    logErrorToFile(`RefreshTokenError error for ${req.body.email}: ${err.message}`);
   }
 };
 
@@ -180,5 +183,6 @@ export const logout = async (req, res) => {
   } catch (error) {
     console.error('Logout error:', error);
     res.status(500).json({ message: 'Failed to log out' });
+    logErrorToFile(`Logout Failed error for ${req.body.email}: ${err.message}`);
   }
 };

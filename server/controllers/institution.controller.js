@@ -1,6 +1,7 @@
 // controllers/institutionController.js
 import * as InstitutionModel from '../models/institutionModel.js';
 import db from '../config/db.js';
+import { logErrorToFile } from '../utils/logger.js';
 
 export async function getAllInstitutions(req, res) {
   try {
@@ -9,6 +10,7 @@ export async function getAllInstitutions(req, res) {
   } catch (error) {
     console.error('Error fetching institutions:', error);
     res.status(500).json({ message: 'Server error' });
+    logErrorToFile(`GetAllInstitutions error for ${req.body.email}: ${err.message}`);
   }
 }
 
@@ -20,6 +22,7 @@ export async function getInstitutionById(req, res) {
   } catch (error) {
     console.error('Error fetching institution by ID:', error);
     res.status(500).json({ message: 'Server error' });
+    logErrorToFile(`getInstitutionByID error for ${req.body.email}: ${err.message}`);
   }
 }
 
@@ -33,6 +36,7 @@ export async function createInstitution(req, res) {
   } catch (error) {
     console.error('Error creating institution:', error);
     res.status(500).json({ message: 'Server error', error: error.message });
+    logErrorToFile(`createInstitution error for ${req.body.email}: ${err.message}`);
   }
 }
 
@@ -49,6 +53,7 @@ export async function deleteInstitution(req, res) {
   } catch (error) {
     console.error('Error deleting institution:', error);
     res.status(500).json({ message: 'Server error' });
+    logErrorToFile(`deleteInstitution error for ${req.body.email}: ${err.message}`);
   }
 }
 
@@ -68,5 +73,6 @@ export const updateInstitution = async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Failed to update institution details' });
+    logErrorToFile(`updateInstitution error for ${req.body.email}: ${err.message}`);
   }
 };

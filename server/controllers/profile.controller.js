@@ -1,4 +1,5 @@
 import * as Profile from '../models/userProfileModel.js';
+import { logErrorToFile } from '../utils/logger.js';
 
 export async function createProfile(req, res) {
   try {
@@ -9,6 +10,7 @@ export async function createProfile(req, res) {
 
   } catch (err) {
     res.status(500).json({ message: 'Server error', error: err.message });
+    logErrorToFile(`CreateProfile error for ${req.body.email}: ${err.message}`);
   }
 }
 
@@ -20,6 +22,7 @@ export async function getProfile(req, res) {
     res.json(profile);
   } catch (err) {
     res.status(500).json({ message: 'Server error', error: err.message });
+    logErrorToFile(`GetProfile error for ${req.body.email}: ${err.message}`);
   }
 }
 
@@ -31,6 +34,7 @@ export async function updateProfile(req, res) {
     res.json({ message: 'Profile updated successfully' });
   } catch (err) {
     res.status(500).json({ message: 'Server error', error: err.message });
+    logErrorToFile(`UpdateProfile error for ${req.body.email}: ${err.message}`);
   }
 }
 
@@ -41,5 +45,6 @@ export async function deleteProfile(req, res) {
     res.json({ message: 'Profile deleted' });
   } catch (err) {
     res.status(500).json({ message: 'Server error', error: err.message });
+    logErrorToFile(`DeleteProfile error for ${req.body.email}: ${err.message}`);
   }
 }

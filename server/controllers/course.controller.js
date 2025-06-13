@@ -1,5 +1,6 @@
 import * as CourseModel from '../models/courseModel.js';
 import { getCourseInstitutionId } from '../models/courseModel.js';
+import { logErrorToFile } from '../utils/logger.js';
 
 
 // Here if an institution creates a Course it will be linked to the institution_id of the user 
@@ -24,6 +25,7 @@ export const createCourse = async (req, res) => {
     res.status(201).json({ message: 'Course created successfully', courseId });
   } catch (err) {
     res.status(500).json({ error: 'Server error while creating course' });
+    logErrorToFile(`createCourse error for ${req.body.email}: ${err.message}`);
   }
 };
 
@@ -34,6 +36,7 @@ export const getAllCourses = async (req, res) => {
   } catch (err) {
     console.error('Get All Courses Error:', err);
     res.status(500).json({ error: 'Server error while fetching courses' });
+    logErrorToFile(`getAllCourses error for ${req.body.email}: ${err.message}`);
   }
 };
 
@@ -45,6 +48,7 @@ export const getCourseById = async (req, res) => {
     res.json(course);
   } catch (err) {
     res.status(500).json({ error: 'Server error while fetching course' });
+    logErrorToFile(`getCourseById error for ${req.body.email}: ${err.message}`);
   }
 };
 
@@ -63,6 +67,7 @@ export const updateCourse = async (req, res) => {
     res.json({ message: 'Course updated successfully' });
   } catch (err) {
     res.status(500).json({ error: 'Server error while updating course' });
+    logErrorToFile(`updateCourse error for ${req.body.email}: ${err.message}`);
   }
 };
 
@@ -80,5 +85,6 @@ export const deleteCourse = async (req, res) => {
     res.json({ message: 'Course deleted successfully' });
   } catch (err) {
     res.status(500).json({ error: 'Server error while deleting course' });
+    logErrorToFile(`deleteCourse error for ${req.body.email}: ${err.message}`);
   }
 };
