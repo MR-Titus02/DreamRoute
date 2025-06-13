@@ -13,9 +13,7 @@ import errorHandler from './middlewares/errorHandler.js';
 import notFound from './middlewares/notFound.js';
 import AI from './routes/ai.route.js';
 import profileRoutes from './routes/profile.routes.js';
-
 import groqRoutes from './routes/groq.routes.js';
-
 import cookieParser from 'cookie-parser';
 
 
