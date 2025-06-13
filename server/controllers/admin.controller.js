@@ -1,5 +1,5 @@
 import pool from '../config/db.js';
-import { logErrorToFile } from '../utils/logger.js';
+import logger, { logUserAction } from '../utils/logger.js';
 
 export const changeUserRole = async (req, res) => {
   const { id } = req.params;
@@ -23,9 +23,10 @@ export const changeUserRole = async (req, res) => {
     }
 
     res.status(200).json({ message: 'User role updated successfully' });
+    await logUserAction(req.user.userId, 'Changed user role', JSON.stringify({ id, role }));
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Server error while updating user role' });
-    logErrorToFile(`Role Update failed for ${req.body.email}: ${err.message}`);
+    await logUserAction(req.user.userId, 'Change user role failed', JSON.stringify({ id, role }));
   }
 };

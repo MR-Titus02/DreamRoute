@@ -4,7 +4,7 @@ import { getAllInstitutions, getInstitutionById, createInstitution, updateInstit
 
 import { verifyToken, checkRole } from '../middlewares/authMiddleware.js';
 import { body } from 'express-validator';
-import { logUserAction } from '../utils/logger.js';
+// import { logUserAction } from '../utils/logger.js';
 
 const router = express.Router();
 

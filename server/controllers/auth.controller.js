@@ -3,7 +3,8 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import pool from '../config/db.js'; 
 import dotenv from 'dotenv';
-import { logErrorToFile } from '../utils/logger.js';
+import logger from '../utils/logger.js';
+import { logUserAction } from '../utils/logger.js';
 
 
 dotenv.config();
@@ -30,10 +31,11 @@ export async function register(req, res) {
     );
 
     res.status(201).json({ message: 'User registered successfully', userId: result.insertId });
+    await logUserAction(result.insertId, 'User registered', JSON.stringify(req.body));
   } catch (error) {
     console.error('Register Error:', error);
     res.status(500).json({ message: 'Server error during registration' });
-    logErrorToFile(`Register error for ${req.body.email}: ${err.message}`);
+    await logUserAction(null, 'Registration failed', JSON.stringify(req.body));
   }
 }
 
@@ -110,7 +112,7 @@ export async function login(req, res) {
   } catch (error) {
     console.error('Login Error:', error);
     res.status(500).json({ message: 'Server error during login' });
-    logErrorToFile(`LoginError error for ${req.body.email}: ${err.message}`);
+    logger.error(`Login Error: ${error.message}`, { stack: error.stack });
   }
 }
 
@@ -153,7 +155,7 @@ export const refreshAccessToken = async (req, res) => {
   } catch (error) {
     console.error('Refresh error:', error);
     res.status(403).json({ message: 'Invalid or expired refresh token' });
-    logErrorToFile(`RefreshTokenError error for ${req.body.email}: ${err.message}`);
+    logger.error(`Refresh Token Error: ${error.message}`, { stack: error.stack });
   }
 };
 
@@ -180,9 +182,10 @@ export const logout = async (req, res) => {
     });
 
     res.status(200).json({ message: 'Logged out successfully' });
+    await logUserAction(req.user.userId, 'Logout successful', JSON.stringify(req.body));
   } catch (error) {
     console.error('Logout error:', error);
     res.status(500).json({ message: 'Failed to log out' });
-    logErrorToFile(`Logout Failed error for ${req.body.email}: ${err.message}`);
+    await logUserAction(req.user.userId, 'Logout failed', JSON.stringify(req.body));
   }
 };
