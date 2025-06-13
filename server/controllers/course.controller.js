@@ -1,6 +1,6 @@
 import * as CourseModel from '../models/courseModel.js';
 import { getCourseInstitutionId } from '../models/courseModel.js';
-import { logErrorToFile } from '../utils/logger.js';
+import { logUserAction } from '../utils/logger.js';
 
 
 // Here if an institution creates a Course it will be linked to the institution_id of the user 
@@ -23,9 +23,10 @@ export const createCourse = async (req, res) => {
   try {
     const courseId = await CourseModel.createCourse(title, description, institution_id);
     res.status(201).json({ message: 'Course created successfully', courseId });
+    await logUserAction(req.user.userId, 'Created course', JSON.stringify(req.body));
   } catch (err) {
     res.status(500).json({ error: 'Server error while creating course' });
-    logErrorToFile(`createCourse error for ${req.body.email}: ${err.message}`);
+    await logUserAction(req.user.userId, 'Create course failed', JSON.stringify(req.body));
   }
 };
 
@@ -33,10 +34,11 @@ export const getAllCourses = async (req, res) => {
   try {
     const courses = await CourseModel.getAllCourses();
     res.json(courses);
+    await logUserAction(req.user.userId, 'Fetched all courses', JSON.stringify(req.body));
   } catch (err) {
     console.error('Get All Courses Error:', err);
     res.status(500).json({ error: 'Server error while fetching courses' });
-    logErrorToFile(`getAllCourses error for ${req.body.email}: ${err.message}`);
+    await logUserAction(req.user.userId, 'Get all courses failed', JSON.stringify(req.body));
   }
 };
 
@@ -46,9 +48,10 @@ export const getCourseById = async (req, res) => {
     const course = await CourseModel.getCourseById(courseId);
     if (!course) return res.status(404).json({ error: 'Course not found' });
     res.json(course);
+    await logUserAction(req.user.userId, 'Fetched course by ID', JSON.stringify(req.body));
   } catch (err) {
     res.status(500).json({ error: 'Server error while fetching course' });
-    logErrorToFile(`getCourseById error for ${req.body.email}: ${err.message}`);
+    await logUserAction(req.user.userId, 'Get course by ID failed', JSON.stringify(req.body));
   }
 };
 
@@ -65,9 +68,11 @@ export const updateCourse = async (req, res) => {
 
     await CourseModel.updateCourse(courseId, title, description, duration, price);
     res.json({ message: 'Course updated successfully' });
+    await logUserAction(req.user.userId, 'Updated course', JSON.stringify(req.body));
   } catch (err) {
     res.status(500).json({ error: 'Server error while updating course' });
     logErrorToFile(`updateCourse error for ${req.body.email}: ${err.message}`);
+    await logUserAction(req.user.userId, 'Update course failed', JSON.stringify(req.body));
   }
 };
 
@@ -83,8 +88,9 @@ export const deleteCourse = async (req, res) => {
 
     await CourseModel.deleteCourse(courseId);
     res.json({ message: 'Course deleted successfully' });
+    await logUserAction(req.user.userId, 'Deleted course', JSON.stringify(req.body));
   } catch (err) {
     res.status(500).json({ error: 'Server error while deleting course' });
-    logErrorToFile(`deleteCourse error for ${req.body.email}: ${err.message}`);
+    await logUserAction(req.user.userId, 'Delete course failed', JSON.stringify(req.body));
   }
 };
