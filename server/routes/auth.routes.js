@@ -4,33 +4,16 @@ import { body } from 'express-validator';
 import { register, login } from '../controllers/auth.controller.js';
 import { validateRequest } from '../middlewares/validateRequest.js';
 import { refreshAccessToken, logout } from '../controllers/auth.controller.js';
-import roleMiddleware, { sameUser } from '../middlewares/roleMiddlware.js';
+import roleMiddleware from '../middlewares/roleMiddlware.js';
 import { verifyToken } from '../middlewares/authMiddleware.js';
 import { loginLimiter } from '../middlewares/rateLimiter.js'; 
 import { logUserAction } from '../utils/logger.js';
+import { validateRegister, validateLogin } from '../middlewares/validateInputs.js';
 
 const router = express.Router();
 
-router.post(
-    '/register',
-    [
-        body('name').notEmpty().withMessage('Name is required'),
-        body('email').isEmail().withMessage('Enter a valid email'),
-        body('password').isLength({ min: 6 }).withMessage('Password must be at least 6 characters'),
-        body('role').isIn(['student', 'institution', 'admin']).withMessage('Invalid role'),
-        validateRequest
-      ],
-    register
-    );
-
-router.post(
-    '/login',
-    [
-        body('email').isEmail().withMessage('Valid email is required'),
-        body('password').notEmpty().withMessage('Password is required'),
-        validateRequest
-    ],
-    loginLimiter, login);
+router.post('/register', validateRegister, validateRequest, register);
+router.post('/login', validateLogin, validateRequest, login);
 
 router.post('/refresh', verifyToken, refreshAccessToken);
 router.post('/logout',roleMiddleware, logout);
