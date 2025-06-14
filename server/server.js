@@ -16,7 +16,10 @@ import AI from './routes/ai.route.js';
 import profileRoutes from './routes/profile.routes.js';
 import groqRoutes from './routes/groq.routes.js';
 import cookieParser from 'cookie-parser';
-
+import googleRoutes from './routes/google.js';
+import passport from 'passport';
+import './config/passport.js';
+import session from 'express-session';
 
 dotenv.config();
 const app = express();
@@ -39,6 +42,16 @@ app.use(
       crossOriginEmbedderPolicy: false, // if using third-party embeds like iframes
     })
   );
+//OAuth
+  app.use(session({
+    secret: process.env.SESSION_SECRET,
+    resave: false,
+    saveUninitialized: false,
+  }));
+  app.use(passport.initialize());
+  app.use(passport.session());
+
+
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/courses', courseRoutes);
@@ -48,6 +61,12 @@ app.use('/api/feedbacks', feedbackRoutes);
 app.use('/api/ai', AI);
 app.use('/api/profile', profileRoutes);
 app.use('/api/groq', groqRoutes);
+app.use("/auth", googleRoutes);
+app.get("/profile", (req, res) => {
+  if (!req.user) return res.status(401).send("Not authenticated");
+  res.json(req.user);
+});
+
 
 app.use(notFound);
 app.use(errorHandler);

@@ -5,6 +5,7 @@ import pool from '../config/db.js';
 import dotenv from 'dotenv';
 import logger from '../utils/logger.js';
 import { logUserAction } from '../utils/logger.js';
+import { sendTemplateEmail } from '../utils/sendEmail.js';
 
 
 dotenv.config();
@@ -32,6 +33,7 @@ export async function register(req, res) {
 
     res.status(201).json({ message: 'User registered successfully', userId: result.insertId });
     await logUserAction(result.insertId, 'User registered', JSON.stringify(req.body));
+    await sendTemplateEmail(email, 'register', { name });
   } catch (error) {
     console.error('Register Error:', error);
     res.status(500).json({ message: 'Server error during registration' });
@@ -109,6 +111,7 @@ export async function login(req, res) {
       message: 'Login successful',
       token: accessToken,
     });
+    await sendTemplateEmail(user.email, 'login', { name: user.name });
   } catch (error) {
     console.error('Login Error:', error);
     res.status(500).json({ message: 'Server error during login' });
