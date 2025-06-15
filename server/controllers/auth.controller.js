@@ -6,6 +6,7 @@ import dotenv from 'dotenv';
 import logger from '../utils/logger.js';
 import { logUserAction } from '../utils/logger.js';
 import { sendTemplateEmail } from '../utils/sendEmail.js';
+import crypto from 'crypto';
 
 
 dotenv.config();
@@ -190,5 +191,81 @@ export const logout = async (req, res) => {
     console.error('Logout error:', error);
     res.status(500).json({ message: 'Failed to log out' });
     await logUserAction(req.user.userId, 'Logout failed', JSON.stringify(req.body));
+  }
+};
+
+
+//forget password
+export const forgotPassword = async (req, res) => {
+  const { email } = req.body;
+
+  try {
+    const [users] = await pool.query('SELECT * FROM users WHERE email = ?', [email]);
+    const user = users[0];
+
+    if (!user) return res.status(404).json({ message: 'No user found with that email.' });
+
+    // Generate reset token
+    const resetToken = crypto.randomBytes(32).toString('hex');
+    const resetTokenHash = crypto.createHash('sha256').update(resetToken).digest('hex');
+    const resetTokenExpires = new Date(Date.now() + 15 * 60 * 1000); // 15 mins
+    console.log('Reset Token:', resetToken); // For debugging, remove in production
+    console.log('Reset Token Hash:', resetTokenHash); // For debugging, remove in production
+    // Save token to DB
+    await pool.query(
+      'UPDATE users SET reset_token = ?, reset_token_expires = ? WHERE id = ?',
+      [resetTokenHash, resetTokenExpires, user.id]
+    );
+
+    // Build reset link
+    const resetLink = `${process.env.FRONTEND_URL}/reset-password/${resetToken}`;
+
+    // Send email
+    // await sendTemplateEmail({
+    //   type: 'resetPassword',
+    //   email: user.email,
+    //   name: user.name,
+    //   resetLink,
+    // });
+
+    await sendTemplateEmail(user.email, 'resetPassword', { name: user.name, resetLink });
+
+    res.status(200).json({ message: 'Password reset link sent to email.' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Something went wrong.' });
+  }
+};
+
+
+
+//reset password
+export const resetPassword = async (req, res) => {
+  const { token } = req.params;
+  const { password } = req.body;
+
+  try {
+    const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
+
+    const [users] = await pool.query(
+      'SELECT * FROM users WHERE reset_token = ? AND reset_token_expires > NOW()',
+      [hashedToken]
+    );
+
+    const user = users[0];
+    if (!user) return res.status(400).json({ message: 'Invalid or expired token.' });
+
+    const hashedPassword = await bcrypt.hash(password, 12);
+
+    // Update password & remove reset token
+    await pool.query(
+      'UPDATE users SET password = ?, reset_token = NULL, reset_token_expires = NULL WHERE id = ?',
+      [hashedPassword, user.id]
+    );
+
+    res.status(200).json({ message: 'Password reset successful!' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Something went wrong.' });
   }
 };
