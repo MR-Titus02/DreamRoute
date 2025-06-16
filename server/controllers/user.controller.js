@@ -62,3 +62,15 @@ export async function deleteUser(req, res) {
     res.status(500).json({ error: 'Failed to delete user', details: err.message });
   }
 }
+
+import { uploadImage } from '../utils/uploadToCloudinary.js';
+
+export const uploadProfileImage = async (req, res) => {
+  try {
+    const localPath = req.file.path;
+    const imageUrl = await uploadImage(localPath);
+    res.status(200).json({ imageUrl });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};

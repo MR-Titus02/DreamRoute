@@ -20,6 +20,7 @@ import googleRoutes from './routes/google.js';
 import passport from 'passport';
 import './config/passport.js';
 import session from 'express-session';
+import checkoutRoutes from './routes/checkout.routes.js';
 
 dotenv.config();
 const app = express();
@@ -66,6 +67,7 @@ app.get("/profile", (req, res) => {
   if (!req.user) return res.status(401).send("Not authenticated");
   res.json(req.user);
 });
+app.use('/api/checkout', checkoutRoutes);
 
 
 app.use(notFound);
