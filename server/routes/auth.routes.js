@@ -17,7 +17,7 @@ router.post('/register', validateRegister, validateRequest, register);
 router.post('/login', validateLogin, validateRequest,loginLimiter, login);
 
 router.post('/refresh', verifyToken, refreshAccessToken);
-router.post('/logout',roleMiddleware, logout);
+router.post('/logout',verifyToken, roleMiddleware, logout);
 router.post('/forgot-password', forgotPassword);
 router.post('/reset-password/:token', resetPassword);
 
