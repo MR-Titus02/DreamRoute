@@ -22,143 +22,135 @@ function SignUp() {
   };
 
   return (
-    <div className="h-screen bg-gradient-to-br from-[#222831] via-[#393E46] to-[#222831] relative overflow-hidden flex flex-col">
+    <div className="h-screen bg-gradient-to-br from-[#222831] via-[#393E46] to-[#222831] relative overflow-hidden flex flex-col justify-between">
       {/* Animated background elements */}
       <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-10 -left-10 w-72 h-72 bg-[#00ADB5] rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse"></div>
-        <div className="absolute -bottom-10 -right-10 w-72 h-72 bg-[#EEEEEE] rounded-full mix-blend-multiply filter blur-xl opacity-10 animate-pulse delay-2000"></div>
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-[#00ADB5] rounded-full mix-blend-multiply filter blur-3xl opacity-5"></div>
+        <div className="absolute -top-10 -left-10 w-60 h-60 bg-[#00ADB5] rounded-full mix-blend-multiply filter blur-lg opacity-20 animate-pulse"></div>
+        <div className="absolute -bottom-10 -right-10 w-60 h-60 bg-[#EEEEEE] rounded-full mix-blend-multiply filter blur-lg opacity-10 animate-pulse delay-2000"></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-[#00ADB5] rounded-full mix-blend-multiply filter blur-2xl opacity-5"></div>
       </div>
 
       {/* Header */}
-      <header className="relative z-10 flex items-center justify-between px-6 lg:px-12 py-3 bg-black/10 backdrop-blur-sm border-b border-white/10 flex-shrink-0">
-        <div className="flex items-center space-x-3">
+      <header className="relative z-10 flex items-center justify-between px-4 lg:px-8 py-2 bg-black/10 backdrop-blur-sm border-b border-white/10 flex-shrink-0">
+        <div className="flex items-center space-x-2">
           <img
             src="https://cdn.builder.io/api/v1/image/assets%2F695e717eeae345fe9c4e2371d3d38c50%2F3f1c97cc2466444ca6af5530dd3bfb31"
             alt="DreamRoute Logo"
-            className="w-10 h-10 rounded-lg shadow-lg"
+            className="w-8 h-8 rounded-lg shadow-lg"
           />
-          <h1 className="font-kaisei-tokumin font-extrabold text-xl lg:text-2xl text-white">
+          <h1 className="font-kaisei-tokumin font-extrabold text-lg lg:text-xl text-white">
             DreamRoute
           </h1>
         </div>
 
-        <div className="flex items-center space-x-4">
-          <button className="text-white/80 hover:text-white transition-colors duration-300 font-inter text-sm">
+        <div className="flex items-center space-x-3">
+          <button className="text-white/80 hover:text-white transition-colors duration-300 font-inter text-xs">
             Login
           </button>
-          <button className="bg-gradient-to-r from-[#00ADB5] to-[#00C4CC] hover:from-[#00C4CC] hover:to-[#00ADB5] text-white px-4 py-1.5 rounded-lg font-medium transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl text-sm">
+          <button className="bg-gradient-to-r from-[#00ADB5] to-[#00C4CC] hover:from-[#00C4CC] hover:to-[#00ADB5] text-white px-3 py-1 rounded-lg font-medium transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl text-xs">
             Get Started
           </button>
         </div>
       </header>
 
       {/* Main Content */}
-      <div className="relative z-10 flex items-center justify-center flex-1 px-4 py-4 mb-4">
-        <div className="w-full max-w-md">
+      <main className="relative z-10 flex flex-col flex-grow px-4 py-4">
+        <div className="w-full max-w-md mx-auto">
           {/* Welcome Section */}
-          <div className="text-center mb-6">
-            <h2 className="font-inter font-bold text-3xl lg:text-4xl text-white mb-2">
+          <div className="text-center mb-4">
+            <h2 className="font-inter font-bold text-2xl lg:text-3xl text-white mb-1">
               Join{" "}
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#00ADB5] to-[#EEEEEE]">
                 DreamRoute
               </span>
             </h2>
-            <p className="text-white/70 text-base font-inter">
+            <p className="text-white/70 text-sm font-inter">
               Start your journey to extraordinary destinations
             </p>
           </div>
 
           {/* Signup Form */}
-          <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-6 shadow-2xl border border-white/20">
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <h3 className="text-xl font-bold text-white text-center mb-6 font-inter">
+          <div className="bg-white/10 backdrop-blur-xl rounded-xl p-4 shadow-xl border border-white/20">
+            <form onSubmit={handleSubmit} className="space-y-3">
+              <h3 className="text-lg font-bold text-white text-center mb-4 font-inter">
                 Create Account
               </h3>
 
               {/* Email Field */}
-              <div className="space-y-2">
-                <label className="block text-sm font-semibold text-white/90 font-inter">
+              <div className="space-y-1">
+                <label className="block text-xs font-semibold text-white/90 font-inter">
                   Email Address
                 </label>
-                <div className="relative">
-                  <input
-                    type="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleInputChange}
-                    onFocus={() => setFocusedField("email")}
-                    onBlur={() => setFocusedField("")}
-                    className={`w-full px-4 py-3 bg-white/5 border rounded-xl text-white placeholder-white/50 font-inter transition-all duration-300 ${
-                      focusedField === "email"
-                        ? "border-[#00ADB5] shadow-lg shadow-[#00ADB5]/25 bg-white/10"
-                        : "border-white/20 hover:border-white/40"
-                    }`}
-                    placeholder="Enter your email"
-                    required
-                  />
-                  <div className="absolute inset-x-0 bottom-0 h-0.5 bg-gradient-to-r from-[#00ADB5] to-[#00C4CC] transform scale-x-0 transition-transform duration-300 origin-left rounded-full"></div>
-                </div>
+                <input
+                  type="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleInputChange}
+                  onFocus={() => setFocusedField("email")}
+                  onBlur={() => setFocusedField("")}
+                  className={`w-full px-3 py-2 bg-white/5 border rounded-lg text-white placeholder-white/50 font-inter transition-all duration-300 ${
+                    focusedField === "email"
+                      ? "border-[#00ADB5] shadow-lg shadow-[#00ADB5]/25 bg-white/10"
+                      : "border-white/20 hover:border-white/40"
+                  }`}
+                  placeholder="Enter your email"
+                  required
+                />
               </div>
 
               {/* Password Field */}
-              <div className="space-y-2">
-                <label className="block text-sm font-semibold text-white/90 font-inter">
+              <div className="space-y-1">
+                <label className="block text-xs font-semibold text-white/90 font-inter">
                   Password
                 </label>
-                <div className="relative">
-                  <input
-                    type="password"
-                    name="password"
-                    value={formData.password}
-                    onChange={handleInputChange}
-                    onFocus={() => setFocusedField("password")}
-                    onBlur={() => setFocusedField("")}
-                    className={`w-full px-4 py-3 bg-white/5 border rounded-xl text-white placeholder-white/50 font-inter transition-all duration-300 ${
-                      focusedField === "password"
-                        ? "border-[#00ADB5] shadow-lg shadow-[#00ADB5]/25 bg-white/10"
-                        : "border-white/20 hover:border-white/40"
-                    }`}
-                    placeholder="Create a strong password"
-                    required
-                  />
-                </div>
+                <input
+                  type="password"
+                  name="password"
+                  value={formData.password}
+                  onChange={handleInputChange}
+                  onFocus={() => setFocusedField("password")}
+                  onBlur={() => setFocusedField("")}
+                  className={`w-full px-3 py-2 bg-white/5 border rounded-lg text-white placeholder-white/50 font-inter transition-all duration-300 ${
+                    focusedField === "password"
+                      ? "border-[#00ADB5] shadow-lg shadow-[#00ADB5]/25 bg-white/10"
+                      : "border-white/20 hover:border-white/40"
+                  }`}
+                  placeholder="Create a strong password"
+                  required
+                />
               </div>
 
               {/* Confirm Password Field */}
-              <div className="space-y-2">
-                <label className="block text-sm font-semibold text-white/90 font-inter">
+              <div className="space-y-1">
+                <label className="block text-xs font-semibold text-white/90 font-inter">
                   Confirm Password
                 </label>
-                <div className="relative">
-                  <input
-                    type="password"
-                    name="confirmPassword"
-                    value={formData.confirmPassword}
-                    onChange={handleInputChange}
-                    onFocus={() => setFocusedField("confirmPassword")}
-                    onBlur={() => setFocusedField("")}
-                    className={`w-full px-4 py-3 bg-white/5 border rounded-xl text-white placeholder-white/50 font-inter transition-all duration-300 ${
-                      focusedField === "confirmPassword"
-                        ? "border-[#00ADB5] shadow-lg shadow-[#00ADB5]/25 bg-white/10"
-                        : "border-white/20 hover:border-white/40"
-                    }`}
-                    placeholder="Confirm your password"
-                    required
-                  />
-                </div>
+                <input
+                  type="password"
+                  name="confirmPassword"
+                  value={formData.confirmPassword}
+                  onChange={handleInputChange}
+                  onFocus={() => setFocusedField("confirmPassword")}
+                  onBlur={() => setFocusedField("")}
+                  className={`w-full px-3 py-2 bg-white/5 border rounded-lg text-white placeholder-white/50 font-inter transition-all duration-300 ${
+                    focusedField === "confirmPassword"
+                      ? "border-[#00ADB5] shadow-lg shadow-[#00ADB5]/25 bg-white/10"
+                      : "border-white/20 hover:border-white/40"
+                  }`}
+                  placeholder="Confirm your password"
+                  required
+                />
               </div>
 
               {/* Submit Button */}
               <button
                 type="submit"
-                className="w-full bg-gradient-to-r from-[#00ADB5] to-[#00C4CC] hover:from-[#00C4CC] hover:to-[#00ADB5] text-white font-bold py-4 px-6 rounded-xl transition-all duration-300 transform hover:scale-[1.02] hover:shadow-2xl hover:shadow-[#00ADB5]/30 focus:outline-none focus:ring-4 focus:ring-[#00ADB5]/50 font-inter"
+                className="w-full bg-gradient-to-r from-[#00ADB5] to-[#00C4CC] hover:from-[#00C4CC] hover:to-[#00ADB5] text-white font-bold py-3 px-4 rounded-lg transition-all duration-300 transform hover:scale-[1.02] hover:shadow-xl hover:shadow-[#00ADB5]/30 focus:outline-none focus:ring-4 focus:ring-[#00ADB5]/50 font-inter"
               >
                 Create Account
               </button>
-
-              {/* Divider */}
-              <div className="relative my-4">
+                     {/* Divider */}
+                     <div className="relative my-4">
                 <div className="absolute inset-0 flex items-center">
                   <div className="w-full border-t border-white/20"></div>
                 </div>
@@ -168,9 +160,8 @@ function SignUp() {
                   </span>
                 </div>
               </div>
-
-              {/* Social Login Buttons */}
-              <div className="grid grid-cols-2 gap-3">
+               {/* Social Login Buttons */}
+               <div className="grid grid-cols-2 gap-3">
                 <button
                   type="button"
                   className="flex items-center justify-center px-4 py-3 border border-white/20 rounded-xl bg-white/5 hover:bg-white/10 transition-all duration-300 group"
@@ -199,7 +190,6 @@ function SignUp() {
                   </svg>
                 </button>
               </div>
-
               {/* Login Link */}
               <p className="text-center text-white/70 font-inter">
                 Already have an account?{" "}
@@ -212,15 +202,13 @@ function SignUp() {
               </p>
             </form>
           </div>
-
-          {/* Footer */}
-          <div className="text-center mt-6">
-            <p className="text-white/60 font-arimo text-sm">
-              © 2025 DreamRoute. All rights reserved.
-            </p>
-          </div>
         </div>
-      </div>
+      </main>
+
+      {/* Footer */}
+      <footer className="relative z-10 py-4 bg-black/10 backdrop-blur-sm border-t border-white/10 text-center text-white">
+        <p>© 2025 DreamRoute. All rights reserved.</p>
+      </footer>
     </div>
   );
 }
