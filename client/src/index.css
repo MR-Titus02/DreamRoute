@@ -1,0 +1,47 @@
+@import "tailwindcss";
+
+@theme {
+  --font-kaisei-tokumin: "Kaisei Tokumin", serif;
+  --font-inter: "Inter", sans-serif;
+  --font-arimo: "Arimo", sans-serif;
+  --animate-pulse: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  --animate-delay-2000: 2s;
+}
+
+/* Custom animations and effects */
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+/* Input focus effects */
+input:focus ~ .focus-line {
+  transform: scaleX(1);
+}
+
+/* Glass morphism backdrop */
+.backdrop-blur-xl {
+  backdrop-filter: blur(24px);
+}
+
+/* Custom gradient text */
+.gradient-text {
+  background: linear-gradient(135deg, #00adb5 0%, #eeeeee 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Smooth transitions for all interactive elements */
+* {
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
