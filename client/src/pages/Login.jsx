@@ -1,6 +1,8 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 function Login() {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -18,6 +20,8 @@ function Login() {
   const handleSubmit = (e) => {
     e.preventDefault();
     console.log("Login submitted:", formData);
+    // Simulate login success and navigate to dashboard
+    navigate("/dashboard");
   };
 
   return (
@@ -41,7 +45,10 @@ function Login() {
             DreamRoute
           </h1>
         </div>
-        <button className="text-white/80 hover:text-white transition-colors duration-300 text-xs font-inter">
+        <button
+          onClick={() => navigate("/signup")}
+          className="text-white/80 hover:text-white transition-colors duration-300 text-xs font-inter"
+        >
           Sign Up
         </button>
       </header>
@@ -116,7 +123,7 @@ function Login() {
               {/* Submit */}
               <button
                 type="submit"
-                className="w-full bg-gradient-to-r from-[#00ADB5] to-[#00C4CC] hover:from-[#00C4CC] hover:to-[#00ADB5] text-white font-bold py-3 px-4 rounded-lg transition-all duration-300 transform hover:scale-[1.02] hover:shadow-xl hover:shadow-[#00ADB5]/30 focus:outline-none focus:ring-4 focus:ring-[#00ADB5]/50 font-inter"
+                className="w-full bg-gradient-to-r from-[#00ADB5] to-[#00C4CC] hover:from-[#00C4CC] hover:to-[#00ADB5] text-white font-bold py-1 px-4 rounded-lg transition-all duration-300 transform hover:scale-[1.02] hover:shadow-xl hover:shadow-[#00ADB5]/30 focus:outline-none focus:ring-4 focus:ring-[#00ADB5]/50 font-inter"
               >
                 Sign In
               </button>
@@ -137,7 +144,7 @@ function Login() {
               <div className="grid grid-cols-2 gap-3">
                 <button
                   type="button"
-                  className="flex items-center justify-center px-4 py-3 border border-white/20 rounded-xl bg-white/5 hover:bg-white/10 transition-all duration-300 group"
+                  className="flex items-center justify-center px-4 py-1 border border-white/20 rounded-xl bg-white/5 hover:bg-white/10 transition-all duration-300 group"
                 >
                   <svg
                     className="w-5 h-5 text-white group-hover:scale-110 transition-transform"
@@ -152,7 +159,7 @@ function Login() {
                 </button>
                 <button
                   type="button"
-                  className="flex items-center justify-center px-4 py-3 border border-white/20 rounded-xl bg-white/5 hover:bg-white/10 transition-all duration-300 group"
+                  className="flex items-center justify-center px-4 py-1 border border-white/20 rounded-xl bg-white/5 hover:bg-white/10 transition-all duration-300 group"
                 >
                   <svg
                     className="w-5 h-5 text-white group-hover:scale-110 transition-transform"
@@ -169,6 +176,7 @@ function Login() {
                 Don’t have an account?{" "}
                 <button
                   type="button"
+                  onClick={() => navigate("/signup")}
                   className="text-[#00ADB5] hover:text-[#00C4CC] font-semibold transition-colors duration-300"
                 >
                   Sign up

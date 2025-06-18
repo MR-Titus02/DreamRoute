@@ -1,6 +1,8 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 function SignUp() {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -19,6 +21,8 @@ function SignUp() {
   const handleSubmit = (e) => {
     e.preventDefault();
     console.log("Form submitted:", formData);
+    // Simulate signup success and navigate to dashboard
+    navigate("/dashboard");
   };
 
   return (
@@ -44,7 +48,10 @@ function SignUp() {
         </div>
 
         <div className="flex items-center space-x-3">
-          <button className="text-white/80 hover:text-white transition-colors duration-300 font-inter text-xs">
+          <button
+            onClick={() => navigate("/login")}
+            className="text-white/80 hover:text-white transition-colors duration-300 font-inter text-xs"
+          >
             Login
           </button>
           <button className="bg-gradient-to-r from-[#00ADB5] to-[#00C4CC] hover:from-[#00C4CC] hover:to-[#00ADB5] text-white px-3 py-1 rounded-lg font-medium transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl text-xs">
@@ -149,8 +156,8 @@ function SignUp() {
               >
                 Create Account
               </button>
-                     {/* Divider */}
-                     <div className="relative my-4">
+              {/* Divider */}
+              <div className="relative my-4">
                 <div className="absolute inset-0 flex items-center">
                   <div className="w-full border-t border-white/20"></div>
                 </div>
@@ -160,8 +167,8 @@ function SignUp() {
                   </span>
                 </div>
               </div>
-               {/* Social Login Buttons */}
-               <div className="grid grid-cols-2 gap-3">
+              {/* Social Login Buttons */}
+              <div className="grid grid-cols-2 gap-3">
                 <button
                   type="button"
                   className="flex items-center justify-center px-4 py-3 border border-white/20 rounded-xl bg-white/5 hover:bg-white/10 transition-all duration-300 group"
@@ -195,6 +202,7 @@ function SignUp() {
                 Already have an account?{" "}
                 <button
                   type="button"
+                  onClick={() => navigate("/login")}
                   className="text-[#00ADB5] hover:text-[#00C4CC] font-semibold transition-colors duration-300"
                 >
                   Sign in
