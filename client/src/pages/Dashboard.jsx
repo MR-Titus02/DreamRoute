@@ -133,7 +133,7 @@ const Dashboard = () => {
             style={{ width: "280px" }}
           >
             <div className="flex h-full flex-col bg-[#393E46] border-r border-gray-700 shadow-2xl">
-              <SidebarHeader className="border-b border-black/20 p-6">
+              <SidebarHeader className="border-b border-black/20 p-5">
                 <div className="flex items-center space-x-3">
                   <div className="w-10 h-10 bg-[#00ADB5] rounded-xl flex items-center justify-center">
                     <Brain className="w-6 h-6 text-white" />
@@ -142,7 +142,7 @@ const Dashboard = () => {
                 </div>
               </SidebarHeader>
 
-              <SidebarContent className="flex-1 p-4">
+              <SidebarContent className="flex-1 p-4 ">
                 <SidebarMenu className="space-y-2">
                   {menuItems.map((item) => {
                     const Icon = item.icon;

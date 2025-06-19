@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import api from "../api/axios";
 
 function Login() {
   const navigate = useNavigate();
@@ -9,6 +10,7 @@ function Login() {
   });
 
   const [focusedField, setFocusedField] = useState("");
+  const [error, setError] = useState("");
 
   const handleInputChange = (e) => {
     setFormData({
@@ -17,11 +19,18 @@ function Login() {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Login submitted:", formData);
-    // Simulate login success and navigate to dashboard
-    navigate("/dashboard");
+    console.log("Sending to backend:", formData); // Debug
+  
+    try {
+      const res = await api.post("/auth/login", formData);
+      localStorage.setItem("accessToken", res.data.accessToken); 
+      navigate("/dashboard");
+    } catch (err) {
+      console.error("Login error:", err.response?.data || err.message);
+      setError("Invalid email or password");
+    }
   };
 
   return (
@@ -119,7 +128,11 @@ function Login() {
                   required
                 />
               </div>
-
+              {error && (
+  <p className="text-red-400 bg-white/10 p-2 rounded text-sm text-center font-inter">
+    {error}
+  </p>
+)}
               {/* Submit */}
               <button
                 type="submit"
