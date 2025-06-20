@@ -16,3 +16,4 @@ export const generateResponse = async (req, res) => {
     res.status(500).json({ error: error.message || 'OpenAI request failed' });
   }
 };
+

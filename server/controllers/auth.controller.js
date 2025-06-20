@@ -56,7 +56,7 @@ export async function login(req, res) {
     if (!user) {
       await pool.query(
         'INSERT INTO login_logs (user_id, ip_address, user_agent, status) VALUES (?, ?, ?, ?)',
-        [null, ip, userAgent, 'failure']
+        [user.id, ip, userAgent, 'failure']
       );
       return res.status(404).json({ message: 'User not found' });
     }
@@ -79,17 +79,20 @@ export async function login(req, res) {
         institution_id: user.institution_id,
       },
       JWT_SECRET,
-      { expiresIn: '10m' } // Short-lived token
+      { expiresIn: '30s' } // Short-lived token
     );
 
     // Generate Refresh Token
     const refreshToken = jwt.sign(
-      { userId: user.id },
+      { userId: user.id,
+        email: user.email,
+        role: user.role,
+        institution_id: user.institution_id },
       REFRESH_TOKEN,
       { expiresIn: '7d' } // Long-lived token
     );
 
-    // OPTIONAL: Store refresh token in database if you want to support backend logout
+    // Store refresh token in database
     await pool.query(
       'UPDATE users SET refresh_token = ? WHERE id = ?',
       [refreshToken, user.id]
@@ -103,7 +106,7 @@ export async function login(req, res) {
     // Send refresh token as HTTP-Only cookie
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
-      secure: true, // Set to true in production (requires HTTPS)
+      secure: false, // Set to true in production (requires HTTPS)
       sameSite: 'Strict',
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
@@ -111,12 +114,13 @@ export async function login(req, res) {
     res.json({
       message: 'Login successful',
       token: accessToken,
+      refreshAccessToken: refreshToken,
     });
     await sendTemplateEmail(user.email, 'login', { name: user.name });
   } catch (error) {
     console.error('Login Error:', error);
     res.status(500).json({ message: 'Server error during login' });
-    logger.error(`Login Error: ${error.message}`, { stack: error.stack });
+    // logger.error(`Login Error: ${error.message}`, { stack: error.stack });
   }
 }
 
@@ -126,24 +130,23 @@ export async function login(req, res) {
 export const refreshAccessToken = async (req, res) => {
   try {
     const refreshToken = req.cookies.refreshToken;
+    console.log("Incoming refresh token:", refreshToken);
 
     if (!refreshToken) {
       return res.status(401).json({ message: 'Refresh token missing' });
     }
 
-    // Verify refresh token
     const decoded = jwt.verify(refreshToken, REFRESH_TOKEN);
-    const userId = decoded.userId;
+    console.log("Decoded payload:", decoded);
 
-    // Check if token matches what's stored in DB
-    const [userRows] = await pool.query('SELECT * FROM users WHERE id = ?', [userId]);
+    const [userRows] = await pool.query('SELECT * FROM users WHERE id = ?', [decoded.userId]);
     const user = userRows[0];
 
     if (!user || user.refresh_token !== refreshToken) {
+      console.log("Token mismatch");
       return res.status(403).json({ message: 'Invalid refresh token' });
     }
 
-    // Generate new access token
     const newAccessToken = jwt.sign(
       {
         userId: user.id,
@@ -157,11 +160,11 @@ export const refreshAccessToken = async (req, res) => {
 
     res.json({ token: newAccessToken });
   } catch (error) {
-    console.error('Refresh error:', error);
+    console.error('Refresh error:', error.message);
     res.status(403).json({ message: 'Invalid or expired refresh token' });
-    logger.error(`Refresh Token Error: ${error.message}`, { stack: error.stack });
   }
 };
+
 
 
 
@@ -220,13 +223,6 @@ export const forgotPassword = async (req, res) => {
     // Build reset link
     const resetLink = `${process.env.FRONTEND_URL}/reset-password/${resetToken}`;
 
-    // Send email
-    // await sendTemplateEmail({
-    //   type: 'resetPassword',
-    //   email: user.email,
-    //   name: user.name,
-    //   resetLink,
-    // });
 
     await sendTemplateEmail(user.email, 'resetPassword', { name: user.name, resetLink });
 

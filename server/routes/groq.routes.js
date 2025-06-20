@@ -1,8 +1,8 @@
 import express from 'express';
-import { chatWithGroq } from '../controllers/groq.controller.js';
+import { Groq } from '../controllers/groq.controller.js';
 
 const router = express.Router();
 
-router.post('/chat', chatWithGroq);
+router.post('/chat', Groq);
 
 export default router;

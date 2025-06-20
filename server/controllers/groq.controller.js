@@ -2,7 +2,7 @@ import axios from 'axios';
 import dotenv from 'dotenv';
 dotenv.config();
 
-export const chatWithGroq = async (req, res) => {
+export const Groq = async (req, res) => {
   try {
     const { model, messages } = req.body;
 

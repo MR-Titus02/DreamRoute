@@ -1,5 +1,5 @@
 import pool from '../config/db.js';
-import logger, { logUserAction } from '../utils/logger.js';
+import { logUserAction } from '../utils/logger.js';
 
 export const changeUserRole = async (req, res) => {
   const { id } = req.params;
