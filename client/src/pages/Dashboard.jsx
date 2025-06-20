@@ -43,6 +43,7 @@ import {
   AreaChart,
   Area,
 } from "recharts";
+import Logo from "../assets/logo.png"; 
 
 const Dashboard = () => {
   const menuItems = [
@@ -85,7 +86,7 @@ const Dashboard = () => {
       change: "2 remaining",
       trend: "neutral",
       icon: Target,
-      color: "bg-[#3D3A3A]",
+      color: "bg-[#00ADB5]",
     },
   ];
 
@@ -135,8 +136,8 @@ const Dashboard = () => {
             <div className="flex h-full flex-col bg-[#393E46] border-r border-gray-700 shadow-2xl">
               <SidebarHeader className="border-b border-black/20 p-5">
                 <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 bg-[#00ADB5] rounded-xl flex items-center justify-center">
-                    <Brain className="w-6 h-6 text-white" />
+                  <div className="w-20 h-20 rounded-xl flex items-center justify-center">
+                  <img src={Logo} alt="DreamRoute Logo" className="w-16 h-16" />
                   </div>
                   <h1 className="text-xl font-bold text-white">DreamRoute</h1>
                 </div>
@@ -209,10 +210,10 @@ const Dashboard = () => {
               </div>
 
               <div className="flex items-center space-x-4">
-                <Button className="bg-[#00ADB5] text-white shadow-lg hover:bg-[#00ADB5]/90 hover:shadow-xl transition-all duration-200">
+                {/* <Button className="bg-[#00ADB5] text-white shadow-lg hover:bg-[#00ADB5]/90 hover:shadow-xl transition-all duration-200">
                   <Calendar className="w-4 h-4 mr-2" />
                   Schedule Session
-                </Button>
+                </Button> */}
                 <div className="w-10 h-10 bg-[#D9D9D9] rounded-full flex items-center justify-center">
                   <span className="text-gray-700 font-medium text-sm">AS</span>
                 </div>
@@ -403,7 +404,7 @@ const Dashboard = () => {
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
-                    <div className="p-4 bg-[#D9D9D9] rounded-lg shadow-sm">
+                    {/* <div className="p-4 bg-[#D9D9D9] rounded-lg shadow-sm">
                       <div className="flex items-center space-x-2 mb-2">
                         <Star className="w-4 h-4 text-[#00ADB5]" />
                         <span className="font-medium text-gray-900">
@@ -417,7 +418,7 @@ const Dashboard = () => {
                       <Button className="w-full bg-[#00ADB5] hover:bg-[#00ADB5]/90 text-white">
                         Start Course
                       </Button>
-                    </div>
+                    </div> */}
 
                     <div className="p-4 bg-[#D9D9D9] rounded-lg shadow-sm">
                       <div className="flex items-center space-x-2 mb-2">

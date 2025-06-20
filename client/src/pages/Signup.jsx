@@ -1,13 +1,18 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import Logo from "../assets/logo.png"
+import axios from "../api/axios";
+
 
 function SignUp() {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
+    name: "",        
     email: "",
     password: "",
     confirmPassword: "",
   });
+  
 
   const [focusedField, setFocusedField] = useState("");
 
@@ -17,14 +22,31 @@ function SignUp() {
       [e.target.name]: e.target.value,
     });
   };
-
-  const handleSubmit = (e) => {
+  
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Form submitted:", formData);
-    // Simulate signup success and navigate to dashboard
-    navigate("/dashboard");
+  
+    const { name, email, password, confirmPassword } = formData;
+  
+    if (password !== confirmPassword) {
+      return alert("Passwords do not match");
+    }
+  
+    try {
+      const payload = {
+        name,
+        email,
+        password,
+        role: "student", // ✅ Default role
+      };
+  
+      const res = await axios.post("/auth/register", payload); // use your axios instance
+      navigate("/dashboard");
+    } catch (err) {
+      console.error("Registration error:", err.response?.data || err.message);
+      alert(err.response?.data?.message || "Registration failed");
+    }
   };
-
   return (
     <div className="h-screen bg-gradient-to-br from-[#222831] via-[#393E46] to-[#222831] relative overflow-hidden flex flex-col justify-between">
       {/* Animated background elements */}
@@ -35,12 +57,12 @@ function SignUp() {
       </div>
 
       {/* Header */}
-      <header className="relative z-10 flex items-center justify-between px-4 lg:px-8 py-2 bg-black/10 backdrop-blur-sm border-b border-white/10 flex-shrink-0">
+      <header className="relative z-10 flex items-center justify-between px-4 lg:px-8 bg-black/10 backdrop-blur-sm border-b border-white/10 flex-shrink-0">
         <div className="flex items-center space-x-2">
           <img
-            src="https://cdn.builder.io/api/v1/image/assets%2F695e717eeae345fe9c4e2371d3d38c50%2F3f1c97cc2466444ca6af5530dd3bfb31"
+            src={Logo}
             alt="DreamRoute Logo"
-            className="w-8 h-8 rounded-lg shadow-lg"
+            className="w-16 h-16 rounded-lg shadow-lg"
           />
           <h1 className="font-kaisei-tokumin font-extrabold text-lg lg:text-xl text-white">
             DreamRoute
@@ -50,21 +72,19 @@ function SignUp() {
         <div className="flex items-center space-x-3">
           <button
             onClick={() => navigate("/login")}
-            className="text-white/80 hover:text-white transition-colors duration-300 font-inter text-xs"
-          >
+            className="bg-gradient-to-r from-[#00ADB5] to-[#00C4CC] hover:from-[#00C4CC] hover:to-[#00ADB5] text-white px-3 py-1 rounded-lg font-medium transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl text-xs"
+            >
             Login
           </button>
-          <button className="bg-gradient-to-r from-[#00ADB5] to-[#00C4CC] hover:from-[#00C4CC] hover:to-[#00ADB5] text-white px-3 py-1 rounded-lg font-medium transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl text-xs">
-            Get Started
-          </button>
+          
         </div>
       </header>
 
       {/* Main Content */}
-      <main className="relative z-10 flex flex-col flex-grow px-4 py-4">
+      <main className="relative z-10 flex flex-col flex-grow px-4 py-2">
         <div className="w-full max-w-md mx-auto">
           {/* Welcome Section */}
-          <div className="text-center mb-4">
+          <div className="text-center mb-2">
             <h2 className="font-inter font-bold text-2xl lg:text-3xl text-white mb-1">
               Join{" "}
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#00ADB5] to-[#EEEEEE]">
@@ -83,6 +103,28 @@ function SignUp() {
                 Create Account
               </h3>
 
+{/* Name Field */}
+<div className="space-y-1">
+                <label className="block text-xs font-semibold text-white/90 font-inter">
+                  Name
+                </label>
+                <input
+                  type="name"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleInputChange}
+                  onFocus={() => setFocusedField("name")}
+                  onBlur={() => setFocusedField("")}
+                  className={`w-full px-3 py-2 bg-white/5 border rounded-lg text-white placeholder-white/50 font-inter transition-all duration-300 ${
+                    focusedField === "name"
+                      ? "border-[#00ADB5] shadow-lg shadow-[#00ADB5]/25 bg-white/10"
+                      : "border-white/20 hover:border-white/40"
+                  }`}
+                  placeholder="Enter your name"
+                  required
+                />
+                </div>
+              
               {/* Email Field */}
               <div className="space-y-1">
                 <label className="block text-xs font-semibold text-white/90 font-inter">
@@ -152,7 +194,7 @@ function SignUp() {
               {/* Submit Button */}
               <button
                 type="submit"
-                className="w-full bg-gradient-to-r from-[#00ADB5] to-[#00C4CC] hover:from-[#00C4CC] hover:to-[#00ADB5] text-white font-bold py-3 px-4 rounded-lg transition-all duration-300 transform hover:scale-[1.02] hover:shadow-xl hover:shadow-[#00ADB5]/30 focus:outline-none focus:ring-4 focus:ring-[#00ADB5]/50 font-inter"
+                className="w-full bg-gradient-to-r from-[#00ADB5] to-[#00C4CC] hover:from-[#00C4CC] hover:to-[#00ADB5] text-white font-bold py-1 px-4 rounded-lg transition-all duration-300 transform hover:scale-[1.02] hover:shadow-xl hover:shadow-[#00ADB5]/30 focus:outline-none focus:ring-4 focus:ring-[#00ADB5]/50 font-inter"
               >
                 Create Account
               </button>
@@ -167,11 +209,12 @@ function SignUp() {
                   </span>
                 </div>
               </div>
+              
               {/* Social Login Buttons */}
               <div className="grid grid-cols-2 gap-3">
                 <button
                   type="button"
-                  className="flex items-center justify-center px-4 py-3 border border-white/20 rounded-xl bg-white/5 hover:bg-white/10 transition-all duration-300 group"
+                  className="flex items-center justify-center px-4 py-1 cursor-pointer border border-white/20 rounded-xl bg-white/5 hover:bg-white/10 transition-all duration-300 group"
                 >
                   <svg
                     className="w-5 h-5 text-white group-hover:scale-110 transition-transform"
@@ -186,15 +229,12 @@ function SignUp() {
                 </button>
                 <button
                   type="button"
-                  className="flex items-center justify-center px-4 py-3 border border-white/20 rounded-xl bg-white/5 hover:bg-white/10 transition-all duration-300 group"
+                  className="flex items-center justify-center px-4 py-1 cursor-pointer border border-white/20 rounded-xl bg-white/5 hover:bg-white/10 transition-all duration-300 group"
                 >
-                  <svg
-                    className="w-5 h-5 text-white group-hover:scale-110 transition-transform"
-                    fill="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z" />
-                  </svg>
+                  <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+  <path fill-rule="evenodd" d="M12.006 2a9.847 9.847 0 0 0-6.484 2.44 10.32 10.32 0 0 0-3.393 6.17 10.48 10.48 0 0 0 1.317 6.955 10.045 10.045 0 0 0 5.4 4.418c.504.095.683-.223.683-.494 0-.245-.01-1.052-.014-1.908-2.78.62-3.366-1.21-3.366-1.21a2.711 2.711 0 0 0-1.11-1.5c-.907-.637.07-.621.07-.621.317.044.62.163.885.346.266.183.487.426.647.71.135.253.318.476.538.655a2.079 2.079 0 0 0 2.37.196c.045-.52.27-1.006.635-1.37-2.219-.259-4.554-1.138-4.554-5.07a4.022 4.022 0 0 1 1.031-2.75 3.77 3.77 0 0 1 .096-2.713s.839-.275 2.749 1.05a9.26 9.26 0 0 1 5.004 0c1.906-1.325 2.74-1.05 2.74-1.05.37.858.406 1.828.101 2.713a4.017 4.017 0 0 1 1.029 2.75c0 3.939-2.339 4.805-4.564 5.058a2.471 2.471 0 0 1 .679 1.897c0 1.372-.012 2.477-.012 2.814 0 .272.18.592.687.492a10.05 10.05 0 0 0 5.388-4.421 10.473 10.473 0 0 0 1.313-6.948 10.32 10.32 0 0 0-3.39-6.165A9.847 9.847 0 0 0 12.007 2Z" clip-rule="evenodd"/>
+</svg>
+
                 </button>
               </div>
               {/* Login Link */}

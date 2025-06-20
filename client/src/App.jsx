@@ -9,17 +9,26 @@ import SignUp from "./pages/Signup";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import LandingPage from "./pages/LandingPage";
+import Feedback from "./pages/Feedback";
+import InstitutionCourse from "./pages/Submit_Course";
+import UserInfo from "./pages/UserInfo";
 
 function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<Navigate to="/login" replace />} />
+        
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<SignUp />} />
         <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/settings" element={<Dashboard />} />
-        <Route path="/home" element={<LandingPage />} />
+        <Route path="/" element={<LandingPage />} />
+        <Route path="*" element={<Navigate to="/" />} />
+        <Route path="/feedback" element={<Feedback />} />
+        <Route path="/submit-course" element={<InstitutionCourse />} />
+        <Route path="/userdetails" element={<UserInfo />} />
+        
+        {/* Redirects */}
+        
 
       </Routes>
     </Router>
