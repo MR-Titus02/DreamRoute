@@ -12,6 +12,7 @@ import LandingPage from "./pages/LandingPage";
 import Feedback from "./pages/Feedback";
 import InstitutionCourse from "./pages/Submit_Course";
 import UserInfo from "./pages/UserInfo";
+import Roadmap from "./pages/Roadmap";
 
 function App() {
   return (
@@ -26,7 +27,8 @@ function App() {
         <Route path="/feedback" element={<Feedback />} />
         <Route path="/submit-course" element={<InstitutionCourse />} />
         <Route path="/userdetails" element={<UserInfo />} />
-        
+        <Route path="/roadmap" element={<Roadmap />} />
+                        
         {/* Redirects */}
         
 

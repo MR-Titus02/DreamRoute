@@ -79,7 +79,7 @@ const InstitutionCourse = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#222831] via-[#393E46] to-[#222831] text-white flex flex-col">
       {/* Header */}
-      <header className="flex justify-between items-center px-4 py-2 border-b border-white/10 bg-black/10 backdrop-blur-sm">
+      <header className="flex justify-between items-center px-4 border-b border-white/10 bg-black/10 backdrop-blur-sm">
         <div className="flex items-center space-x-2">
           <img src={Logo} alt="DreamRoute Logo" className="w-14 h-14 rounded shadow" />
           <h1 className="text-xl font-extrabold">DreamRoute</h1>
@@ -94,9 +94,9 @@ const InstitutionCourse = () => {
 
       {/* Main Content */}
       <main className="flex-grow p-6 flex justify-center items-center">
-        <div className="w-full max-w-3xl bg-white/10 backdrop-blur-xl rounded-2xl p-6 border border-white/20 shadow-xl">
-          <h2 className="text-2xl font-bold text-center mb-2">Request to Add a Course</h2>
-          <p className="text-center text-sm text-white/70 mb-6">
+        <div className="w-full max-w-2xl bg-white/10 backdrop-blur-xl rounded-2xl p-4 border border-white/20 shadow-xl">
+          <h2 className="text-2xl font-bold text-center ">Request to Add a Course</h2>
+          <p className="text-center text-sm text-white/70 mb-1">
             Submit course details to be reviewed and added by an admin.
           </p>
 
@@ -131,7 +131,7 @@ const InstitutionCourse = () => {
                 onBlur={() => setFocused("")}
                 placeholder="Explain what this course covers"
                 required
-                className={`w-full px-4 py-2 rounded-lg border bg-white/5 placeholder-white/50 text-white h-28 resize-none transition-all ${
+                className={`w-full px-4 py-2 rounded-lg border bg-white/5 placeholder-white/50 text-white h-20 resize-none transition-all ${
                   focused === "description"
                     ? "border-[#00ADB5] shadow shadow-[#00ADB5]/30"
                     : "border-white/20 hover:border-white/40"
