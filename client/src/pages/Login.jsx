@@ -29,10 +29,10 @@ function Login() {
     try {
       const res = await api.post("/auth/login", formData);
       console.log("Response from backend:", res.data); // Debug
-      const { user, accessToken } = res.data;
+      const { user, token } = res.data;
       console.log("Login successful:", user); // Debug
-      login(user); // Save to context
-      localStorage.setItem("accessToken", accessToken);
+      login(user, res.data.token);
+
       
 
       // ✅ Redirect based on role

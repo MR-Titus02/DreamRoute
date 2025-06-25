@@ -1,47 +1,44 @@
 import { createContext, useContext, useState, useEffect } from "react";
 
-// Create the Auth Context
 const AuthContext = createContext();
 
-// Auth Provider Component
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
+  const [token, setToken] = useState(null);
+  const [loading, setLoading] = useState(true); // 👈 new
 
-  // On initial load, safely get user from localStorage
   useEffect(() => {
-    try {
-      const storedUser = localStorage.getItem("user");
-      if (storedUser) {
-        const parsedUser = JSON.parse(storedUser);
-        if (parsedUser && typeof parsedUser === "object") {
-          setUser(parsedUser);
-        }
-      }
-    } catch (err) {
-      console.error("Failed to parse user from localStorage:", err);
-      localStorage.removeItem("user"); // Clean corrupted value
+    const storedUser = localStorage.getItem("user");
+    const storedToken = localStorage.getItem("token");
+
+    if (storedUser && storedToken) {
+      setUser(JSON.parse(storedUser));
+      setToken(storedToken);
     }
+
+    setLoading(false); // 
   }, []);
 
-  // Save user to both state and localStorage
-  const login = (userData) => {
+  const login = (userData, token) => {
     setUser(userData);
+    setToken(token);
     localStorage.setItem("user", JSON.stringify(userData));
+    localStorage.setItem("token", token);
   };
 
-  // Clear user from state and localStorage
   const logout = () => {
     setUser(null);
+    setToken(null);
     localStorage.removeItem("user");
-    localStorage.removeItem("accessToken"); // Optional: also remove token
+    localStorage.removeItem("token");
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout }}>
+    <AuthContext.Provider value={{ user, token, login, logout, loading }}>
       {children}
     </AuthContext.Provider>
   );
 };
 
-// Export useAuth hook for components
+
 export const useAuth = () => useContext(AuthContext);
