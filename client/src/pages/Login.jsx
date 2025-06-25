@@ -2,8 +2,10 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../api/axios";
 import Logo from "../assets/logo.png";
+import { useAuth } from "@/context/AuthContext";
 
 function Login() {
+  const { login } = useAuth();
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     email: "",
@@ -23,11 +25,24 @@ function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     console.log("Sending to backend:", formData); // Debug
-  
+
     try {
       const res = await api.post("/auth/login", formData);
-      localStorage.setItem("accessToken", res.data.accessToken); 
-      navigate("/dashboard");
+      console.log("Response from backend:", res.data); // Debug
+      const { user, accessToken } = res.data;
+      console.log("Login successful:", user); // Debug
+      login(user); // Save to context
+      localStorage.setItem("accessToken", accessToken);
+      
+
+      // ✅ Redirect based on role
+      if (user.role === "admin") {
+        navigate("/admin");
+      } else if (user.role === "institution") {
+        navigate("/institution-dashboard");
+      } else {
+        navigate("/dashboard");
+      }
     } catch (err) {
       console.error("Login error:", err.response?.data || err.message);
       setError("Invalid email or password");
@@ -205,5 +220,4 @@ function Login() {
     </div>
   );
 }
-
 export default Login;
