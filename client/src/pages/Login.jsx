@@ -24,13 +24,13 @@ function Login() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Sending to backend:", formData); // Debug
+    // console.log("Sending to backend:", formData); // Debug
 
     try {
       const res = await api.post("/auth/login", formData);
-      console.log("Response from backend:", res.data); // Debug
+      // console.log("Response from backend:", res.data); // Debug
       const { user, token } = res.data;
-      console.log("Login successful:", user); // Debug
+      // console.log("Login successful:", user); // Debug
       login(user, res.data.token);
 
       

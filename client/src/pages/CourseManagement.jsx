@@ -14,6 +14,7 @@ import {
   SelectItem,
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
+import Sidebar from "@/components/Sidebar"; // ✅ Sidebar added
 
 export default function CourseManagement() {
   const [courses, setCourses] = useState([]);
@@ -53,82 +54,85 @@ export default function CourseManagement() {
   });
 
   return (
-    <div className="p-6 bg-[#1E293B] min-h-screen text-[#F1F5F9]">
-      <h2 className="text-3xl font-bold mb-6 text-white">Course Management</h2>
+    <div className="flex">
+      <Sidebar />
+      <div className="flex-1 p-6 bg-[#1E293B] min-h-screen text-[#F1F5F9]">
+        <h2 className="text-3xl font-bold mb-6 text-white">Course Management</h2>
 
-      <div className="flex gap-4 mb-6">
-        <Input
-          placeholder="Search by title..."
-          value={titleFilter}
-          onChange={(e) => setTitleFilter(e.target.value)}
-          className="bg-[#1E293B] text-white border-gray-500"
-        />
-        <Select
-          onValueChange={(val) => setStatusFilter(val)}
-          defaultValue="all"
-        >
-          <SelectTrigger className="w-48 bg-[#1E293B] text-white border-gray-500">
-            {statusFilter === "all" ? "All Statuses" : statusFilter}
-          </SelectTrigger>
-          <SelectContent className="bg-[#3B4758] text-white">
-            <SelectItem value="all">All</SelectItem>
-            <SelectItem value="pending">Pending</SelectItem>
-            <SelectItem value="approved">Approved</SelectItem>
-            <SelectItem value="rejected">Rejected</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
+        <div className="flex gap-4 mb-6">
+          <Input
+            placeholder="Search by title..."
+            value={titleFilter}
+            onChange={(e) => setTitleFilter(e.target.value)}
+            className="bg-[#1E293B] text-white border-gray-500"
+          />
+          <Select
+            onValueChange={(val) => setStatusFilter(val)}
+            defaultValue="all"
+          >
+            <SelectTrigger className="w-48 bg-[#1E293B] text-white border-gray-500">
+              {statusFilter === "all" ? "All Statuses" : statusFilter}
+            </SelectTrigger>
+            <SelectContent className="bg-[#3B4758] text-white">
+              <SelectItem value="all">All</SelectItem>
+              <SelectItem value="pending">Pending</SelectItem>
+              <SelectItem value="approved">Approved</SelectItem>
+              <SelectItem value="rejected">Rejected</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
 
-      <Card className="bg-[#3B4758] shadow-lg">
-        <CardHeader>
-          <CardTitle>All Courses</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <table className="w-full text-left">
-            <thead className="text-gray-300">
-              <tr>
-                <th className="py-2">Title</th>
-                <th>Institution</th>
-                <th>Status</th>
-                <th className="text-center">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredCourses.map((course) => (
-                <tr key={course.id} className="border-t border-gray-600">
-                  <td className="py-2">{course.title}</td>
-                  <td>{course.institution_name || "Admin Created"}</td>
-                  <td>{course.status}</td>
-                  <td className="space-x-2 text-center">
-                    {course.status === "pending" && (
-                      <>
-                        <Button
-                          variant="secondary"
-                          onClick={() => handleCourseAction(course.id, "approve")}
-                        >
-                          Approve
-                        </Button>
-                        <Button
-                          variant="outline"
-                          onClick={() => handleCourseAction(course.id, "reject")}
-                        >
-                          Reject
-                        </Button>
-                      </>
-                    )}
-                    <Button
-                      variant="destructive"
-                      onClick={() => handleCourseAction(course.id, "delete")}
-                    >
-                      Delete
-                    </Button>
-                  </td>
+        <Card className="bg-[#3B4758] shadow-lg">
+          <CardHeader>
+            <CardTitle>All Courses</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <table className="w-full text-left">
+              <thead className="text-gray-300">
+                <tr>
+                  <th className="py-2">Title</th>
+                  <th>Institution</th>
+                  <th>Status</th>
+                  <th className="text-center">Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </CardContent>
-      </Card>
+              </thead>
+              <tbody>
+                {filteredCourses.map((course) => (
+                  <tr key={course.id} className="border-t border-gray-600">
+                    <td className="py-2">{course.title}</td>
+                    <td>{course.name || "Admin Created"}</td>
+                    <td>{course.status}</td>
+                    <td className="space-x-2 text-center">
+                      {course.status === "pending" && (
+                        <>
+                          <Button
+                            variant="secondary"
+                            onClick={() => handleCourseAction(course.id, "approve")}
+                          >
+                            Approve
+                          </Button>
+                          <Button
+                            variant="outline"
+                            onClick={() => handleCourseAction(course.id, "reject")}
+                          >
+                            Reject
+                          </Button>
+                        </>
+                      )}
+                      <Button
+                        variant="destructive"
+                        onClick={() => handleCourseAction(course.id, "delete")}
+                      >
+                        Delete
+                      </Button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }
