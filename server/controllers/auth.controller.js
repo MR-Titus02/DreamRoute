@@ -79,7 +79,7 @@ export async function login(req, res) {
         institution_id: user.institution_id,
       },
       JWT_SECRET,
-      { expiresIn: '30s' } // Short-lived token
+      { expiresIn: '15m' } // Short-lived token
     );
 
     // Generate Refresh Token
@@ -115,12 +115,18 @@ export async function login(req, res) {
       message: 'Login successful',
       token: accessToken,
       refreshAccessToken: refreshToken,
+      user: {
+        id: user.id,
+        email: user.email,
+        role: user.role,
+        institution_id: user.institution_id,
+        name: user.name,
+      },
     });
     await sendTemplateEmail(user.email, 'login', { name: user.name });
   } catch (error) {
     console.error('Login Error:', error);
     res.status(500).json({ message: 'Server error during login' });
-    // logger.error(`Login Error: ${error.message}`, { stack: error.stack });
   }
 }
 

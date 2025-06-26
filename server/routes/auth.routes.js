@@ -14,7 +14,7 @@ import { forgotPassword, resetPassword } from '../controllers/auth.controller.js
 const router = express.Router();
 
 router.post('/register', validateRegister, validateRequest, register);
-router.post('/login', validateLogin, validateRequest,loginLimiter, login);
+router.post('/login', validateLogin, validateRequest, login); //loginlimiter
 
 router.post('/refresh', verifyToken, refreshAccessToken);
 router.post('/logout',verifyToken, logout);

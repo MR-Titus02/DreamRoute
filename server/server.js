@@ -21,7 +21,7 @@ import passport from 'passport';
 import './config/passport.js';
 import session from 'express-session';
 import checkoutRoutes from './routes/checkout.routes.js';
-
+import loginLogsRoutes from './routes/loginLogs.routes.js';
 
 
 
@@ -71,7 +71,7 @@ app.get("/profile", (req, res) => {
   res.json(req.user);
 });
 app.use('/api/checkout', checkoutRoutes);
-
+app.use("/api/login-logs", loginLogsRoutes);
 
 app.use(notFound);
 app.use(errorHandler);
