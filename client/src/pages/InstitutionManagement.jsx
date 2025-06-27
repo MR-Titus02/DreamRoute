@@ -8,20 +8,27 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Select, SelectTrigger, SelectContent, SelectItem } from "@/components/ui/select";
-import Sidebar from "@/components/Sidebar"; // ✅ Sidebar added
+import {
+  Select,
+  SelectTrigger,
+  SelectContent,
+  SelectItem,
+  SelectValue,
+} from "@/components/ui/select";
+import Sidebar from "@/components/Sidebar";
 
 export default function InstitutionManagement() {
   const [institutions, setInstitutions] = useState([]);
   const [courses, setCourses] = useState([]);
   const [selectedInstitutionId, setSelectedInstitutionId] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const [newCourseTitle, setNewCourseTitle] = useState("");
   const [newInstitutionName, setNewInstitutionName] = useState("");
-  const [newInstitutionEmail, setNewInstitutionEmail] = useState("");
+  const [selectedUserEmail, setSelectedUserEmail] = useState("");
+  const [userEmails, setUserEmails] = useState([]);
 
   useEffect(() => {
     fetchInstitutions();
+    fetchUserEmails();
   }, []);
 
   async function fetchInstitutions() {
@@ -30,6 +37,16 @@ export default function InstitutionManagement() {
       setInstitutions(res.data);
     } catch (err) {
       console.error("Error fetching institutions:", err);
+    }
+  }
+
+  async function fetchUserEmails() {
+    try {
+      const res = await api.get("/users");
+      const filtered = res.data.filter((user) => user.role !== "institution");
+      setUserEmails(filtered);
+    } catch (err) {
+      console.error("Error fetching user emails:", err);
     }
   }
 
@@ -56,26 +73,13 @@ export default function InstitutionManagement() {
     try {
       await api.post("/institutions/", {
         name: newInstitutionName,
-        email: newInstitutionEmail,
+        email: selectedUserEmail,
       });
       setNewInstitutionName("");
-      setNewInstitutionEmail("");
+      setSelectedUserEmail("");
       fetchInstitutions();
     } catch (err) {
       console.error("Error adding institution:", err);
-    }
-  }
-
-  async function handleAddCourse() {
-    try {
-      await api.post("/courses/", {
-        title: newCourseTitle,
-        institutionId: selectedInstitutionId,
-      });
-      setNewCourseTitle("");
-      fetchInstitutionCourses(selectedInstitutionId);
-    } catch (err) {
-      console.error("Error adding course:", err);
     }
   }
 
@@ -103,16 +107,22 @@ export default function InstitutionManagement() {
           </CardHeader>
           <CardContent>
             <div className="mb-4 flex space-x-2">
+              <Select onValueChange={setSelectedUserEmail}>
+                <SelectTrigger className="bg-[#1E293B] text-white border-gray-500 w-64">
+                  <SelectValue placeholder="Select User Email" />
+                </SelectTrigger>
+                <SelectContent>
+                  {userEmails.map((user) => (
+                    <SelectItem key={user.id} value={user.email}>
+                      {user.email}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               <Input
-                placeholder="New Institution Name"
+                placeholder="Institution Name"
                 value={newInstitutionName}
                 onChange={(e) => setNewInstitutionName(e.target.value)}
-                className="bg-[#1E293B] text-white border-gray-500"
-              />
-              <Input
-                placeholder="New Institution Email"
-                value={newInstitutionEmail}
-                onChange={(e) => setNewInstitutionEmail(e.target.value)}
                 className="bg-[#1E293B] text-white border-gray-500"
               />
               <Button onClick={handleAddInstitution}>Add Institution</Button>
@@ -153,15 +163,6 @@ export default function InstitutionManagement() {
               <CardTitle>Courses by Institution</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="mb-4 flex space-x-2">
-                <Input
-                  placeholder="New Course Title"
-                  value={newCourseTitle}
-                  onChange={(e) => setNewCourseTitle(e.target.value)}
-                  className="bg-[#1E293B] text-white border-gray-500"
-                />
-                <Button onClick={handleAddCourse}>Add Course</Button>
-              </div>
               {courses.length === 0 ? (
                 <p className="text-gray-400">No courses found for this institution.</p>
               ) : (
@@ -169,13 +170,15 @@ export default function InstitutionManagement() {
                   <thead>
                     <tr className="text-gray-300">
                       <th className="py-2">Course</th>
+                      <th>Description</th>
                       <th>Status</th>
                     </tr>
                   </thead>
                   <tbody>
                     {courses.map((course) => (
                       <tr key={course.id} className="border-t border-gray-600">
-                        <td className="py-2">{course.title}</td>
+                        <td className="py-2 font-medium">{course.title}</td>
+                        <td className="text-sm text-gray-200">{course.description}</td>
                         <td>{course.status}</td>
                       </tr>
                     ))}
