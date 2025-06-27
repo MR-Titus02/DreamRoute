@@ -2,6 +2,7 @@
 import * as InstitutionModel from '../models/institutionModel.js';
 import db from '../config/db.js';
 import { logUserAction } from '../utils/logger.js';
+import { getCoursesByInstitution } from '../models/courseModel.js';
 
 export async function getAllInstitutions(req, res) {
   try {
@@ -85,7 +86,17 @@ export const updateInstitution = async (req, res) => {
 export const getCoursesOfInstitution = async (req, res) => {
   try {
     const institutionId = req.params.id;
+
     const courses = await getCoursesByInstitution(institutionId);
+
+    // Debug log
+    console.log("Courses fetched:", courses);
+
+    // Check if course data is valid
+    if (!Array.isArray(courses)) {
+      return res.status(500).json({ message: "Invalid course data received." });
+    }
+
     res.json(courses);
   } catch (error) {
     console.error("Error fetching courses for institution:", error);

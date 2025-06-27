@@ -80,10 +80,11 @@ export async function updateCourseStatus(id, status) {
 
 export const getCoursesByInstitution = async (institutionId) => {
   const [rows] = await pool.query(
-    `SELECT c.id, c.title, c.description, c.status, c.created_at
-     FROM courses c
-     WHERE c.institution_id = ?`,
+    `SELECT id, title, description, status, created_at
+     FROM courses
+     WHERE institution_id = ?`,
     [institutionId]
   );
   return rows;
 };
+
