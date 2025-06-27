@@ -75,3 +75,27 @@ export const uploadProfileImage = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+
+export const completeProfile = async (req, res) => {
+  const userId = req.user.userId;
+
+  await pool.query("UPDATE users SET isProfileComplete = true WHERE id = ?", [userId]);
+
+  res.json({ message: "Profile marked as complete" });
+};
+
+
+export const getCurrentUser = async (req, res) => {
+  try {
+    const userId = req.user.userId;
+
+    const [rows] = await db.query("SELECT id, name, email, role, isProfileComplete FROM users WHERE id = ?", [userId]);
+
+    if (rows.length === 0) return res.status(404).json({ message: "User not found" });
+
+    res.json(rows[0]);
+  } catch (error) {
+    console.error("Error getting current user:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};

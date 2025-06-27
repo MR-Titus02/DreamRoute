@@ -32,16 +32,55 @@ export async function register(req, res) {
       [email, hashedPassword, role, name]
     );
 
-    res.status(201).json({ message: 'User registered successfully', userId: result.insertId });
-    await logUserAction(result.insertId, 'User registered', JSON.stringify(req.body));
+    const userId = result.insertId;
+
+    // 🔐 Generate JWT tokens (same as in login)
+    const accessToken = jwt.sign(
+      { userId, email, role, institution_id: null },
+      JWT_SECRET,
+      { expiresIn: '45m' }
+    );
+
+    const refreshToken = jwt.sign(
+      { userId, email, role, institution_id: null },
+      REFRESH_TOKEN,
+      { expiresIn: '7d' }
+    );
+
+    // 💾 Store refresh token in DB
+    await pool.query('UPDATE users SET refresh_token = ? WHERE id = ?', [refreshToken, userId]);
+
+    // 🍪 Set refresh token as cookie
+    res.cookie('refreshToken', refreshToken, {
+      httpOnly: true,
+      secure: false, // change to true in production
+      sameSite: 'Strict',
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+
+    // ✅ Send access token and user data
+    res.status(201).json({
+      message: 'User registered successfully',
+      token: accessToken,
+      refreshAccessToken: refreshToken,
+      user: {
+        id: userId,
+        email,
+        role,
+        institution_id: null,
+        name,
+      },
+    });
+
+    await logUserAction(userId, 'User registered', JSON.stringify(req.body));
     await sendTemplateEmail(email, 'register', { name });
+
   } catch (error) {
     console.error('Register Error:', error);
     res.status(500).json({ message: 'Server error during registration' });
     await logUserAction(null, 'Registration failed', JSON.stringify(req.body));
   }
 }
-
 // Login user
 // Main login function
 

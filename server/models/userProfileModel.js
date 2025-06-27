@@ -1,28 +1,121 @@
-import  pool  from '../config/db.js';
-export async function createUserProfile({ user_id, dob, location, career_interests, bio }) {
-    const [result] = await pool.query(
-      `INSERT INTO user_profiles (user_id, dob, location,  career_interests, bio)
-       VALUES (?, ?, ?, ?, ?)`,
-      [user_id,  dob, location, career_interests, bio]
-    );
-    return { id: result.insertId };
-  }
+import db from '../config/db.js'; // Your MySQL connection
+
+export async function createUserProfile(data) {
+  const {
+    user_id,
+    fullName,
+    email,
+    dob,
+    gender,
+    location,
+    preferredCareer,
+    interestAreas,
+    shortTermGoals,
+    longTermGoals,
+    dreamCompany,
+    educationLevel,
+    studyLanguage,
+    budget,
+    experience,
+    certifications,
+    age // ✅ include age
+  } = data;
+
+  const [result] = await db.query(
+    `INSERT INTO career_profiles (
+      user_id, full_name, email, dob, gender, location,
+      preferred_career, interest_areas, short_term_goals, long_term_goals, dream_company,
+      education_level, study_language, budget, experience, certifications, age
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    [
+      user_id,
+      fullName,
+      email,
+      dob,
+      gender,
+      location,
+      preferredCareer,
+      JSON.stringify(interestAreas), // ✅ stored as JSON string
+      shortTermGoals,
+      longTermGoals,
+      dreamCompany,
+      educationLevel,
+      studyLanguage,
+      budget,
+      experience,
+      certifications,
+      age // ✅ added here
+    ]
+  );
+
+  return { id: result.insertId };
   
-  export async function getUserProfile(user_id) {
-    const [rows] = await pool.query(`SELECT * FROM user_profiles WHERE user_id = ?`, [user_id]);
-    return rows[0];
-  }
-  
-  export async function updateUserProfile(user_id, fields) {
-    const {  dob,  location, career_interests, bio } = fields;
-    await pool.query(
-      `UPDATE user_profiles SET dob = ?,  location = ?,  career_interests = ?, bio = ?
-       WHERE user_id = ?`,
-      [ dob,  location,  career_interests, bio, user_id]
-    );
-  }
-  
-  export async function deleteUserProfile(user_id) {
-    await pool.query(`DELETE FROM user_profiles WHERE user_id = ?`, [user_id]);
-  }
-  
+
+}
+
+export async function getUserProfile(user_id) {
+  const [rows] = await db.query(
+    `SELECT * FROM career_profiles WHERE user_id = ?`,
+    [user_id]
+  );
+
+  if (rows.length === 0) return null;
+
+  // Parse JSON fields
+  const profile = rows[0];
+  profile.interest_areas = JSON.parse(profile.interest_areas || '[]');
+  return profile;
+}
+
+export async function updateUserProfile(user_id, data) {
+  const {
+    fullName,
+    email,
+    dob,
+    gender,
+    location,
+    preferredCareer,
+    interestAreas,
+    shortTermGoals,
+    longTermGoals,
+    dreamCompany,
+    educationLevel,
+    studyLanguage,
+    budget,
+    experience,
+    certifications
+  } = data;
+
+  await db.query(
+    `UPDATE career_profiles SET
+      full_name = ?, email = ?, dob = ?, gender = ?, location = ?,
+      preferred_career = ?, interest_areas = ?, short_term_goals = ?, long_term_goals = ?, dream_company = ?,
+      education_level = ?, study_language = ?, budget = ?, experience = ?, certifications = ?
+    WHERE user_id = ?`,
+    [
+      fullName,
+      email,
+      dob,
+      gender,
+      location,
+      preferredCareer,
+      JSON.stringify(interestAreas),
+      shortTermGoals,
+      longTermGoals,
+      dreamCompany,
+      educationLevel,
+      studyLanguage,
+      budget,
+      experience,
+      certifications,
+      user_id
+    ]
+  );
+}
+
+export async function deleteUserProfile(user_id) {
+  await db.query(
+    `DELETE FROM career_profiles WHERE user_id = ?`,
+    [user_id]
+  );
+}

@@ -6,7 +6,9 @@ import {
     getAllUsers,
      getUserById,
      updateUser,
-    deleteUser
+    deleteUser,
+    completeProfile,
+    getCurrentUser
 } from '../controllers/user.controller.js';
 // import { logUserAction } from '../utils/logger.js';
 
@@ -21,6 +23,10 @@ router.get('/:id', verifyToken, roleMiddleware, getUserById);
 router.put('/:id', verifyToken, roleMiddleware, updateUser);
 //delete /api/users/:id
 router.delete('/:id', verifyToken, roleMiddleware, deleteUser);
+
+router.get('/me',verifyToken,roleMiddleware, completeProfile);
+
+router.put('/complete-profile', verifyToken, roleMiddleware, completeProfile);
 
 export default router;
 
