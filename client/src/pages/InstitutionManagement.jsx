@@ -71,7 +71,7 @@ export default function InstitutionManagement() {
 
   async function handleAddInstitution() {
     try {
-      await api.post("/institutions/", {
+      await api.post("/institutions/new-ins", {
         name: newInstitutionName,
         email: selectedUserEmail,
       });
@@ -107,18 +107,22 @@ export default function InstitutionManagement() {
           </CardHeader>
           <CardContent>
             <div className="mb-4 flex space-x-2">
-              <Select onValueChange={setSelectedUserEmail}>
-                <SelectTrigger className="bg-[#1E293B] text-white border-gray-500 w-64">
-                  <SelectValue placeholder="Select User Email" />
-                </SelectTrigger>
-                <SelectContent>
-                  {userEmails.map((user) => (
-                    <SelectItem key={user.id} value={user.email}>
-                      {user.email}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+            <Select onValueChange={setSelectedUserEmail}>
+  <SelectTrigger className="bg-[#1E293B] text-white border-gray-500 w-64">
+    <SelectValue placeholder="Select User Email" />
+  </SelectTrigger>
+  <SelectContent className="bg-[#1E293B] text-white border-gray-500">
+    {userEmails.map((user) => (
+      <SelectItem
+        key={user.id}
+        value={user.email}
+        className="text-white hover:bg-[#334155] focus:bg-[#334155] cursor-pointer"
+      >
+        {user.email}
+      </SelectItem>
+    ))}
+  </SelectContent>
+</Select>
               <Input
                 placeholder="Institution Name"
                 value={newInstitutionName}
