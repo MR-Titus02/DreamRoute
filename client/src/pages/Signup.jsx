@@ -1,18 +1,19 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import Logo from "../assets/logo.png"
+import Logo from "../assets/logo.png";
 import axios from "../api/axios";
-
+import { useAuth } from '@/context/AuthContext';
 
 function SignUp() {
   const navigate = useNavigate();
+  const { login } = useAuth(); // Get login function from AuthContext
+
   const [formData, setFormData] = useState({
     name: "",        
     email: "",
     password: "",
     confirmPassword: "",
   });
-  
 
   const [focusedField, setFocusedField] = useState("");
 
@@ -37,16 +38,25 @@ function SignUp() {
         name,
         email,
         password,
-        role: "student", // ✅ Default role
+        role: "student", // default role
       };
   
-      const res = await axios.post("/auth/register", payload); // use your axios instance
-      navigate("/dashboard");
+      const res = await axios.post("/auth/register", payload);
+
+      // Destructure user and token from response data
+      const { user, token } = res.data;
+
+      // Use AuthContext login to set global auth state
+      login(user, token);
+
+      // Navigate to user details page after successful register + login
+      navigate("/userdetails");
     } catch (err) {
       console.error("Registration error:", err.response?.data || err.message);
       alert(err.response?.data?.message || "Registration failed");
     }
   };
+
   return (
     <div className="h-screen bg-gradient-to-br from-[#222831] via-[#393E46] to-[#222831] relative overflow-hidden flex flex-col justify-between">
       {/* Animated background elements */}
@@ -73,10 +83,9 @@ function SignUp() {
           <button
             onClick={() => navigate("/login")}
             className="bg-gradient-to-r from-[#00ADB5] to-[#00C4CC] hover:from-[#00C4CC] hover:to-[#00ADB5] text-white px-3 py-1 rounded-lg font-medium transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl text-xs"
-            >
+          >
             Login
           </button>
-          
         </div>
       </header>
 
@@ -103,13 +112,13 @@ function SignUp() {
                 Create Account
               </h3>
 
-{/* Name Field */}
-<div className="space-y-1">
+              {/* Name Field */}
+              <div className="space-y-1">
                 <label className="block text-xs font-semibold text-white/90 font-inter">
                   Name
                 </label>
                 <input
-                  type="name"
+                  type="text"
                   name="name"
                   value={formData.name}
                   onChange={handleInputChange}
@@ -123,8 +132,8 @@ function SignUp() {
                   placeholder="Enter your name"
                   required
                 />
-                </div>
-              
+              </div>
+
               {/* Email Field */}
               <div className="space-y-1">
                 <label className="block text-xs font-semibold text-white/90 font-inter">
@@ -198,6 +207,7 @@ function SignUp() {
               >
                 Create Account
               </button>
+
               {/* Divider */}
               <div className="relative my-4">
                 <div className="absolute inset-0 flex items-center">
@@ -216,6 +226,7 @@ function SignUp() {
                   type="button"
                   className="flex items-center justify-center px-4 py-1 cursor-pointer border border-white/20 rounded-xl bg-white/5 hover:bg-white/10 transition-all duration-300 group"
                 >
+                  {/* Google Icon */}
                   <svg
                     className="w-5 h-5 text-white group-hover:scale-110 transition-transform"
                     viewBox="0 0 24 24"
@@ -231,12 +242,13 @@ function SignUp() {
                   type="button"
                   className="flex items-center justify-center px-4 py-1 cursor-pointer border border-white/20 rounded-xl bg-white/5 hover:bg-white/10 transition-all duration-300 group"
                 >
-                  <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
-  <path fill-rule="evenodd" d="M12.006 2a9.847 9.847 0 0 0-6.484 2.44 10.32 10.32 0 0 0-3.393 6.17 10.48 10.48 0 0 0 1.317 6.955 10.045 10.045 0 0 0 5.4 4.418c.504.095.683-.223.683-.494 0-.245-.01-1.052-.014-1.908-2.78.62-3.366-1.21-3.366-1.21a2.711 2.711 0 0 0-1.11-1.5c-.907-.637.07-.621.07-.621.317.044.62.163.885.346.266.183.487.426.647.71.135.253.318.476.538.655a2.079 2.079 0 0 0 2.37.196c.045-.52.27-1.006.635-1.37-2.219-.259-4.554-1.138-4.554-5.07a4.022 4.022 0 0 1 1.031-2.75 3.77 3.77 0 0 1 .096-2.713s.839-.275 2.749 1.05a9.26 9.26 0 0 1 5.004 0c1.906-1.325 2.74-1.05 2.74-1.05.37.858.406 1.828.101 2.713a4.017 4.017 0 0 1 1.029 2.75c0 3.939-2.339 4.805-4.564 5.058a2.471 2.471 0 0 1 .679 1.897c0 1.372-.012 2.477-.012 2.814 0 .272.18.592.687.492a10.05 10.05 0 0 0 5.388-4.421 10.473 10.473 0 0 0 1.313-6.948 10.32 10.32 0 0 0-3.39-6.165A9.847 9.847 0 0 0 12.007 2Z" clip-rule="evenodd"/>
-</svg>
-
+                  {/* GitHub Icon */}
+                  <svg className="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+                    <path fillRule="evenodd" d="M12.006 2a9.847 9.847 0 0 0-6.484 2.44 10.32 10.32 0 0 0-3.393 6.17 10.48 10.48 0 0 0 1.317 6.955 10.045 10.045 0 0 0 5.4 4.418c.504.095.683-.223.683-.494 0-.245-.01-1.052-.014-1.908-2.78.62-3.366-1.21-3.366-1.21a2.711 2.711 0 0 0-1.11-1.5c-.907-.637.07-.621.07-.621.317.044.62.163.885.346.266.183.487.426.647.71.135.253.318.476.538.655a2.079 2.079 0 0 0 2.37.196c.045-.52.27-1.006.635-1.37-2.219-.259-4.554-1.138-4.554-5.07a4.022 4.022 0 0 1 1.031-2.75 3.77 3.77 0 0 1 .096-2.713s.839-.275 2.749 1.05a9.26 9.26 0 0 1 5.004 0c1.906-1.325 2.74-1.05 2.74-1.05.37.858.406 1.828.101 2.713a4.017 4.017 0 0 1 1.029 2.75c0 3.939-2.339 4.805-4.564 5.058a2.471 2.471 0 0 1 .679 1.897c0 1.372-.012 2.477-.012 2.814 0 .272.18.592.687.492a10.05 10.05 0 0 0 5.388-4.421 10.473 10.473 0 0 0 1.313-6.948 10.32 10.32 0 0 0-3.39-6.165A9.847 9.847 0 0 0 12.007 2Z" clipRule="evenodd"/>
+                  </svg>
                 </button>
               </div>
+
               {/* Login Link */}
               <p className="text-center text-white/70 font-inter">
                 Already have an account?{" "}

@@ -3,14 +3,32 @@ import React, { useState } from 'react';
 import Step1PersonalDetails from './Step1PersonalDetails';
 import Step2CareerGoals from './Step2CareerGoals';
 import Step3SkillsExperience from './Step3SkillsExperience';
+import { useNavigate } from 'react-router-dom';
+import api from '../api/axios'; // your axios instance
 
 const UserInfo = () => {
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({});
+  const navigate = useNavigate();
 
-  const handleNext = (data) => {
-    setFormData({ ...formData, ...data });
-    setStep(step + 1);
+  const handleNext = async (data) => {
+    const combinedData = { ...formData, ...data };
+
+    if (step < 3) {
+      setFormData(combinedData);
+      setStep(step + 1);
+    } else {
+      // Final submit
+      try {
+        await api.post('/profile', combinedData);
+        console.log('Submitting formData:', combinedData);
+        navigate('/roadmap', { state: combinedData });
+      } catch (err) {
+        console.error('Profile submission failed:', err);
+        console.log('Submitting formData:', combinedData);
+        alert('Failed to submit profile. Try again.');
+      }
+    }
   };
 
   const handlePrev = () => setStep(step - 1);
