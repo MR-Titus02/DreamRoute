@@ -2,30 +2,34 @@ import * as CourseModel from '../models/courseModel.js';
 import { getCourseInstitutionId } from '../models/courseModel.js';
 import { logUserAction } from '../utils/logger.js';
 
-
-// Here if an institution creates a Course it will be linked to the institution_id of the user 
-// If an admin creates a Course it will be linked to the institution_id provided in the request body
 export const createCourse = async (req, res) => {
-  const { title, description, institution_id: bodyInstitutionId } = req.body;
+  const { title, description, institution_id: bodyInstitutionId, duration, price } = req.body;
   let institution_id;
+let status = req.body.status || 'pending'; // ✅ use frontend-sent or fallback
 
-  if (req.user.role === 'institution') {
-    institution_id = req.user.institution_id;
-  } else if (req.user.role === 'admin') {
-    if (!bodyInstitutionId) {
-      return res.status(400).json({ error: 'Admin must provide institution_id in request body' });
-    }
-    institution_id = bodyInstitutionId;
-  } else {
-    return res.status(403).json({ error: 'Only institutions or admins can create courses' });
+if (req.user.role === 'institution') {
+  institution_id = req.user.institution_id;
+} else if (req.user.role === 'admin') {
+  if (!bodyInstitutionId) {
+    return res.status(400).json({ error: 'Admin must provide institution_id in request body' });
   }
+  institution_id = bodyInstitutionId;
+
+  // ✅ Enforce valid status if sent by admin
+  if (!["approved", "pending"].includes(status)) {
+    status = 'approved';
+  }
+} else {
+  return res.status(403).json({ error: 'Only institutions or admins can create courses' });
+}
+
 
   try {
-    const courseId = await CourseModel.createCourse(title, description, institution_id);
+    const courseId = await CourseModel.createCourse(title, description, institution_id, duration, price, status);
     res.status(201).json({ message: 'Course created successfully', courseId });
     await logUserAction(req.user.userId, 'Created course', JSON.stringify(req.body));
   } catch (err) {
-    res.status(500).json({ error: 'Server error while creating course' });
+    res.status(500).json({ error: 'Server error while creating course', err });
     await logUserAction(req.user.userId, 'Create course failed', JSON.stringify(req.body));
   }
 };
@@ -37,7 +41,7 @@ export const getAllCourses = async (req, res) => {
     await logUserAction(req.user.userId, 'Fetched all courses', JSON.stringify(req.body));
   } catch (err) {
     console.error('Get All Courses Error:', err);
-    res.status(500).json({ error: 'Server error while fetching courses' });
+    res.status(500).json({ error: 'Server error while fetching courses', err });
     await logUserAction(req.user.userId, 'Get all courses failed', JSON.stringify(req.body));
   }
 };
@@ -71,7 +75,6 @@ export const updateCourse = async (req, res) => {
     await logUserAction(req.user.userId, 'Updated course', JSON.stringify(req.body));
   } catch (err) {
     res.status(500).json({ error: 'Server error while updating course' });
-    logErrorToFile(`updateCourse error for ${req.body.email}: ${err.message}`);
     await logUserAction(req.user.userId, 'Update course failed', JSON.stringify(req.body));
   }
 };
@@ -92,5 +95,29 @@ export const deleteCourse = async (req, res) => {
   } catch (err) {
     res.status(500).json({ error: 'Server error while deleting course' });
     await logUserAction(req.user.userId, 'Delete course failed', JSON.stringify(req.body));
+  }
+};
+
+
+export const updateCourseStatus = async (req, res) => {
+  const { status } = req.body;
+  const { id } = req.params;
+
+  if (!["approved", "rejected"].includes(status)) {
+    return res.status(400).json({ error: "Invalid status" });
+  }
+
+  try {
+    const courseInstitutionId = await getCourseInstitutionId(id);
+
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({ error: "Only admin can change status" });
+    }
+    console.log("Updating course ID:", id, "to status:", status);
+    await CourseModel.updateCourseStatus(id, status);
+    res.json({ message: `Course ${status} successfully` });
+  } catch (err) {
+    console.error("Update course status error:", err);
+    res.status(500).json({ error: "Server error while updating status" });
   }
 };

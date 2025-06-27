@@ -1,6 +1,6 @@
 // routes/institutionRoutes.js
 import express from 'express';
-import { getAllInstitutions, getInstitutionById, createInstitution, updateInstitution, deleteInstitution } from '../controllers/institution.controller.js';
+import { getAllInstitutions, getInstitutionById, createInstitution, updateInstitution, deleteInstitution,  getCoursesOfInstitution } from '../controllers/institution.controller.js';
 
 import { verifyToken, checkRole } from '../middlewares/authMiddleware.js';
 import { body } from 'express-validator';
@@ -35,6 +35,7 @@ router.delete('/:id', verifyToken, checkRole('admin'), deleteInstitution);
 
 router.put('/update', verifyToken, updateInstitution);
 
+router.get("/:id/courses", getCoursesOfInstitution);
 
 
 export default router;

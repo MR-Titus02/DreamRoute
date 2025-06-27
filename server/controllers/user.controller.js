@@ -14,6 +14,7 @@ export async function getAllUsers(req, res) {
     res.status(500).json({ message: 'Server error' });
   }
 }
+
 // GET user by ID
 export async function getUserById(req, res) {
   try {

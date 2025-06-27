@@ -80,3 +80,15 @@ export const updateInstitution = async (req, res) => {
     await logUserAction(userId, 'Update institution details failed', JSON.stringify(req.body));
   }
 };
+
+
+export const getCoursesOfInstitution = async (req, res) => {
+  try {
+    const institutionId = req.params.id;
+    const courses = await getCoursesByInstitution(institutionId);
+    res.json(courses);
+  } catch (error) {
+    console.error("Error fetching courses for institution:", error);
+    res.status(500).json({ message: "Server error fetching courses." });
+  }
+};

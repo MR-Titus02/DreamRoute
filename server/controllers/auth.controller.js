@@ -79,7 +79,7 @@ export async function login(req, res) {
         institution_id: user.institution_id,
       },
       JWT_SECRET,
-      { expiresIn: '15m' } // Short-lived token
+      { expiresIn: '45m' } // Short-lived token
     );
 
     // Generate Refresh Token

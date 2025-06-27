@@ -4,10 +4,12 @@ import {
   getAllCourses,
   getCourseById,
   updateCourse,
-  deleteCourse
+  deleteCourse,
+  updateCourseStatus
 } from '../controllers/course.controller.js';
 
-import { verifyToken } from '../middlewares/authMiddleware.js';
+import { verifyToken, checkRole } from '../middlewares/authMiddleware.js';
+import roleMiddleware from '../middlewares/roleMiddlware.js';
 // import { logUserAction } from '../utils/logger.js';
 const router = express.Router();
 
@@ -17,7 +19,8 @@ router.get('/:id', getCourseById);
 
 // Protected Routes
 router.post('/', verifyToken, createCourse); 
-router.put('/:id', verifyToken, updateCourse); 
-router.delete('/:id', verifyToken, deleteCourse); 
+router.put('/:id', verifyToken, roleMiddleware, updateCourse); 
+router.put('/:id/status', verifyToken, updateCourseStatus);
+router.delete('/:id', verifyToken, roleMiddleware ,deleteCourse); 
 
 export default router;

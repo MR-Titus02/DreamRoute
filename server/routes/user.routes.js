@@ -6,7 +6,7 @@ import {
     getAllUsers,
      getUserById,
      updateUser,
-    deleteUser,
+    deleteUser
 } from '../controllers/user.controller.js';
 // import { logUserAction } from '../utils/logger.js';
 

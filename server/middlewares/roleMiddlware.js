@@ -12,14 +12,14 @@ export default function roleMiddleware(req, res, next) {
   }
 
 
-export function sameUser(req, res, next) {
-  const  userId  = req.user.userId; // req.user comes from your auth middleware
-  const requestedUserId = parseInt(req.params.id);
+// export function sameUser(req, res, next) {
+//   const  userId  = req.user.userId; // req.user comes from your auth middleware
+//   const requestedUserId = parseInt(req.params.id);
 
-  // If the user is the owner of the data
-  if (userId === requestedUserId) {
-    return next();
-  }
+//   // If the user is the owner of the data
+//   if (userId === requestedUserId) {
+//     return next();
+//   }
 
-  return res.status(403).json({ error: 'Access forbidden: Not authorized' });
-}
+//   return res.status(403).json({ error: 'Access forbidden: Not authorized' });
+// }
