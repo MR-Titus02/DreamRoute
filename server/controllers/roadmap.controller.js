@@ -10,7 +10,7 @@ export const generateRoadmap = async (req, res) => {
 
   try {
     const [[user]] = await db.query("SELECT * FROM users WHERE id = ?", [userId]);
-    const [courses] = await db.query("SELECT id, title, description FROM courses");
+    const [courses] = await db.query("SELECT id, title, description, institution_id FROM courses");
     const [institutions] = await db.query("SELECT id, name, address FROM institutions");
 
     if (!user) {
@@ -23,47 +23,61 @@ export const generateRoadmap = async (req, res) => {
       });
     }
 
-    const courseList = courses.map(c => `(${c.id}) ${c.title}`).join(", ");
-    const institutionList = institutions.map(i => `(${i.id}) ${i.name} - ${i.address}`).join(", ");
+    // 🔄 Better course formatting (with institution ID info)
+    const courseList = courses.map(c =>
+      `(${c.id}) ${c.title} - ${c.description} [institution_id: ${c.institution_id}]`
+    ).join(",\n");
 
-    // ✅ Update prompt: only use courseId in roadmap; institutions listed separately
+    // 🔄 Institution formatting
+    const institutionList = institutions.map(i =>
+      `(${i.id}) ${i.name} - ${i.address}`
+    ).join(",\n");
+
+    // ✅ Improved prompt
     const messages = [
       {
         role: "system",
-        content: "You are a helpful assistant that returns structured JSON career roadmaps only.",
+        content: "You are a helpful assistant that returns strictly valid JSON career roadmaps only.",
       },
       {
         role: "user",
         content: `
-User:
+You are a strict JSON generator. Return ONLY raw JSON. No markdown, explanations, or extra text.
+
+User Profile:
 - Age: ${user.age}
 - Education Level: ${user.educationLevel}
 - Location: ${user.location}
 - Skills: ${user.skills}
-- Goal: ${user.careerGoal}
+- Career Goal: ${user.careerGoal}
 - Budget: ${user.budget}
 - Dream Company: ${user.dreamCompany}
 
-Return ONLY a JSON object in this format:
+Return a JSON response in the following format:
 
 {
   "career": "Suggested Career Title",
   "roadmap": [
-    { "id": "1", "label": "Start", "description": "Intro", "month": 1 },
-    { "id": "2", "label": "Course: Learn React", "description": "React basics", "month": 2, "courseId": 3 },
+    { "id": "1", "label": "Explore Careers", "description": "Research tech fields and roles", "month": 1 },
+    { "id": "2", "label": "Course: JavaScript Basics", "description": "Learn JS", "month": 2, "courseId": 4 },
     ...
   ],
-  "courses": [3 best matching course objects],
-  "institutions": [2 best matching institution objects]
+  "courses": [3 matching course objects from the list below],
+  "institutions": [2 matching institution objects from the list below]
 }
 
-Use only these courses: ${courseList}
-Use only these institutions: ${institutionList}
+Use only these courses (with their institution_id):
+${courseList}
 
-IMPORTANT: Do NOT include institutionId in roadmap nodes. Only use "courseId" if a roadmap step is based on a course.
-Institutions should appear only in the "institutions" array at the bottom.
-        `.trim(),
-      }
+Use only these institutions:
+${institutionList}
+
+IMPORTANT:
+- Match each course with its real institution (based on institution_id).
+- Do NOT include institutionId in roadmap steps.
+- Return raw, valid JSON only. No explanations, markdown, or code blocks.
+`.trim(),
+      },
     ];
 
     const completion = await openai.chat.completions.create({
@@ -82,25 +96,37 @@ Institutions should appear only in the "institutions" array at the bottom.
       return res.status(500).json({ error: "OpenAI returned invalid JSON." });
     }
 
-    const courseMap = {};
+    // 🔄 Build map of courseId → course
+    const fullCourseMap = {};
     courses.forEach(course => {
-      courseMap[course.id] = course.title;
+      fullCourseMap[course.id] = course;
     });
 
-    // ✅ Only replace roadmap labels based on courseId
+    // ✅ Replace minimal AI course data with real DB course data
+    if (Array.isArray(data.courses)) {
+      data.courses = data.courses.map(aiCourse => {
+        return fullCourseMap[aiCourse.id] || aiCourse;
+      });
+    }
+
+    // ✅ Replace roadmap node labels using actual course titles
     data.roadmap = data.roadmap.map(node => {
-      if (node.courseId && courseMap[node.courseId]) {
-        node.label = `${courseMap[node.courseId]} (${node.month} months)`;
+      if (node.courseId && fullCourseMap[node.courseId]) {
+        node.label = `${fullCourseMap[node.courseId].title} (${node.month} months)`;
       }
       return node;
     });
 
-    // ✅ Return response with roadmap (only course names) and institutions below
+    // ✅ Filter institutions to only those used in selected courses
+    const usedInstitutionIds = new Set(data.courses.map(c => c.institution_id));
+    data.institutions = institutions.filter(inst => usedInstitutionIds.has(inst.id));
+
+    // ✅ Send final JSON response
     res.json({
       career: data.career || "Unknown",
       roadmap: data.roadmap,
-      courses: data.courses || [],
-      institutions: data.institutions || [],
+      courses: data.courses,
+      institutions: data.institutions,
     });
 
   } catch (err) {
