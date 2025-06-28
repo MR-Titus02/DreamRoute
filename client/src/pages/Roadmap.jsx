@@ -21,6 +21,7 @@ export default function Roadmap() {
   const [institutions, setInstitutions] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [career, setCareer] = useState("");
 
   const userId = user?.id || JSON.parse(localStorage.getItem("user"))?.id;
 
@@ -35,8 +36,10 @@ export default function Roadmap() {
     setInstitutions([]);
 
     try {
-      const { roadmap, courses, institutions } = await fetchRoadmap(userId);
+      
+      const { career, roadmap, courses, institutions } = await fetchRoadmap(userId);
 
+      setCareer(career);
       const newNodes = roadmap.map((step, index) => ({
         id: step.id.toString(),
         data: { label: `${step.label}\n(${step.month} month${step.month > 1 ? "s" : ""})` },
@@ -72,6 +75,14 @@ export default function Roadmap() {
 
   return (
     <div className="min-h-screen bg-[#1E293B] p-6 text-white">
+<Card className="bg-[#3B4758] shadow-xl p-4 mb-6">
+  <CardHeader>
+    <CardTitle className="text-xl">
+      Suggested Career Path:{" "}
+      <span className="text-green-400">{career || "Not available"}</span>
+    </CardTitle>
+  </CardHeader>
+</Card>
       <Card className="bg-[#3B4758] shadow-xl p-4 mb-6">
         <CardHeader>
           <CardTitle className="text-2xl">Your Personalized Career Roadmap</CardTitle>
