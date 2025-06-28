@@ -19,13 +19,14 @@ export const generateRoadmap = async (req, res) => {
 
     if (courses.length === 0 || institutions.length === 0) {
       return res.status(400).json({
-        error: "Required data missing. Please add some courses and institutions first."
+        error: "Required data missing. Please add some courses and institutions first.",
       });
     }
 
     const courseList = courses.map(c => `(${c.id}) ${c.title}`).join(", ");
     const institutionList = institutions.map(i => `(${i.id}) ${i.name} - ${i.address}`).join(", ");
 
+    // ✅ Update prompt: only use courseId in roadmap; institutions listed separately
     const messages = [
       {
         role: "system",
@@ -46,8 +47,10 @@ User:
 Return ONLY a JSON object in this format:
 
 {
+  "career": "Suggested Career Title",
   "roadmap": [
     { "id": "1", "label": "Start", "description": "Intro", "month": 1 },
+    { "id": "2", "label": "Course: Learn React", "description": "React basics", "month": 2, "courseId": 3 },
     ...
   ],
   "courses": [3 best matching course objects],
@@ -56,6 +59,9 @@ Return ONLY a JSON object in this format:
 
 Use only these courses: ${courseList}
 Use only these institutions: ${institutionList}
+
+IMPORTANT: Do NOT include institutionId in roadmap nodes. Only use "courseId" if a roadmap step is based on a course.
+Institutions should appear only in the "institutions" array at the bottom.
         `.trim(),
       }
     ];
@@ -68,13 +74,34 @@ Use only these institutions: ${institutionList}
 
     const result = completion.choices[0].message.content;
 
+    let data;
     try {
-      const data = JSON.parse(result);
-      res.json(data);
+      data = JSON.parse(result);
     } catch (parseError) {
       console.error("❌ JSON Parse Error:", result);
       return res.status(500).json({ error: "OpenAI returned invalid JSON." });
     }
+
+    const courseMap = {};
+    courses.forEach(course => {
+      courseMap[course.id] = course.title;
+    });
+
+    // ✅ Only replace roadmap labels based on courseId
+    data.roadmap = data.roadmap.map(node => {
+      if (node.courseId && courseMap[node.courseId]) {
+        node.label = `${courseMap[node.courseId]} (${node.month} months)`;
+      }
+      return node;
+    });
+
+    // ✅ Return response with roadmap (only course names) and institutions below
+    res.json({
+      career: data.career || "Unknown",
+      roadmap: data.roadmap,
+      courses: data.courses || [],
+      institutions: data.institutions || [],
+    });
 
   } catch (err) {
     console.error("❌ AI Error:", err?.response?.data || err.message || err);
