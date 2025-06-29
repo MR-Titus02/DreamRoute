@@ -9,7 +9,7 @@ import { body } from 'express-validator';
 
 const router = express.Router();
 
-router.get('/',verifyToken, getAllInstitutions);         // GET /api/institutions
+router.get('/', getAllInstitutions);         // GET /api/institutions
 router.get('/:id', getInstitutionById);       // GET /api/institutions/:id
 
   // Logic to create a new institution only done by admin

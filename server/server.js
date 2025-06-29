@@ -22,6 +22,7 @@ import './config/passport.js';
 import session from 'express-session';
 import checkoutRoutes from './routes/checkout.routes.js';
 import loginLogsRoutes from './routes/loginLogs.routes.js';
+import analyticsRoutes from './routes/analytics.route.js';
 
 
 
@@ -72,6 +73,7 @@ app.get("/profile", (req, res) => {
 });
 app.use('/api/checkout', checkoutRoutes);
 app.use("/api/login-logs", loginLogsRoutes);
+app.use("/api/analytics", analyticsRoutes);
 
 app.use(notFound);
 app.use(errorHandler);
