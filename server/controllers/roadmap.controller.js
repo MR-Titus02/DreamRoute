@@ -10,7 +10,7 @@ export const generateRoadmap = async (req, res) => {
 
   try {
     const [[user]] = await db.query("SELECT * FROM users WHERE id = ?", [userId]);
-    const [courses] = await db.query("SELECT id, title, description, institution_id FROM courses");
+    const [courses] = await db.query("SELECT id, title, description, price, duration, institution_id FROM courses");
     const [institutions] = await db.query("SELECT id, name, address FROM institutions");
 
     if (!user) {
@@ -23,99 +23,79 @@ export const generateRoadmap = async (req, res) => {
       });
     }
 
-    // 🔄 Better course formatting (with institution ID info)
-    const courseList = courses.map(c =>
-      `(${c.id}) ${c.title} - ${c.description} [institution_id: ${c.institution_id}]`
-    ).join(",\n");
+    const courseList = courses
+      .map(c => `(${c.id}) ${c.title} - ${c.description} [institution_id: ${c.institution_id}]`)
+      .join(",\n");
 
-    // 🔄 Institution formatting
-    const institutionList = institutions.map(i =>
-      `(${i.id}) ${i.name} - ${i.address}`
-    ).join(",\n");
+    const institutionList = institutions
+      .map(i => `(${i.id}) ${i.name} - ${i.address}`)
+      .join(",\n");
 
-    // ✅ Improved prompt
     const messages = [
       {
         role: "system",
-        content: "You are a helpful assistant that returns strictly valid JSON career roadmaps only.",
+        content: "You are a strict JSON generator that returns ONLY raw JSON. No markdown, explanation, or extra text."
       },
       {
         role: "user",
         content: `
-    You are a strict JSON generator. Return ONLY raw JSON. No markdown, explanations, or extra text.
-    
-    User Profile:
-    - Age: ${user.age}
-    - Education Level: ${user.educationLevel}
-    - Location: ${user.location}
-    - Skills: ${user.skills}
-    - Career Goal: ${user.careerGoal}
-    - Budget: ${user.budget}
-    - Dream Company: ${user.dreamCompany}
-    
-    Generate a detailed career roadmap with a **minimum of 5 sections**, and **at least 3 to 5 steps per section** (totaling **15 to 25 steps** minimum). Make each step granular and small enough to be completed in 2–5 days.
-    Do NOT skip small steps. Break every concept into multiple smaller steps if needed. Think like roadmap.sh.
+Generate a detailed technical career roadmap in valid JSON format only.
 
-    
-    For each section, include:
-    - A "section" title
-    - A brief "description" of the section
-    
-    For each step inside sections, include:
-    - A unique "id"
-    - A "label" summarizing the step
-    - A detailed "description"
-    - An "estimatedTime" (e.g. "3 days", "1 week")
-    - A list of relevant "skills" this step teaches
-    - A list of "resources" (names and URLs) for learning
-    - If applicable, include "courseId" referencing a course from the provided list
-    
-    Return a JSON response in this format:
-    
+User Profile:
+- Age: ${user.age}
+- Education Level: ${user.educationLevel}
+- Location: ${user.location}
+- Skills: ${user.skills}
+- Career Goal: ${user.careerGoal}
+- Budget: ${user.budget}
+- Dream Company: ${user.dreamCompany}
+
+INSTRUCTIONS:
+- Suggest a suitable career title.
+- Return a roadmap with 15–20 main steps.
+- Each step must have:
+  - "id": string
+  - "label": short step title
+  - "description": 1–2 line explanation
+  - "estimatedTime": how long this step might take (e.g., "2 weeks", "1 month")
+  - "details": an array of 3–5 technical subtasks (e.g., "Learn JSX syntax", "Use React Hooks")
+
+FORMAT:
+{
+  "career": "Suggested Career Title",
+  "roadmap": [
     {
-      "career": "Suggested Career Title",
-      "roadmap": [
-        {
-          "id": "1",
-          "section": "Section Title",
-          "description": "Brief description of the section",
-          "steps": [
-            {
-              "id": "1.1",
-              "label": "Step Title",
-              "description": "What to learn in this step",
-              "estimatedTime": "2 weeks",
-              "skills": ["Skill1", "Skill2"],
-              "resources": [
-                { "name": "Resource Name", "url": "https://resource.url" }
-              ],
-              "courseId": 4
-            },
-            ...
-          ]
-        },
-        ...
-      ],
-      "courses": [3 matching course objects from the list below],
-      "institutions": [2 matching institution objects from the list below]
-    }
-    
-    Use only these courses (with their institution_id):
-    ${courseList}
-    
-    Use only these institutions:
-    ${institutionList}
-    
-    IMPORTANT:
-    - Ensure the roadmap contains at least 15 steps total.
-    - Each courseId used in roadmap must match an object from the course list.
-    - Match each course with its correct institution (based on institution_id) in the 'courses' section.
-    - Do NOT include institutionId in roadmap steps.
-    - Return raw, valid JSON only. No explanations, markdown, or code blocks.
-    `.trim(),
-      },
+      "id": "1",
+      "label": "Learn JavaScript Basics",
+      "description": "Start with JavaScript syntax and concepts",
+      "estimatedTime": "2 weeks",
+      "details": [
+        { "id": "1.1", "label": "Variables & Types", "description": "Understand let, const, var" },
+        { "id": "1.2", "label": "Functions & Scope", "description": "Write reusable JS functions" },
+        { "id": "1.3", "label": "DOM Manipulation", "description": "Use JS to manipulate HTML DOM" }
+      ]
+    },
+    ...
+  ],
+  "courses": [only relevant course objects from this list],
+  "institutions": [only matching institutions from this list]
+}
+
+ONLY USE:
+Courses:
+${courseList}
+
+Institutions:
+${institutionList}
+
+STRICT RULES:
+- Generate 15–20 main roadmap steps only.
+- Each must include at least 3 detailed technical subtasks.
+- Use only valid course objects from the list above. Do NOT invent.
+- Return valid JSON. No explanation or markdown.
+`.trim()
+      }
     ];
-    
 
     const completion = await openai.chat.completions.create({
       model: "gpt-3.5-turbo-0125",
@@ -124,7 +104,6 @@ export const generateRoadmap = async (req, res) => {
     });
 
     const result = completion.choices[0].message.content;
-    console.log("AI Response:", result);
     let data;
     try {
       data = JSON.parse(result);
@@ -133,32 +112,35 @@ export const generateRoadmap = async (req, res) => {
       return res.status(500).json({ error: "OpenAI returned invalid JSON." });
     }
 
-    // 🔄 Build map of courseId → course
+    // ✅ Map DB courses
     const fullCourseMap = {};
     courses.forEach(course => {
       fullCourseMap[course.id] = course;
     });
 
-    // ✅ Replace minimal AI course data with real DB course data
+    // ✅ Replace and filter invalid courses
     if (Array.isArray(data.courses)) {
-      data.courses = data.courses.map(aiCourse => {
-        return fullCourseMap[aiCourse.id] || aiCourse;
-      });
+      data.courses = data.courses
+        .map(aiCourse => fullCourseMap[aiCourse.id])
+        .filter(Boolean); // removes undefined/null
     }
 
-    // ✅ Replace roadmap node labels using actual course titles
+    // ✅ Replace roadmap step label using estimatedTime
     data.roadmap = data.roadmap.map(node => {
       if (node.courseId && fullCourseMap[node.courseId]) {
-        node.label = `${fullCourseMap[node.courseId].title} (${node.month} months)`;
+        node.label = `${fullCourseMap[node.courseId].title} - ${node.estimatedTime || "flexible"}`;
       }
       return node;
     });
 
-    // ✅ Filter institutions to only those used in selected courses
+    // ✅ Filter institutions used in these courses
     const usedInstitutionIds = new Set(data.courses.map(c => c.institution_id));
     data.institutions = institutions.filter(inst => usedInstitutionIds.has(inst.id));
 
-    // ✅ Send final JSON response
+    // 🧪 Debug output (optional)
+    console.log("✅ Final Filtered Courses:", data.courses.length);
+    console.log("✅ Final Filtered Institutions:", data.institutions.length);
+
     res.json({
       career: data.career || "Unknown",
       roadmap: data.roadmap,
