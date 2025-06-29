@@ -20,6 +20,9 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 import UserManagement from "./pages/UserManagement";
 import CourseManagement from "./pages/CourseManagement";
 import InstitutionManagement from "./pages/InstitutionManagement";
+import Courses from "./pages/Courses";
+import UserAnalytics from "./pages/Analytics";
+import Settings from "./pages/Settings";
 
 
 function App() {
@@ -36,7 +39,10 @@ function App() {
         <Route path="/feedback" element={<Feedback />} />
         <Route path="/submit-course" element={<InstitutionCourse />} />
         <Route path="/userdetails" element={<UserInfo />} />
-        <Route path="/roadmap" element={<Roadmap />} />
+        <Route path="dashboard/roadmap" element={<Roadmap />} />
+        <Route path="dashboard/courses" element={<Courses />} />
+        <Route path="dashboard/analytics" element={<UserAnalytics />} />
+        <Route path="dashboard/settings" element={<Settings />} />
 <Route
       path="/admin"
       element={

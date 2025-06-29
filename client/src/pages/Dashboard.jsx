@@ -39,8 +39,8 @@ const Dashboard = () => {
 
   const menuItems = [
     { title: "Overview", href: "/dashboard", icon: BarChart3, active: true },
-    { title: "AI Career Path", href: "/dashboard/career-path", icon: Brain },
-    { title: "My Roadmap", href: "/dashboard/roadmap", icon: Target },
+    // { title: "AI Career Path", href: "/dashboard/career-path", icon: Brain },
+    // { title: "My Roadmap", href: "/dashboard/roadmap", icon: Target },
     { title: "Find Courses", href: "/dashboard/courses", icon: BookOpen },
     { title: "Analytics", href: "/dashboard/analytics", icon: TrendingUp },
     { title: "Settings", href: "/dashboard/settings", icon: Users },
