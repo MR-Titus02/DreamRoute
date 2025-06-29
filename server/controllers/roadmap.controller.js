@@ -137,10 +137,47 @@ STRICT RULES:
     const usedInstitutionIds = new Set(data.courses.map(c => c.institution_id));
     data.institutions = institutions.filter(inst => usedInstitutionIds.has(inst.id));
 
-    // 🧪 Debug output (optional)
+    // 🧪 Debug output
     console.log("✅ Final Filtered Courses:", data.courses.length);
     console.log("✅ Final Filtered Institutions:", data.institutions.length);
 
+    // 🔐 BONUS: Clear old roadmap for the user
+    await db.query("DELETE FROM roadmaps WHERE user_id = ?", [userId]);
+
+    // ✅ SAVE roadmap to DB
+    const [roadmapInsert] = await db.query(
+      "INSERT INTO roadmaps (user_id, career) VALUES (?, ?)",
+      [userId, data.career || "Unknown"]
+    );
+    const roadmapId = roadmapInsert.insertId;
+
+    // ✅ SAVE steps to roadmap_steps
+    for (const step of data.roadmap) {
+      const [stepResult] = await db.query(
+        "INSERT INTO roadmap_steps (roadmap_id, step_id, label, description, estimated_time, course_id) VALUES (?, ?, ?, ?, ?, ?)",
+        [
+          roadmapId,
+          step.id,
+          step.label,
+          step.description,
+          step.estimatedTime || null,
+          step.courseId || null,
+        ]
+      );
+      const roadmapStepId = stepResult.insertId;
+
+      // ✅ SAVE subtasks (step.details) to step_details
+      if (Array.isArray(step.details)) {
+        for (const sub of step.details) {
+          await db.query(
+            "INSERT INTO step_details (roadmap_step_id, sub_id, label, description) VALUES (?, ?, ?, ?)",
+            [roadmapStepId, sub.id, sub.label, sub.description]
+          );
+        }
+      }
+    }
+
+    // ✅ Send response
     res.json({
       career: data.career || "Unknown",
       roadmap: data.roadmap,
@@ -151,5 +188,87 @@ STRICT RULES:
   } catch (err) {
     console.error("❌ AI Error:", err?.response?.data || err.message || err);
     res.status(500).json({ error: "Failed to generate roadmap" });
+  }
+};
+
+
+export const getAllRoadmaps = async (req, res) => {
+  try {
+    const [roadmaps] = await db.query(
+      `SELECT r.id AS roadmap_id, r.user_id, u.name AS user_name, r.career, r.created_at
+       FROM roadmaps r
+       JOIN users u ON r.user_id = u.id
+       ORDER BY r.created_at DESC`
+    );
+
+    res.json(roadmaps);
+  } catch (err) {
+    console.error("❌ Error fetching all roadmaps:", err);
+    res.status(500).json({ error: "Failed to fetch all roadmaps." });
+  }
+};
+
+// ✅ Get the latest roadmap for a specific user
+export const getSavedRoadmap = async (req, res) => {
+  const userId = req.params.userId;
+  console.log("🔍 Fetching saved roadmap for user:", userId);
+
+  try {
+    const [[roadmap]] = await db.query(
+      "SELECT id, career, created_at FROM roadmaps WHERE user_id = ? ORDER BY created_at DESC LIMIT 1",
+      [userId]
+    );
+
+    if (!roadmap) {
+      return res.status(404).json({ error: "No roadmap found for this user." });
+    }
+
+    const roadmapId = roadmap.id;
+
+    const [steps] = await db.query(
+      "SELECT id, step_id, label, description, estimated_time, course_id FROM roadmap_steps WHERE roadmap_id = ?",
+      [roadmapId]
+    );
+
+    const roadmapWithDetails = await Promise.all(
+      steps.map(async (step) => {
+        const [details] = await db.query(
+          "SELECT sub_id, label, description FROM step_details WHERE roadmap_step_id = ?",
+          [step.id]
+        );
+
+        return {
+          id: step.step_id,
+          label: step.label,
+          description: step.description,
+          estimatedTime: step.estimated_time,
+          courseId: step.course_id,
+          details,
+        };
+      })
+    );
+
+    const courseIds = steps.map((s) => s.course_id).filter(Boolean);
+    let courses = [];
+    let institutions = [];
+
+    if (courseIds.length > 0) {
+      [courses] = await db.query("SELECT * FROM courses WHERE id IN (?)", [courseIds]);
+
+      const institutionIds = [...new Set(courses.map((c) => c.institution_id))];
+      if (institutionIds.length > 0) {
+        [institutions] = await db.query("SELECT * FROM institutions WHERE id IN (?)", [institutionIds]);
+      }
+    }
+
+    res.json({
+      career: roadmap.career,
+      roadmap: roadmapWithDetails,
+      courses,
+      institutions,
+    });
+  } catch (err) {
+    console.error("❌ Error fetching saved roadmap:", err);
+    res.status(500).json({ error: "Failed to fetch saved roadmap." });
   }
 };
