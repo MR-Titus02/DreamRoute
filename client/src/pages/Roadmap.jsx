@@ -10,6 +10,7 @@ import {
 import "react-vertical-timeline-component/style.min.css";
 
 import { Button } from "@/components/ui/button";
+import Navbar from "../components/Navbar";
 
 const STATUS_COLORS = {
   not_started: { bg: "#1E293B", border: "#475569", text: "#94a3b8" }, // gray
@@ -89,6 +90,8 @@ export default function Roadmap() {
   };
 
   return (
+    <>
+    <Navbar />
     <div className="min-h-screen bg-gradient-to-b from-[#0f172a] to-[#1e293b] p-6 text-white max-w-full">
       <h1 className="text-4xl font-bold text-green-400 mb-6 text-center">
         🎯 Career Recommendation: <span className="text-white">{career || "Not available"}</span>
@@ -287,5 +290,6 @@ export default function Roadmap() {
       </div>      
       )}
     </div>
+    </>
   );
 }

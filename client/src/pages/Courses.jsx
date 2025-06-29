@@ -3,6 +3,7 @@ import axios from "axios";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import DashboardLayout from "@/layouts/DashboardLayout"; // ✅ import layout
 
 export default function Courses() {
   const [courses, setCourses] = useState([]);
@@ -31,7 +32,6 @@ export default function Courses() {
           return;
         }
 
-        // Add institution_name to each course
         const updatedCourses = coursesData.map((course) => {
           const inst = institutionsData.find(
             (i) => i.id === course.institution_id
@@ -84,7 +84,7 @@ export default function Courses() {
   }, [searchTerm, selectedInstitution, minDuration, maxDuration, minPrice, maxPrice, courses]);
 
   return (
-    <div className="min-h-screen bg-[#1e293b] p-6 text-white">
+    <DashboardLayout>
       <h1 className="text-3xl font-bold text-center mb-6 text-green-400">
         🎓 Explore Available Courses
       </h1>
@@ -126,13 +126,13 @@ export default function Courses() {
           className="w-40 bg-white text-black"
         />
 
-        <Input
+        {/* <Input
           type="number"
           placeholder="Min Price"
           value={minPrice}
           onChange={(e) => setMinPrice(e.target.value)}
           className="w-40 bg-white text-black"
-        />
+        /> */}
         <Input
           type="number"
           placeholder="Max Price"
@@ -172,6 +172,6 @@ export default function Courses() {
           No courses match your filters.
         </p>
       )}
-    </div>
+    </DashboardLayout>
   );
 }
