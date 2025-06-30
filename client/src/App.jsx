@@ -23,7 +23,7 @@ import InstitutionManagement from "./pages/InstitutionManagement";
 import Courses from "./pages/Courses";
 import UserAnalytics from "./pages/Analytics";
 import Settings from "./pages/Settings";
-
+import GoogleSuccess from "./pages/GoogleSuccess";
 
 function App() {
   const { user } = useAuth();
@@ -43,6 +43,8 @@ function App() {
         <Route path="dashboard/courses" element={<Courses />} />
         <Route path="dashboard/analytics" element={<UserAnalytics />} />
         <Route path="dashboard/settings" element={<Settings />} />
+        <Route path="/auth/google-success" element={<GoogleSuccess />} />
+
 <Route
       path="/admin"
       element={
