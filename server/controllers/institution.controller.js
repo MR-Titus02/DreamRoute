@@ -39,6 +39,7 @@ export async function createInstitution(req, res) {
     await logUserAction(user_id, 'Created institution', JSON.stringify(req.body));
   } catch (error) {
     console.error('Error creating institution:', error);
+    
     res.status(500).json({ message: 'Server error', error: error.message });
     await logUserAction(req.user.userId, 'Create institution failed', JSON.stringify(req.body));
   }

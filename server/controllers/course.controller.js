@@ -3,36 +3,76 @@ import { getCourseInstitutionId } from '../models/courseModel.js';
 import { logUserAction } from '../utils/logger.js';
 
 export const createCourse = async (req, res) => {
-  const { title, description, institution_id: bodyInstitutionId, duration, price } = req.body;
-  let institution_id;
-let status = req.body.status || 'pending'; // ✅ use frontend-sent or fallback
-
-if (req.user.role === 'institution') {
-  institution_id = req.user.institution_id;
-} else if (req.user.role === 'admin') {
-  if (!bodyInstitutionId) {
-    return res.status(400).json({ error: 'Admin must provide institution_id in request body' });
-  }
-  institution_id = bodyInstitutionId;
-
-  // ✅ Enforce valid status if sent by admin
-  if (!["approved", "pending"].includes(status)) {
-    status = 'approved';
-  }
-} else {
-  return res.status(403).json({ error: 'Only institutions or admins can create courses' });
-}
-
+  const {
+    title,
+    description,
+    institution_id: bodyInstitutionId,
+    duration,
+    price,
+    status: frontendStatus,
+  } = req.body;
 
   try {
-    const courseId = await CourseModel.createCourse(title, description, institution_id, duration, price, status);
-    res.status(201).json({ message: 'Course created successfully', courseId });
+    if (!req.user) {
+      return res.status(401).json({ error: "Unauthorized. User not found in request." });
+    }
+
+    const role = req.user.role?.toLowerCase(); // Normalize role
+    let institution_id;
+    let status = frontendStatus || 'pending';
+
+    // Validate required fields
+    if (!title || !description || !duration || !price) {
+      return res.status(400).json({ error: "Missing required course fields." });
+    }
+
+    // Role-based handling
+    if (role === 'institution') {
+      if (!req.user.institution_id) {
+        return res.status(400).json({ error: "Institution user missing institution_id.", details: req.user });
+      }
+      institution_id = req.user.institution_id;
+    } else if (role === 'admin') {
+      if (!bodyInstitutionId) {
+        return res.status(400).json({ error: "Admin must provide institution_id in request body." });
+      }
+      institution_id = bodyInstitutionId;
+
+      // Only allow specific statuses from admin
+      if (!["approved", "pending"].includes(status)) {
+        status = 'approved';
+      }
+    } else {
+      console.error("Invalid role or access attempt:", req.user);
+      return res.status(403).json({ error: "Only institutions or admins can create courses." });
+    }
+
+    // Create course
+    const courseId = await CourseModel.createCourse(
+      title,
+      description,
+      institution_id,
+      duration,
+      price,
+      status
+    );
+
     await logUserAction(req.user.userId, 'Created course', JSON.stringify(req.body));
+
+    return res.status(201).json({
+      message: "Course created successfully",
+      courseId,
+    });
+
   } catch (err) {
-    res.status(500).json({ error: 'Server error while creating course', err });
-    await logUserAction(req.user.userId, 'Create course failed', JSON.stringify(req.body));
+    console.error("Server error in createCourse:", err);
+    await logUserAction(req.user?.userId || "unknown", 'Create course failed', JSON.stringify(req.body));
+    return res.status(500).json({
+      error: "Server error while creating course",
+    });
   }
 };
+
 
 export const getAllCourses = async (req, res) => {
   try {

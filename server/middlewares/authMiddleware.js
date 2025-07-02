@@ -12,7 +12,11 @@ export const verifyToken = async (req, res, next) => {
   jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
     if (err) return res.status(403).json({ message: 'Invalid token' });
 
-    req.user = user; // This must contain user.id and user.role
+     req.user = {
+      userId: user.userId,
+      role: user.role,
+      institution_id: user.institution_id || null, // ✅ safely add
+    }; // This must contain user.id and user.role
     next();
   });
 }

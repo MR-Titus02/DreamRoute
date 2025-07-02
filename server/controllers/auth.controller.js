@@ -89,13 +89,14 @@ export async function login(req, res) {
     const { email, password } = req.body;
     const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
     const userAgent = req.headers['user-agent'];
+
     const [userRows] = await pool.query('SELECT * FROM users WHERE email = ?', [email]);
     const user = userRows[0];
 
     if (!user) {
       await pool.query(
         'INSERT INTO login_logs (user_id, ip_address, user_agent, status) VALUES (?, ?, ?, ?)',
-        [user.id, ip, userAgent, 'failure']
+        [null, ip, userAgent, 'failure']
       );
       return res.status(404).json({ message: 'User not found' });
     }
@@ -109,45 +110,58 @@ export async function login(req, res) {
       return res.status(401).json({ message: 'Invalid password' });
     }
 
+    // ✅ Fetch institution_id if user is an institution
+    let institution_id = null;
+    if (user.role === 'institution') {
+      const [institutionRows] = await pool.query(
+        'SELECT id FROM institutions WHERE user_id = ?',
+        [user.id]
+      );
+      institution_id = institutionRows[0]?.id || null;
+    }
+
     // Generate Access Token
     const accessToken = jwt.sign(
       {
         userId: user.id,
         email: user.email,
         role: user.role,
-        institution_id: user.institution_id,
+        institution_id, // ✅ now correct
       },
       JWT_SECRET,
-      { expiresIn: '45m' } // Short-lived token
+      { expiresIn: '45m' }
     );
 
     // Generate Refresh Token
     const refreshToken = jwt.sign(
-      { userId: user.id,
+      {
+        userId: user.id,
         email: user.email,
         role: user.role,
-        institution_id: user.institution_id },
+        institution_id,
+      },
       REFRESH_TOKEN,
-      { expiresIn: '7d' } // Long-lived token
+      { expiresIn: '7d' }
     );
 
-    // Store refresh token in database
+    // Save refresh token
     await pool.query(
       'UPDATE users SET refresh_token = ? WHERE id = ?',
       [refreshToken, user.id]
     );
 
+    // Log success
     await pool.query(
       'INSERT INTO login_logs (user_id, ip_address, user_agent, status) VALUES (?, ?, ?, ?)',
       [user.id, ip, userAgent, 'success']
     );
 
-    // Send refresh token as HTTP-Only cookie
+    // Set cookie
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
-      secure: false, // Set to true in production (requires HTTPS)
+      secure: false, // Set to true in production
       sameSite: 'Strict',
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
     res.json({
@@ -158,10 +172,11 @@ export async function login(req, res) {
         id: user.id,
         email: user.email,
         role: user.role,
-        institution_id: user.institution_id,
+        institution_id : institution_id,
         name: user.name,
       },
     });
+
     await sendTemplateEmail(user.email, 'login', { name: user.name });
   } catch (error) {
     console.error('Login Error:', error);

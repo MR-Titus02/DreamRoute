@@ -36,7 +36,7 @@ router.delete('/:id', verifyToken, checkRole('admin'), deleteInstitution);
 
 router.put('/update', verifyToken, updateInstitution);
 
-router.get("/:id/courses", getCoursesOfInstitution);
+router.get("/:id/courses", verifyToken ,getCoursesOfInstitution);
 
 
 export default router;

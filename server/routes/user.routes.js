@@ -15,7 +15,7 @@ import {
 const router = express.Router();
 
 // GET All users /api/users
-router.get('/', verifyToken, getAllUsers);
+router.get('/',  getAllUsers);
 
 // GET /api/users/:id
 router.get('/:id', verifyToken, roleMiddleware, getUserById);

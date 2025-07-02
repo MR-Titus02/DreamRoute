@@ -12,7 +12,8 @@ router.get('/google', passport.authenticate('google', {
 router.get('/google/callback',
   passport.authenticate('google', {
     failureRedirect: '/auth/failure',
-    successRedirect: '/profile', // or a frontend route
+    successRedirect: 'http://localhost:5173/auth/google-success'
+
   })
 );
 
