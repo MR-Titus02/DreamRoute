@@ -105,9 +105,9 @@ export default function UserManagement() {
         </Select>
       </div>
 
-      <Card className="bg-[#3B4758] text-white">
+      <Card className="bg-secondary text-primary-text">
         <CardHeader>
-          <CardTitle className="text-white">All Users</CardTitle>
+          <CardTitle className="text-primary-text">All Users</CardTitle>
         </CardHeader>
         <CardContent>
           <ul>

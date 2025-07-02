@@ -24,6 +24,10 @@ import Courses from "./pages/Courses";
 import UserAnalytics from "./pages/Analytics";
 import Settings from "./pages/Settings";
 import GoogleSuccess from "./pages/GoogleSuccess";
+import './index.css'; 
+import CareerPathFlow from "./pages/CareerPathFlow";
+import InstitutionDashboard from "./pages/InstitutionDashboard";
+import ManageCourses from "./pages/ManageCourses";
 
 function App() {
   const { user } = useAuth();
@@ -44,6 +48,8 @@ function App() {
         <Route path="dashboard/analytics" element={<UserAnalytics />} />
         <Route path="dashboard/settings" element={<Settings />} />
         <Route path="/auth/google-success" element={<GoogleSuccess />} />
+        <Route path="/roadmap" element={<Roadmap />} />
+        <Route path="/dashboard/career-path" element={<CareerPathFlow />} />
 
 <Route
       path="/admin"
@@ -57,6 +63,9 @@ function App() {
         <Route path="/admin/users" element={<UserManagement />} />
         <Route path="/admin/courses" element={<CourseManagement />} />
         <Route path="/admin/institutions" element={<InstitutionManagement />} />
+        <Route path="/institution/dashboard" element={<InstitutionDashboard />} />
+        <Route path="/institution/courses" element={<ManageCourses />} />
+
         {/* Redirects */}
         
       </Routes>

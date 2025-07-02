@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import axios from "../api/axios"; // Update path if different
+import axios from "../api/axios"; 
 import { X, Send, MessageSquare } from "lucide-react";
 
 const ChatBot = ({ userId }) => {

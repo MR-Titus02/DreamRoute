@@ -30,12 +30,6 @@ const LandingPage = () => {
           <span className="text-cyan-300 tracking-wide">DreamRoute</span>
         </div>
         <div className="space-x-4">
-          {/* <button
-            onClick={() => navigate("/login")}
-            className="text-sm text-gray-300 hover:text-white"
-          >
-            Login
-          </button> */}
           <button
             onClick={() => navigate("/login")}
             className="bg-gradient-to-r from-[#00ADB5] to-[#00C4CC] hover:from-[#00C4CC] hover:to-[#00ADB5] text-white font-bold py-2 px-5 rounded-full transition-all duration-300 transform hover:scale-105 shadow-md animate-pulse"

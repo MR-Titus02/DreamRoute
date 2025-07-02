@@ -31,7 +31,7 @@ function Login() {
       if (user.role === "admin") {
         navigate("/admin");
       } else if (user.role === "institution") {
-        navigate("/institution-dashboard");
+        navigate("/institution/dashboard");
       } else {
         navigate("/dashboard");
       }
