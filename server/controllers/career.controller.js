@@ -86,7 +86,7 @@ Guidelines:
 - You may reuse shared steps across branches (e.g., “Learn JavaScript”).
 - Start from current education level and include intermediate steps.
 - Use IDs like "1", "2", "3a", "3b" etc. to support merging and diverging paths.
-
+- You should create the roadmap based on the following user profile:
 User Profile:
 - Full Name: ${profile.full_name}
 - Target Career: ${career.career}
@@ -97,6 +97,7 @@ User Profile:
 - Certifications: ${profile.certifications}
 - Age: ${profile.age}
 
+Target Career is MUST
 Return ONLY a JSON array of roadmap steps with this structure:
 
 [
@@ -147,6 +148,7 @@ Return ONLY a JSON array of roadmap steps with this structure:
 
     console.log("Sending prompt to OpenAI...");
     const completion = await openai.chat.completions.create({
+      // model: "gpt-3.5-turbo-0125",
       model: "gpt-4o",
       messages: [
         { role: "system", content: "You are a helpful roadmap planner that creates visual flows for students." },
@@ -211,4 +213,4 @@ Return ONLY a JSON array of roadmap steps with this structure:
     console.error("Error generating roadmap:", err);
     return res.status(500).json({ error: "Failed to generate roadmap." });
   }
-};
+}; 

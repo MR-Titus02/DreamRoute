@@ -3,9 +3,10 @@ import { generateRoadmap, getSavedRoadmap, getAllRoadmaps } from "../controllers
 
 const router = express.Router();
 router.post("/", generateRoadmap);
+ 
+router.get("/:userId", getSavedRoadmap);
 
-router.get("/", getAllRoadmaps); 
-router.get("/:userId", getSavedRoadmap); 
+
 
 
 export default router;

@@ -23,6 +23,34 @@ export const generateRoadmap = async (req, res) => {
       });
     }
 
+    // 🟡 STEP 1: Check if a roadmap already exists
+    const [existingRoadmaps] = await db.query("SELECT * FROM roadmaps WHERE user_id = ?", [userId]);
+
+    if (existingRoadmaps.length > 0) {
+      const roadmapId = existingRoadmaps[0].id;
+
+      // 🟡 STEP 2: Fetch the roadmap, steps, details, and related course/institution info
+      const [steps] = await db.query("SELECT * FROM roadmap_steps WHERE roadmap_id = ?", [roadmapId]);
+
+      for (const step of steps) {
+        const [details] = await db.query("SELECT * FROM step_details WHERE roadmap_step_id = ?", [step.id]);
+        step.details = details;
+      }
+
+      const courseIds = steps.map(s => s.course_id).filter(Boolean);
+      const usedCourses = courses.filter(c => courseIds.includes(c.id));
+      const usedInstitutionIds = [...new Set(usedCourses.map(c => c.institution_id))];
+      const usedInstitutions = institutions.filter(i => usedInstitutionIds.includes(i.id));
+
+      return res.json({
+        career: existingRoadmaps[0].career,
+        roadmap: steps,
+        courses: usedCourses,
+        institutions: usedInstitutions,
+      });
+    }
+
+    // 🟡 STEP 3: No roadmap exists — generate with OpenAI
     const courseList = courses
       .map(c => `(${c.id}) ${c.title} - ${c.description} [institution_id: ${c.institution_id}]`)
       .join(",\n");
@@ -63,20 +91,7 @@ INSTRUCTIONS:
 FORMAT:
 {
   "career": "Suggested Career Title",
-  "roadmap": [
-    {
-      "id": "1",
-      "label": "Learn JavaScript Basics",
-      "description": "Start with JavaScript syntax and concepts",
-      "estimatedTime": "2 weeks",
-      "details": [
-        { "id": "1.1", "label": "Variables & Types", "description": "Understand let, const, var" },
-        { "id": "1.2", "label": "Functions & Scope", "description": "Write reusable JS functions" },
-        { "id": "1.3", "label": "DOM Manipulation", "description": "Use JS to manipulate HTML DOM" }
-      ]
-    },
-    ...
-  ],
+  "roadmap": [...],
   "courses": [only relevant course objects from this list],
   "institutions": [only matching institutions from this list]
 }
@@ -87,13 +102,8 @@ ${courseList}
 
 Institutions:
 ${institutionList}
-
-STRICT RULES:
-- Generate 15–20 main roadmap steps only.
-- Each must include at least 3 detailed technical subtasks.
-- Use only valid course objects from the list above. Do NOT invent.
-- Return valid JSON. No explanation or markdown.
-`.trim()
+If the user’s profile clearly aligns with another field (e.g. cybersecurity, data science, mobile development), prefer suggesting that over Full Stack Development.
+        `.trim()
       }
     ];
 
@@ -112,20 +122,17 @@ STRICT RULES:
       return res.status(500).json({ error: "OpenAI returned invalid JSON." });
     }
 
-    // ✅ Map DB courses
     const fullCourseMap = {};
     courses.forEach(course => {
       fullCourseMap[course.id] = course;
     });
 
-    // ✅ Replace and filter invalid courses
     if (Array.isArray(data.courses)) {
       data.courses = data.courses
         .map(aiCourse => fullCourseMap[aiCourse.id])
-        .filter(Boolean); // removes undefined/null
+        .filter(Boolean);
     }
 
-    // ✅ Replace roadmap step label using estimatedTime
     data.roadmap = data.roadmap.map(node => {
       if (node.courseId && fullCourseMap[node.courseId]) {
         node.label = `${fullCourseMap[node.courseId].title} - ${node.estimatedTime || "flexible"}`;
@@ -133,25 +140,16 @@ STRICT RULES:
       return node;
     });
 
-    // ✅ Filter institutions used in these courses
     const usedInstitutionIds = new Set(data.courses.map(c => c.institution_id));
     data.institutions = institutions.filter(inst => usedInstitutionIds.has(inst.id));
 
-    // 🧪 Debug output
-    console.log("✅ Final Filtered Courses:", data.courses.length);
-    console.log("✅ Final Filtered Institutions:", data.institutions.length);
-
-    // 🔐 BONUS: Clear old roadmap for the user
-    await db.query("DELETE FROM roadmaps WHERE user_id = ?", [userId]);
-
-    // ✅ SAVE roadmap to DB
+    // 🟡 STEP 4: Save new roadmap
     const [roadmapInsert] = await db.query(
       "INSERT INTO roadmaps (user_id, career) VALUES (?, ?)",
       [userId, data.career || "Unknown"]
     );
     const roadmapId = roadmapInsert.insertId;
 
-    // ✅ SAVE steps to roadmap_steps
     for (const step of data.roadmap) {
       const [stepResult] = await db.query(
         "INSERT INTO roadmap_steps (roadmap_id, step_id, label, description, estimated_time, course_id) VALUES (?, ?, ?, ?, ?, ?)",
@@ -166,7 +164,6 @@ STRICT RULES:
       );
       const roadmapStepId = stepResult.insertId;
 
-      // ✅ SAVE subtasks (step.details) to step_details
       if (Array.isArray(step.details)) {
         for (const sub of step.details) {
           await db.query(
@@ -177,7 +174,7 @@ STRICT RULES:
       }
     }
 
-    // ✅ Send response
+    // 🟡 STEP 5: Return the newly created roadmap
     res.json({
       career: data.career || "Unknown",
       roadmap: data.roadmap,
@@ -272,3 +269,4 @@ export const getSavedRoadmap = async (req, res) => {
     res.status(500).json({ error: "Failed to fetch saved roadmap." });
   }
 };
+
