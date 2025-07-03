@@ -28,6 +28,7 @@ import './index.css';
 import CareerPathFlow from "./pages/CareerPathFlow";
 import InstitutionDashboard from "./pages/InstitutionDashboard";
 import ManageCourses from "./pages/ManageCourses";
+// import Homepage from "./pages/Homepage";
 
 function App() {
   const { user } = useAuth();
@@ -60,11 +61,12 @@ function App() {
       }
     />
         <Route path="/unauthorized" element={<Unauthorized />} />
-        <Route path="/admin/users" element={<UserManagement />} />
-        <Route path="/admin/courses" element={<CourseManagement />} />
-        <Route path="/admin/institutions" element={<InstitutionManagement />} />
-        <Route path="/institution/dashboard" element={<InstitutionDashboard />} />
-        <Route path="/institution/courses" element={<ManageCourses />} />
+        <Route path="/admin/users" element={ <ProtectedRoute role="admin"> <UserManagement />  </ProtectedRoute> } />
+        <Route path="/admin/courses" element={ <ProtectedRoute role="admin"> <CourseManagement /> </ProtectedRoute>} />
+        <Route path="/admin/institutions" element={ <ProtectedRoute role="admin"> <InstitutionManagement /> </ProtectedRoute> } />
+        <Route path="/institution/" element={ <ProtectedRoute role="institution"> <InstitutionDashboard /> </ProtectedRoute>} />
+        <Route path="/institution/courses" element={ <ProtectedRoute role="institution"><ManageCourses /> </ProtectedRoute>  } />
+        {/* <Route path="/home" element={ <Homepage />   } /> */}
 
         {/* Redirects */}
         

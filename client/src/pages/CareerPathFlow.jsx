@@ -1,22 +1,24 @@
-import React, { useEffect, useState, useCallback } from 'react';
-import ReactFlow, { Background, Controls } from 'reactflow';
-import 'reactflow/dist/style.css';
-import axios from 'axios';
+import React, { useEffect, useState, useCallback } from "react";
+import ReactFlow, { Background, Controls } from "reactflow";
+import "reactflow/dist/style.css";
+import axios from "axios";
 import { useAuth } from "@/context/AuthContext";
+import Navbar from "@/components/Navbar";
+import { Button } from "@/components/ui/button";
+import { LoaderCircle } from "lucide-react";
 
 const STATUS_COLORS = {
-  not_started: { background: '#1E293B', border: '#475569', text: '#94a3b8' },
-  ongoing: { background: '#312e81', border: '#6366f1', text: '#a5b4fc' },
-  done: { background: '#064e3b', border: '#10b981', text: '#6ee7b7' },
+  not_started: { background: "#1E293B", border: "#475569", text: "#CBD5E1" },
+  ongoing: { background: "#3730A3", border: "#6366F1", text: "#E0E7FF" },
+  done: { background: "#065F46", border: "#10B981", text: "#BBF7D0" },
 };
 
 function getNextStatus(current) {
-  if (current === 'not_started') return 'ongoing';
-  if (current === 'ongoing') return 'done';
-  return 'not_started';
+  if (current === "not_started") return "ongoing";
+  if (current === "ongoing") return "done";
+  return "not_started";
 }
 
-// Custom Status Node
 function StatusNode({ id, data }) {
   const { label, description, status, onToggleStatus } = data;
   const colors = STATUS_COLORS[status] || STATUS_COLORS.not_started;
@@ -25,29 +27,39 @@ function StatusNode({ id, data }) {
     <div
       onClick={() => onToggleStatus(id)}
       style={{
-        padding: 12,
-        borderRadius: 10,
+        padding: 14,
+        borderRadius: 12,
         border: `2px solid ${colors.border}`,
-        backgroundColor: colors.background,
+        background: colors.background,
         color: colors.text,
-        cursor: 'pointer',
-        minWidth: 220,
-        maxWidth: 260,
-        userSelect: 'none',
+        cursor: "pointer",
+        minWidth: 240,
+        maxWidth: 280,
+        userSelect: "none",
         fontSize: 14,
-        boxShadow: '0 3px 8px rgba(0,0,0,0.2)',
-        whiteSpace: 'normal',
-        overflowWrap: 'break-word'
+        boxShadow: `0 0 14px ${colors.border}88`,
+        whiteSpace: "normal",
+        overflowWrap: "break-word",
+        transition: "all 0.3s ease",
       }}
       title="Click to toggle status"
     >
-      <div style={{ fontWeight: 'bold', fontSize: 16, marginBottom: 6 }}>{label}</div>
-      <div style={{ fontSize: 12, opacity: 0.85, whiteSpace: 'pre-wrap' }}>{description}</div>
+      <div style={{ fontWeight: "bold", fontSize: 18, marginBottom: 6 }}>{label}</div>
+      <div style={{ fontSize: 13, opacity: 0.9, whiteSpace: "pre-wrap" }}>{description}</div>
+      <div className="mt-2 text-xs italic text-indigo-300 select-none">
+        Status:{" "}
+        <span className="font-semibold">
+          {status === "not_started"
+            ? "Not Started"
+            : status === "ongoing"
+            ? "Ongoing"
+            : "Done"}
+        </span>
+      </div>
     </div>
   );
 }
 
-// Memoized node types (outside component)
 const nodeTypes = { statusNode: StatusNode };
 
 export default function CareerRoadmapReactFlow() {
@@ -56,19 +68,20 @@ export default function CareerRoadmapReactFlow() {
 
   const [nodes, setNodes] = useState([]);
   const [edges, setEdges] = useState([]);
+  const [career, setCareer] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [statusMap, setStatusMap] = useState(() => {
-    const saved = localStorage.getItem('careerRoadmapStatus');
+    const saved = localStorage.getItem("careerRoadmapStatus");
     return saved ? JSON.parse(saved) : {};
   });
 
   const handleToggleStatus = useCallback((nodeId) => {
     setStatusMap((prev) => {
-      const current = prev[nodeId] || 'not_started';
+      const current = prev[nodeId] || "not_started";
       const next = getNextStatus(current);
       const updated = { ...prev, [nodeId]: next };
-      localStorage.setItem('careerRoadmapStatus', JSON.stringify(updated));
+      localStorage.setItem("careerRoadmapStatus", JSON.stringify(updated));
 
       setNodes((nds) =>
         nds.map((node) =>
@@ -90,45 +103,47 @@ export default function CareerRoadmapReactFlow() {
       const res = await axios.post("http://localhost:5000/api/career", { userId });
 
       if (res.data.type !== "reactflow") {
-        setError("Invalid roadmap format");
+        setError("Invalid roadmap format.");
         setLoading(false);
         return;
       }
 
-      const { nodes: rawNodes, edges: rawEdges } = res.data.content;
+      const { nodes: rawNodes, edges: rawEdges, career: careerTitle } = res.data.content;
 
       const preparedNodes = rawNodes.map((node) => ({
         ...node,
-        type: 'statusNode',
+        type: "statusNode",
         data: {
           ...node.data,
-          status: statusMap[node.id] || 'not_started',
+          status: statusMap[node.id] || "not_started",
           onToggleStatus: handleToggleStatus,
         },
         position: node.position || { x: 0, y: 0 },
       }));
 
-      const preparedEdges = rawEdges.map(({ id, source, target, type }) => ({
+      const preparedEdges = rawEdges.map(({ id, source, target }) => ({
         id,
         source,
         target,
-        type: type || 'smoothstep',
+        type: "smoothstep",
         animated: true,
-        style: { stroke: '#00ADB5', strokeWidth: 2 },
+        style: {
+          stroke: "#7c3aed",
+          strokeWidth: 3,
+        },
         markerEnd: {
-          type: 'arrowclosed',
-          color: '#00ADB5',
+          type: "arrowclosed",
+          color: "#a78bfa",
           width: 20,
           height: 20,
         },
       }));
-      
 
+      setCareer(careerTitle);
       setNodes(preparedNodes);
       setEdges(preparedEdges);
     } catch (err) {
-      console.error("Failed to load roadmap", err);
-      setError(err.response?.data?.error || "Could not load roadmap");
+      setError(err.response?.data?.error || "Something went wrong.");
     } finally {
       setLoading(false);
     }
@@ -138,57 +153,80 @@ export default function CareerRoadmapReactFlow() {
     fetchRoadmap();
   }, [fetchRoadmap]);
 
-  if (loading) return <div className="text-center py-10">Loading roadmap...</div>;
-  if (error) return (
-    <div className="text-center py-10 text-red-600">
-      <p>{error}</p>
-      <button
-        onClick={fetchRoadmap}
-        className="mt-4 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-      >
-        Retry / Regenerate
-      </button>
-    </div>
-  );
+  useEffect(() => {
+    localStorage.setItem("careerRoadmapStatus", JSON.stringify(statusMap));
+  }, [statusMap]);
 
   return (
-    <div className="w-full h-[900px] border rounded-xl p-4 shadow bg-white">
-      <ReactFlow
-        nodes={nodes}
-        edges={edges}
-        fitView
-        panOnDrag
-        zoomOnScroll
-        nodeTypes={nodeTypes}
-        attributionPosition="bottom-left"
-        nodesDraggable={false}
-        nodesConnectable={false}
-        defaultEdgeOptions={{
-            animated: true,
-            type: 'smoothstep',
-            markerEnd: {
-              type: 'arrowclosed',
-              color: '#00ADB5', 
-              width: 20,
-              height: 20,
-            },
-            style: {
-              stroke: '#1e40af',
-              strokeWidth: 2,
-            },
-          }}
-      >
-        <Controls />
-        <Background gap={18} size={1} />
-      </ReactFlow>
-      <div className="text-center mt-4">
-        <button
-          onClick={fetchRoadmap}
-          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-        >
-          Regenerate Roadmap
-        </button>
+    <>
+      <Navbar />
+      <div className="min-h-screen bg-gradient-to-b from-[#0f172a] to-[#1e293b] text-white p-6">
+      <h1 className="text-4xl font-bold text-center text-green-400 mb-2">
+          🎯 Career Goal: <span className="text-white">{career}</span>
+        </h1>
+        <p className="text-center text-indigo-300 text-sm mb-6">
+          Visual roadmap with branching paths, click nodes to track your progress.
+        </p>
+
+        {loading ? (
+          <div className="flex flex-col items-center justify-center h-[300px] animate-pulse text-gray-300 space-y-4">
+            <LoaderCircle className="animate-spin w-10 h-10 text-purple-500" />
+            <p className="text-lg font-medium">Generating your roadmap...</p>
+          </div>
+        ) : error ? (
+          <div className="bg-red-600 text-white p-4 rounded-lg mb-6 text-center max-w-2xl mx-auto">
+            <p className="mb-3">{error}</p>
+            <Button
+              className="bg-gradient-to-r from-white to-gray-200 text-red-600 hover:brightness-105"
+              onClick={fetchRoadmap}
+            >
+              🔁 Retry / Regenerate
+            </Button>
+          </div>
+        ) : (
+          <>
+            <div className="w-full h-[850px] bg-[#1e293b] border border-[#334155] rounded-xl p-2 shadow-lg">
+              <ReactFlow
+                nodes={nodes}
+                edges={edges}
+                fitView
+                panOnDrag
+                zoomOnScroll
+                nodeTypes={nodeTypes}
+                attributionPosition="bottom-left"
+                nodesDraggable={false}
+                nodesConnectable={false}
+                defaultEdgeOptions={{
+                  animated: true,
+                  type: "smoothstep",
+                  markerEnd: {
+                    type: "arrowclosed",
+                    color: "#7c3aed",
+                    width: 20,
+                    height: 20,
+                  },
+                  style: {
+                    stroke: "#7c3aed",
+                    strokeWidth: 3,
+                  },
+                }}
+              >
+                <Controls />
+                <Background gap={20} size={1.5} color="#475569" />
+              </ReactFlow>
+            </div>
+
+            <div className="text-center mt-8">
+              <Button
+                onClick={fetchRoadmap}
+                className="bg-gradient-to-r from-indigo-500 to-purple-500 text-white px-6 py-2 rounded-full font-semibold hover:brightness-110 transition"
+              >
+                🔄 Regenerate Roadmap
+              </Button>
+            </div>
+          </>
+        )}
       </div>
-    </div>
+    </>
   );
 }

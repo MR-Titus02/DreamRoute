@@ -17,8 +17,18 @@ function SignUp() {
 
   const [focusedField, setFocusedField] = useState("");
 
+  // New state to toggle password visibility
+  const [showPassword, setShowPassword] = useState({
+    password: false,
+    confirmPassword: false,
+  });
+
   const handleInputChange = (e) => {
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+  };
+
+  const toggleShowPassword = (field) => {
+    setShowPassword((prev) => ({ ...prev, [field]: !prev[field] }));
   };
 
   const handleSubmit = async (e) => {
@@ -67,18 +77,32 @@ function SignUp() {
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-4">
           {["name", "email", "password", "confirmPassword"].map((field) => (
-            <div key={field}>
-              <label className="block text-sm font-semibold text-white/90 capitalize mb-1">
+            <div key={field} className="relative">
+              <label
+                htmlFor={field}
+                className="block text-sm font-semibold text-white/90 capitalize mb-1"
+              >
                 {field === "confirmPassword" ? "Confirm Password" : field}
               </label>
               <input
+                id={field}
                 name={field}
-                type={field.includes("password") ? "password" : field === "email" ? "email" : "text"}
+                type={
+                  field === "password" || field === "confirmPassword"
+                    ? showPassword[field]
+                      ? "text"
+                      : "password"
+                    : field === "email"
+                    ? "email"
+                    : "text"
+                }
                 value={formData[field]}
                 onChange={handleInputChange}
                 onFocus={() => setFocusedField(field)}
                 onBlur={() => setFocusedField("")}
-                placeholder={`Enter your ${field === "confirmPassword" ? "password again" : field}`}
+                placeholder={`Enter your ${
+                  field === "confirmPassword" ? "password again" : field
+                }`}
                 required
                 className={`w-full px-4 py-2 rounded-lg bg-white/10 border placeholder-white/50 text-white font-medium transition duration-300 ${
                   focusedField === field
@@ -86,6 +110,65 @@ function SignUp() {
                     : "border-white/30 hover:border-white/50"
                 }`}
               />
+
+              {/* Show/hide toggle for password fields */}
+              {(field === "password" || field === "confirmPassword") && (
+                <button
+                  type="button"
+                  onClick={() => toggleShowPassword(field)}
+                  className="absolute right-3 top-[38px] text-white/70 hover:text-white"
+                  tabIndex={-1}
+                  aria-label={
+                    showPassword[field] ? "Hide password" : "Show password"
+                  }
+                >
+                  {showPassword[field] ? (
+                    // Eye Off Icon (hide)
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-5 w-5"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M13.875 18.825A10.05 10.05 0 0112 19c-5.523 0-10-4.477-10-10 0-1.098.2-2.155.57-3.13M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                      />
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M3 3l18 18"
+                      />
+                    </svg>
+                  ) : (
+                    // Eye Icon (show)
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-5 w-5"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                      />
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                      />
+                    </svg>
+                  )}
+                </button>
+              )}
             </div>
           ))}
 
