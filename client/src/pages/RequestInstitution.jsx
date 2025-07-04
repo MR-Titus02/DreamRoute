@@ -3,9 +3,12 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import api from "@/api/axios";
 import { useAuth } from "@/context/AuthContext";
+import { useNavigate } from "react-router-dom";
+import BackButton from "@/components/BackButton"; 
 
 export default function RequestInstitution() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     name: "",
     description: "",
@@ -29,7 +32,12 @@ export default function RequestInstitution() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#222831] px-4">
+    <div className="min-h-screen flex items-center justify-center bg-[#222831] px-4 relative">
+      {/* Back Button */}
+      <div className="absolute top-4 left-4 z-10">
+        <BackButton to="/" label="Back" />
+      </div>
+
       <div className="w-full max-w-xl bg-[#3B4758] p-8 rounded-2xl shadow-lg text-white space-y-6">
         <h2 className="text-3xl font-bold text-white text-center">
           Apply to Become an Institution
