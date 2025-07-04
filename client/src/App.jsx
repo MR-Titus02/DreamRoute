@@ -29,6 +29,8 @@ import CareerPathFlow from "./pages/CareerPathFlow";
 import InstitutionDashboard from "./pages/InstitutionDashboard";
 import ManageCourses from "./pages/ManageCourses";
 // import Homepage from "./pages/Homepage";
+import ForgotPassword from "./components/ForgotPassword";
+import ResetPassword from "./components/ResetPassword";
 
 function App() {
   const { user } = useAuth();
@@ -67,6 +69,8 @@ function App() {
         <Route path="/institution/" element={ <ProtectedRoute role="institution"> <InstitutionDashboard /> </ProtectedRoute>} />
         <Route path="/institution/courses" element={ <ProtectedRoute role="institution"><ManageCourses /> </ProtectedRoute>  } />
         {/* <Route path="/home" element={ <Homepage />   } /> */}
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password/:token" element={<ResetPassword />} />
 
         {/* Redirects */}
         

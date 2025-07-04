@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import Logo from "../assets/logo.png";
 import axios from "../api/axios";
 import { useAuth } from "@/context/AuthContext";
+import BackButton from "../components/BackButton"; // ✅ Import the BackButton
 
 function SignUp() {
   const navigate = useNavigate();
@@ -16,8 +17,6 @@ function SignUp() {
   });
 
   const [focusedField, setFocusedField] = useState("");
-
-  // New state to toggle password visibility
   const [showPassword, setShowPassword] = useState({
     password: false,
     confirmPassword: false,
@@ -54,16 +53,22 @@ function SignUp() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#222831] via-[#393E46] to-[#222831] flex items-center justify-center px-4 relative overflow-hidden">
-      {/* Animated Background Blobs */}
+
+      {/* ✅ Back Button Top-Left */}
+      <div className="absolute top-4 left-4 z-10">
+        <BackButton to="/" label="Back" />
+      </div>
+
+      {/* 🔵 Animated Background Blobs */}
       <div className="absolute inset-0 -z-10 overflow-hidden">
         <div className="absolute -top-10 -left-10 w-64 h-64 bg-[#00ADB5] rounded-full mix-blend-multiply filter blur-2xl opacity-20 animate-pulse"></div>
         <div className="absolute -bottom-12 -right-12 w-72 h-72 bg-[#EEEEEE] rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-pulse delay-2000"></div>
         <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-[#00ADB5] rounded-full mix-blend-multiply filter blur-3xl opacity-5"></div>
       </div>
 
-      {/* Centered SignUp Form Card */}
+      {/* 📄 SignUp Form Card */}
       <div className="w-full max-w-md bg-white/10 backdrop-blur-xl rounded-2xl p-6 shadow-2xl border border-white/20">
-        {/* Logo and Heading */}
+        {/* 🔗 Logo and Heading */}
         <div className="flex flex-col items-center mb-4">
           <img src={Logo} alt="DreamRoute" className="w-16 h-16 mb-2 rounded-lg" />
           <h2 className="text-2xl font-bold text-white text-center mb-1">
@@ -74,7 +79,7 @@ function SignUp() {
           </p>
         </div>
 
-        {/* Form */}
+        {/* 🔐 Form */}
         <form onSubmit={handleSubmit} className="space-y-4">
           {["name", "email", "password", "confirmPassword"].map((field) => (
             <div key={field} className="relative">
@@ -111,7 +116,7 @@ function SignUp() {
                 }`}
               />
 
-              {/* Show/hide toggle for password fields */}
+              {/* 👁️ Toggle password visibility */}
               {(field === "password" || field === "confirmPassword") && (
                 <button
                   type="button"
@@ -123,7 +128,6 @@ function SignUp() {
                   }
                 >
                   {showPassword[field] ? (
-                    // Eye Off Icon (hide)
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
                       className="h-5 w-5"
@@ -145,7 +149,6 @@ function SignUp() {
                       />
                     </svg>
                   ) : (
-                    // Eye Icon (show)
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
                       className="h-5 w-5"
@@ -172,7 +175,7 @@ function SignUp() {
             </div>
           ))}
 
-          {/* Submit */}
+          {/* ✅ Submit */}
           <button
             type="submit"
             className="w-full py-2 mt-2 rounded-lg bg-gradient-to-r from-[#00ADB5] to-[#00C4CC] hover:from-[#00C4CC] hover:to-[#00ADB5] text-white font-bold shadow-lg hover:shadow-xl transition-transform duration-300 hover:scale-105"
@@ -187,7 +190,6 @@ function SignUp() {
         {/* Social Buttons */}
         <div className="grid grid-cols-2 gap-3">
           <button className="flex items-center justify-center gap-2 py-2 border border-white/20 rounded-lg bg-white/5 hover:bg-white/10 transition-all text-white text-sm">
-            {/* Google Icon */}
             <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
               <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
               <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
@@ -197,7 +199,6 @@ function SignUp() {
             Google
           </button>
           <button className="flex items-center justify-center gap-2 py-2 border border-white/20 rounded-lg bg-white/5 hover:bg-white/10 transition-all text-white text-sm">
-            {/* GitHub Icon */}
             <svg
               className="w-5 h-5"
               viewBox="0 0 24 24"
@@ -214,7 +215,7 @@ function SignUp() {
           </button>
         </div>
 
-        {/* Login Link */}
+        {/* 🔁 Login Redirect */}
         <p className="mt-5 text-center text-sm text-white/70">
           Already have an account?{" "}
           <button
