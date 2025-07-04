@@ -50,10 +50,15 @@ app.use(
   );
 //OAuth
   app.use(session({
-    secret: process.env.SESSION_SECRET,
-    resave: false,
-    saveUninitialized: false,
-  }));
+  secret: process.env.SESSION_SECRET,
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    httpOnly: true,
+    secure: false, // ⚠️ set to true in production with HTTPS
+    sameSite: "lax", // or "none" if secure: true
+  }
+}));
   app.use(passport.initialize());
   app.use(passport.session());
 

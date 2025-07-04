@@ -19,8 +19,8 @@ router.get('/:id', getCourseById);
 
 // Protected Routes
 router.post('/', verifyToken, createCourse); 
-router.put('/:id', verifyToken, roleMiddleware, updateCourse); 
+router.put('/:id', verifyToken, updateCourse); 
 router.put('/:id/status', verifyToken, updateCourseStatus);
-router.delete('/:id', verifyToken, roleMiddleware ,deleteCourse); 
+router.delete('/:id', verifyToken ,deleteCourse); 
 
 export default router;

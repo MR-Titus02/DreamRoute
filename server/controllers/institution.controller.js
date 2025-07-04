@@ -3,6 +3,7 @@ import * as InstitutionModel from '../models/institutionModel.js';
 import db from '../config/db.js';
 import { logUserAction } from '../utils/logger.js';
 import { getCoursesByInstitution } from '../models/courseModel.js';
+import { validationResult } from "express-validator";
 
 export async function getAllInstitutions(req, res) {
   try {
@@ -102,5 +103,39 @@ export const getCoursesOfInstitution = async (req, res) => {
   } catch (error) {
     console.error("Error fetching courses for institution:", error);
     res.status(500).json({ message: "Server error fetching courses." });
+  }
+};
+
+
+export const createInstitutionRequest = async (req, res) => {
+  // Validate input from middleware
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+
+  const { name, email, description = "", address = "" } = req.body;
+
+  try {
+    const [existing] = await db.query(
+      "SELECT * FROM institution_requests WHERE email = ? AND status = 'pending'",
+      [email]
+    );
+
+    if (existing.length > 0) {
+      return res
+        .status(409)
+        .json({ message: "An application with this email is already pending." });
+    }
+
+    await db.query(
+      `INSERT INTO institution_requests (name, email, description, address) VALUES (?, ?, ?, ?)`,
+      [name, email, description, address]
+    );
+
+    return res.status(201).json({ message: "Institution request submitted successfully." });
+  } catch (err) {
+    console.error("Error creating institution request:", err);
+    return res.status(500).json({ error: "Server error" });
   }
 };

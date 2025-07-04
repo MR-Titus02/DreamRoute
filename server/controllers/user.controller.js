@@ -87,9 +87,11 @@ export const completeProfile = async (req, res) => {
 
 export const getCurrentUser = async (req, res) => {
   try {
-    const userId = req.user.userId;
+    const userId = req.user?.userId || req.user?.id; // Handle both JWT and Passport sessions
+    console.log("Session user:", req.user);
+    if (!userId) return res.status(401).json({ message: "Unauthorized" });
 
-    const [rows] = await db.query("SELECT id, name, email, role, isProfileComplete FROM users WHERE id = ?", [userId]);
+    const [rows] = await pool.query("SELECT id, name, email, role FROM users WHERE id = ?", [userId]);
 
     if (rows.length === 0) return res.status(404).json({ message: "User not found" });
 

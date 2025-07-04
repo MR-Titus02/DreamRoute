@@ -49,6 +49,21 @@ export const sendTemplateEmail = async (to, type, data) => {
       `;
       break;
 
+      case 'institutionApproved':
+        subject = 'Your Institution Account Has Been Approved';
+        html = `
+          <h3>Hello ${data.name},</h3>
+          <p>Your institution application has been approved! 🎉</p>
+          <p>You can now log in as an institution using the following credentials:</p>
+          <ul>
+            <li><strong>Email:</strong> ${data.email}</li>
+            <li><strong>Password:</strong> ${data.password}</li>
+          </ul>
+          <p>Please log in and change your password after your first login.</p>
+          <p><a href="${data.loginUrl}" style="color:#00ADB5;">Login Now</a></p>
+        `;
+        break;
+
     default:
       console.error('Unknown email type:', type);
       return;
