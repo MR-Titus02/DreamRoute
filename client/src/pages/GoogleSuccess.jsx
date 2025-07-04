@@ -10,13 +10,14 @@ function GoogleSuccess() {
   useEffect(() => {
     const fetchGoogleUser = async () => {
       try {
-        const res = await api.get("/users", { withCredentials: true });
+        // ✅ Fetch the currently logged-in user via session
+        const res = await api.get("/users/me", { withCredentials: true });
         const user = res.data;
 
-        // Optionally save a dummy token or leave null
-        login(user, "session"); // session placeholder
+        // ✅ Save user and dummy session token
+        login(user, "session");
 
-        // Redirect by role
+        // ✅ Redirect based on role
         if (user.role === "admin") {
           navigate("/admin");
         } else if (user.role === "institution") {

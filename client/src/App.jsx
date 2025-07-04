@@ -31,6 +31,8 @@ import ManageCourses from "./pages/ManageCourses";
 // import Homepage from "./pages/Homepage";
 import ForgotPassword from "./components/ForgotPassword";
 import ResetPassword from "./components/ResetPassword";
+import InstitutionSettings from "./pages/InstitutionSettings";
+import RequestInstitution from "./pages/RequestInstitution";
 
 function App() {
   const { user } = useAuth();
@@ -71,7 +73,8 @@ function App() {
         {/* <Route path="/home" element={ <Homepage />   } /> */}
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password/:token" element={<ResetPassword />} />
-
+        <Route path="/institution/settings" element={<ProtectedRoute role="institution"><InstitutionSettings /></ProtectedRoute>} />
+        <Route path="institution/requests" element={<RequestInstitution />} />
         {/* Redirects */}
         
       </Routes>

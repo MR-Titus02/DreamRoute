@@ -192,7 +192,7 @@ export default function LandingPage() {
               </li>
             </ul>
             <button
-              onClick={() => navigate("/institution-login")}
+              onClick={() => navigate("/institution/requests")}
               className="flex items-center gap-2 bg-cyan-400 hover:bg-cyan-500 text-white font-bold py-2 px-6 rounded-full text-lg transition-all shadow-md"
             >
               {/* Login Arrow icon */}

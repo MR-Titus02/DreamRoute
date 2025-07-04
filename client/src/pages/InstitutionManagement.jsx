@@ -15,7 +15,14 @@ import {
   SelectItem,
   SelectValue,
 } from "@/components/ui/select";
-import { Dialog, DialogTrigger, DialogContent, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogTrigger,
+  DialogContent,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import AdminLayout from "@/layouts/AdminLayout";
 
 export default function InstitutionManagement() {
@@ -26,10 +33,12 @@ export default function InstitutionManagement() {
   const [newInstitutionName, setNewInstitutionName] = useState("");
   const [selectedUserEmail, setSelectedUserEmail] = useState("");
   const [userEmails, setUserEmails] = useState([]);
+  const [requests, setRequests] = useState([]);
 
   useEffect(() => {
     fetchInstitutions();
     fetchUserEmails();
+    fetchInstitutionRequests();
   }, []);
 
   async function fetchInstitutions() {
@@ -84,6 +93,34 @@ export default function InstitutionManagement() {
     }
   }
 
+  async function fetchInstitutionRequests() {
+    try {
+      const res = await api.get("/admin/");
+      setRequests(res.data);
+    } catch (err) {
+      console.error("Error fetching institution requests:", err);
+    }
+  }
+
+  async function handleApproveRequest(id) {
+    try {
+      await api.post(`/admin/${id}/approve`);
+      fetchInstitutionRequests();
+      fetchInstitutions();
+    } catch (err) {
+      console.error("Error approving request:", err);
+    }
+  }
+
+  async function handleRejectRequest(id) {
+    try {
+      await api.post(`/admin/${id}/reject`);
+      fetchInstitutionRequests();
+    } catch (err) {
+      console.error("Error rejecting request:", err);
+    }
+  }
+
   const filteredInstitutions = institutions.filter((i) =>
     (i.name || "").toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -92,6 +129,7 @@ export default function InstitutionManagement() {
     <AdminLayout>
       <h1 className="text-3xl font-bold mb-6 text-white">Institution Management</h1>
 
+      {/* Existing Institution Management UI */}
       <Card className="mb-6 bg-[#3B4758] text-white">
         <CardHeader>
           <CardTitle className="flex justify-between items-center text-white">
@@ -160,6 +198,7 @@ export default function InstitutionManagement() {
         </CardContent>
       </Card>
 
+      {/* Courses by Selected Institution */}
       {selectedInstitutionId && (
         <Card className="bg-[#3B4758] text-white">
           <CardHeader>
@@ -222,6 +261,57 @@ export default function InstitutionManagement() {
           </CardContent>
         </Card>
       )}
+
+      {/* Institution Requests (New Section) */}
+      <Card className="mt-6 bg-[#3B4758] text-white">
+        <CardHeader>
+          <CardTitle className="text-white">Pending Institution Requests</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {requests.filter((r) => r.status === "pending").length === 0 ? (
+            <p className="text-gray-300">No pending requests.</p>
+          ) : (
+            <table className="w-full text-left">
+              <thead>
+                <tr className="text-gray-200 border-b border-gray-600">
+                  <th className="py-2">Name</th>
+                  <th>Email</th>
+                  <th>Description</th>
+                  <th>Address</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {requests
+                  .filter((r) => r.status === "pending")
+                  .map((req) => (
+                    <tr key={req.id} className="border-t border-gray-600">
+                      <td className="py-2 text-white">{req.name}</td>
+                      <td className="text-sm text-gray-200">{req.email}</td>
+                      <td className="text-sm text-gray-300">{req.description}</td>
+                      <td className="text-sm text-gray-300">{req.address}</td>
+                      <td className="space-x-2">
+                        <Button
+                          onClick={() => handleApproveRequest(req.id)}
+                          className="bg-green-600 hover:bg-green-700 text-white px-4 py-1"
+                        >
+                          Approve
+                        </Button>
+                        <Button
+                          variant="destructive"
+                          onClick={() => handleRejectRequest(req.id)}
+                          className="px-4 py-1"
+                        >
+                          Reject
+                        </Button>
+                      </td>
+                    </tr>
+                  ))}
+              </tbody>
+            </table>
+          )}
+        </CardContent>
+      </Card>
     </AdminLayout>
   );
 }
