@@ -119,6 +119,9 @@ export async function login(req, res) {
       );
       institution_id = institutionRows[0]?.id || null;
     }
+    
+
+
 
     // Generate Access Token
     const accessToken = jwt.sign(
