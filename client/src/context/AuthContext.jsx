@@ -5,7 +5,7 @@ const AuthContext = createContext();
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(null);
-  const [loading, setLoading] = useState(true); // 👈 new
+  const [loading, setLoading] = useState(true); 
 
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
@@ -16,7 +16,7 @@ export const AuthProvider = ({ children }) => {
       setToken(storedToken);
     }
 
-    setLoading(false); // 
+    setLoading(false); 
   }, []);
 
   const login = (userData, token) => {

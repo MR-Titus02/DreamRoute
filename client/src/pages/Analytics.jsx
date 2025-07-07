@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import api from "@/api/axios";
 import { Card, CardContent } from "@/components/ui/card";
 import { useAuth } from "@/context/AuthContext";
-import DashboardLayout from "@/layouts/DashboardLayout"; // ✅ layout wrapper
+import DashboardLayout from "@/layouts/DashboardLayout"; 
 
 export default function Analytics() {
   const { user } = useAuth();

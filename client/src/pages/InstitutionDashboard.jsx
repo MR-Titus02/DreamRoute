@@ -38,7 +38,7 @@ export default function InstitutionDashboard() {
           </CardContent>
         </Card>
 
-        {/* You can add more dashboard cards below */}
+        
       </div>
     </InstitutionDashboardLayout>
   );

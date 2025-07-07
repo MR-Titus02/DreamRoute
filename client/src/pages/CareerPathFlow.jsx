@@ -162,7 +162,7 @@ export default function CareerRoadmapReactFlow() {
       <Navbar />
       <div className="min-h-screen bg-gradient-to-b from-[#0f172a] to-[#1e293b] text-white p-6">
       <h1 className="text-4xl font-bold text-center text-green-400 mb-2">
-          🎯 Career Goal: <span className="text-white">{career}</span>
+          🎯 Career Goal <span className="text-white">{career}</span>
         </h1>
         <p className="text-center text-indigo-300 text-sm mb-6">
           Visual roadmap with branching paths, click nodes to track your progress.

@@ -89,24 +89,7 @@ export default function AdminLayout({ children }) {
                 })}
               </SidebarMenu>
 
-              {/* Optional extra admin tools
-              <div className="mt-8 p-4 bg-[#3B4758] rounded-xl border border-gray-600">
-                <h3 className="text-sm font-semibold text-white mb-3">Admin Tools</h3>
-                <div className="space-y-2">
-                  <Button
-                    onClick={() => navigate("/admin/analytics")}
-                    className="w-full justify-start bg-[#00ADB5] text-white hover:bg-[#00ADB5]/90 shadow-sm border-0"
-                  >
-                    Analytics
-                  </Button>
-                  <Button
-                    onClick={() => navigate("/admin/reports")}
-                    className="w-full justify-start bg-[#3D3A3A] text-white hover:bg-[#3D3A3A]/90 shadow-sm border-0"
-                  >
-                    Reports
-                  </Button>
-                </div>
-              </div> */}
+              
             </SidebarContent>
           </div>
         </Sidebar>

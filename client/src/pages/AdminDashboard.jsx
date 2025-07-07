@@ -21,7 +21,7 @@ export default function AdminDashboard() {
   const [users, setUsers] = useState([]);
   const [courses, setCourses] = useState([]);
   const [logs, setLogs] = useState([]);
-  const [limit, setLimit] = useState(10); // Set default limit to 10
+  const [limit, setLimit] = useState(10); 
   const [notifications, setNotifications] = useState([]);
   const [loadingCounts, setLoadingCounts] = useState(true);
   const { token, loading } = useAuth();

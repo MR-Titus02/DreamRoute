@@ -3,7 +3,7 @@ import axios from "axios";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import DashboardLayout from "@/layouts/DashboardLayout"; // ✅ import layout
+import DashboardLayout from "@/layouts/DashboardLayout"; 
 
 export default function Courses() {
   const [courses, setCourses] = useState([]);
@@ -15,6 +15,20 @@ export default function Courses() {
   const [maxDuration, setMaxDuration] = useState("");
   const [minPrice, setMinPrice] = useState("");
   const [maxPrice, setMaxPrice] = useState("");
+  // const [limit, setLimit] = useState(6);
+  const [currentPage, setCurrentPage] = useState(1);
+  // const [currentPage, setCurrentPage] = useState(1);
+  const limit = 6;
+
+
+
+
+  const totalPages = Math.ceil(filteredCourses.length / limit);
+
+  const paginatedCourses = filteredCourses.slice(
+    (currentPage - 1) * limit,
+    currentPage * limit
+  )
 
   useEffect(() => {
     const fetchCoursesAndInstitutions = async () => {
@@ -126,13 +140,7 @@ export default function Courses() {
           className="w-40 bg-white text-black"
         />
 
-        {/* <Input
-          type="number"
-          placeholder="Min Price"
-          value={minPrice}
-          onChange={(e) => setMinPrice(e.target.value)}
-          className="w-40 bg-white text-black"
-        /> */}
+        
         <Input
           type="number"
           placeholder="Max Price"
@@ -143,7 +151,7 @@ export default function Courses() {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl mx-auto">
-        {filteredCourses.map((course) => (
+      {paginatedCourses.map((course) => (
           <Card
             key={course.id}
             className="bg-[#334155] p-5 rounded-xl text-white border border-[#475569] hover:shadow-xl transition"
@@ -165,6 +173,7 @@ export default function Courses() {
             </p>
           </Card>
         ))}
+      
       </div>
 
       {filteredCourses.length === 0 && (
@@ -172,6 +181,30 @@ export default function Courses() {
           No courses match your filters.
         </p>
       )}
+
+{filteredCourses.length > limit && (
+          <div className="flex justify-center items-center gap-4 mt-6">
+            <Button
+              className="bg-accent text-primary"
+              onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+              disabled={currentPage === 1}
+            >
+              Previous
+            </Button>
+            <span className="text-sm text-neutral-text">
+              Page {currentPage} of {totalPages}
+            </span>
+            <Button
+              className="bg-accent text-primary"
+              onClick={() =>
+                setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+              }
+              disabled={currentPage === totalPages}
+            >
+              Next
+            </Button>
+          </div>
+        )}
     </DashboardLayout>
   );
 }

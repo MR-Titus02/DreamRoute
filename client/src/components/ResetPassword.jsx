@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import api from "../api/axios";
-import BackButton from "./BackButton"; // fixed import path
+import BackButton from "./BackButton"; 
 
 function ResetPassword() {
   const { token } = useParams();

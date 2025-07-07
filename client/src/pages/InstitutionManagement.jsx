@@ -129,7 +129,7 @@ export default function InstitutionManagement() {
     <AdminLayout>
       <h1 className="text-3xl font-bold mb-6 text-white">Institution Management</h1>
 
-      {/* Existing Institution Management UI */}
+      {/* Institution Management UI */}
       <Card className="mb-6 bg-[#3B4758] text-white">
         <CardHeader>
           <CardTitle className="flex justify-between items-center text-white">
@@ -262,7 +262,7 @@ export default function InstitutionManagement() {
         </Card>
       )}
 
-      {/* Institution Requests (New Section) */}
+      {/* Institution Requests */}
       <Card className="mt-6 bg-[#3B4758] text-white">
         <CardHeader>
           <CardTitle className="text-white">Pending Institution Requests</CardTitle>

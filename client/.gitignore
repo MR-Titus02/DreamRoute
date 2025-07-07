@@ -26,3 +26,4 @@ dist-ssr
 
 .env
 /tools
+/src/pages/TestPage.jsx

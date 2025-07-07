@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import api from "../api/axios";
 import Logo from "../assets/logo.png";
 import { useAuth } from "@/context/AuthContext";
-import BackButton from "../components/BackButton"; // 👈 Make sure this component exists
+import BackButton from "../components/BackButton"; 
 
 function Login() {
   const { login } = useAuth();
@@ -41,7 +41,8 @@ function Login() {
       }
     } catch (err) {
       console.error("Login error:", err.response?.data || err.message);
-      setError("Invalid email or password");
+      const serverMsg = err.response?.data?.message || "Something went wrong";
+      setError(serverMsg);
     }
   };
 

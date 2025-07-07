@@ -33,6 +33,7 @@ import ForgotPassword from "./components/ForgotPassword";
 import ResetPassword from "./components/ResetPassword";
 import InstitutionSettings from "./pages/InstitutionSettings";
 import RequestInstitution from "./pages/RequestInstitution";
+import TestPage from "./pages/TestPage";
 
 function App() {
   const { user } = useAuth();
@@ -55,6 +56,7 @@ function App() {
         <Route path="/auth/google-success" element={<GoogleSuccess />} />
         <Route path="/roadmap" element={<Roadmap />} />
         <Route path="/dashboard/career-path" element={<CareerPathFlow />} />
+        <Route path="/test" element={<TestPage />} />
 
 <Route
       path="/admin"
