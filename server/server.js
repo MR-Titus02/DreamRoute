@@ -25,6 +25,7 @@ import loginLogsRoutes from './routes/loginLogs.routes.js';
 import analyticsRoutes from './routes/analytics.route.js';
 import careerRoutes from './routes/career.route.js';
 import chatRoutes from "./routes/chat.routes.js";
+import progressRoutes from './routes/progress.routes.js';
 
 
 dotenv.config();
@@ -82,6 +83,7 @@ app.use("/api/login-logs", loginLogsRoutes);
 app.use("/api/analytics", analyticsRoutes);
 app.use('/api/career', careerRoutes);
 app.use('/api', chatRoutes);
+app.use('/api/progress', progressRoutes);
 
 app.use(notFound);
 app.use(errorHandler);
