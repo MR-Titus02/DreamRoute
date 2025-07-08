@@ -44,7 +44,7 @@ function SignUp() {
       const res = await axios.post("/auth/register", payload);
       const { user, token } = res.data;
       login(user, token);
-      navigate("/userdetails");
+      navigate("/dashboard");
     } catch (err) {
       console.error("Registration error:", err.response?.data || err.message);
       alert(err.response?.data?.message || "Registration failed");

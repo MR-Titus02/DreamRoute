@@ -39,20 +39,22 @@ export default function Roadmap() {
 
     try {
       const { career, roadmap, courses, institutions } = await fetchRoadmap(userId);
+
+      // Flatten steps if roadmap has sections
       const flatSteps = Array.isArray(roadmap[0]?.steps)
         ? roadmap.flatMap((section) =>
             section.steps.map((step) => ({ ...step, section: section.section }))
           )
         : roadmap;
+
       const progressResponse = await fetchProgress(userId);
       const progressArray = progressResponse?.data || progressResponse;
-const progressMap = {};
+      const progressMap = {};
+      console.log({ roadmap, courses, institutions });
+      progressArray.forEach(({ step_id, status }) => {
+        progressMap[String(step_id)] = status;
+      });
 
-progressArray.forEach(({ step_id, status }) => {
-  progressMap[String(step_id)] = status;
-});
-
-setStatusMap(progressMap);
       setCareer(career);
       setRoadmap(flatSteps);
       setCourses(courses);
@@ -132,6 +134,16 @@ setStatusMap(progressMap);
               const expanded = !!expandedSteps[step.id];
               const colors = STATUS_COLORS[status] || STATUS_COLORS["not_started"];
 
+              // Find the linked course for this step
+              const course = courses.find(
+                (c) => c.id === step.courseId || c.id === step.course_id
+              );
+
+              // Find the institution for the linked course
+              const institution = course
+                ? institutions.find((i) => i.id === course.institution_id)
+                : null;
+
               return (
                 <VerticalTimelineElement
                   key={step.id}
@@ -199,6 +211,21 @@ setStatusMap(progressMap);
                   {expanded && step.details && typeof step.details === "string" && (
                     <div className="mt-3 text-sm text-gray-400 whitespace-pre-line">
                       {step.details}
+                    </div>
+                  )}
+
+                  {/* --- Course & Institution display --- */}
+                  {course && (
+                    <div className="mt-4 p-3 bg-[#222c3c] rounded text-sm border border-indigo-600">
+                      <strong className="text-indigo-300">Course:</strong> {course.title} <br />
+                      <span className="text-gray-400">{course.description}</span>
+
+                      {institution && (
+                        <div className="mt-2 text-xs text-gray-500">
+                          <strong>Provided by:</strong> {institution.name} <br />
+                          <span>{institution.address}</span>
+                        </div>
+                      )}
                     </div>
                   )}
 
