@@ -34,11 +34,21 @@ import ResetPassword from "./components/ResetPassword";
 import InstitutionSettings from "./pages/InstitutionSettings";
 import RequestInstitution from "./pages/RequestInstitution";
 import TestPage from "./pages/TestPage";
+import PlansPage from "./pages/PlansPage";
+import PaymentMethodsPage from "./pages/PaymentMethodsPage";
+import { loadStripe } from "@stripe/stripe-js";
+import { Elements } from "@stripe/react-stripe-js";
+
+
+const STRIPE_PUBLIC_KEY = import.meta.env.VITE_STRIPE_PUBLIC_KEY;
+const stripePromise = loadStripe(STRIPE_PUBLIC_KEY);
+console.log("Stripe Public Key:", STRIPE_PUBLIC_KEY);
 
 function App() {
   const { user } = useAuth();
   return (
     <Router>
+      <Elements stripe={stripePromise}>
       <Routes>
         
         <Route path="/login" element={<Login />} />
@@ -77,9 +87,12 @@ function App() {
         <Route path="/reset-password/:token" element={<ResetPassword />} />
         <Route path="/institution/settings" element={<ProtectedRoute role="institution"><InstitutionSettings /></ProtectedRoute>} />
         <Route path="institution/requests" element={<RequestInstitution />} />
+        <Route path="/plans" element={<PlansPage />} />
+        <Route path="/payment-methods" element={<PaymentMethodsPage />} />
         {/* Redirects */}
         
       </Routes>
+      </Elements>
     </Router>
   );
 }

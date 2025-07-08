@@ -17,9 +17,9 @@ export async function fetchRoadmap(userId) {
 
 
 export async function fetchProgress(userId) {
-  const res = await api.get(`"http://localhost:5000/api/progress/${userId}"`);
-  return Object.entries(res.data).map(([step_id, status]) => ({ step_id, status }));
-};
+  const res = await api.get(`http://localhost:5000/api/progress/${userId}`);
+  return res.data; // Array of { step_id, status }
+}
 
 export async function updateProgress({ userId, stepId, status }) {
   await api.post("http://localhost:5000/api/progress/", { userId, stepId, status });

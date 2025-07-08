@@ -45,14 +45,14 @@ export default function Roadmap() {
           )
         : roadmap;
       const progressResponse = await fetchProgress(userId);
-      const progressData = progressResponse?.data || progressResponse;
-      console.log("Fetched progress data:", progressData);
-      const progressMap = {};
-      for (const item of progressData) {
-        if (item.step_id && item.status) {
-          progressMap[item.step_id] = item.status;
-        }
-      }
+      const progressArray = progressResponse?.data || progressResponse;
+const progressMap = {};
+
+progressArray.forEach(({ step_id, status }) => {
+  progressMap[String(step_id)] = status;
+});
+
+setStatusMap(progressMap);
       setCareer(career);
       setRoadmap(flatSteps);
       setCourses(courses);
