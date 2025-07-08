@@ -8,11 +8,8 @@ export const getProgress = async (req, res) => {
       "SELECT step_id, status FROM roadmap_progress WHERE user_id = ?",
       [userId]
     );
-    const progressMap = {};
-    rows.forEach(row => {
-      progressMap[row.step_id] = row.status;
-    });
-    res.json(progressMap);
+    // ✅ Return rows directly (array of objects)
+    res.json(rows);
   } catch (err) {
     res.status(500).json({ error: "Failed to fetch progress." });
   }
