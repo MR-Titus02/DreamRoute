@@ -217,7 +217,13 @@ export const getSavedRoadmap = async (req, res) => {
     );
 
     if (!roadmap) {
-      return res.status(404).json({ error: "No roadmap found for this user." });
+      // ✅ Return empty format instead of 404
+      return res.status(200).json({
+        career: null,
+        roadmap: [],
+        courses: [],
+        institutions: [],
+      });
     }
 
     const roadmapId = roadmap.id;
@@ -269,4 +275,3 @@ export const getSavedRoadmap = async (req, res) => {
     res.status(500).json({ error: "Failed to fetch saved roadmap." });
   }
 };
-
