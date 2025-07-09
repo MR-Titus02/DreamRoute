@@ -23,7 +23,7 @@ import InstitutionManagement from "./pages/InstitutionManagement";
 import Courses from "./pages/Courses";
 import UserAnalytics from "./pages/Analytics";
 import Settings from "./pages/Settings";
-import GoogleSuccess from "./pages/GoogleSuccess";
+import OAuthRedirect from "./pages/OAuthRedirect";
 import './index.css'; 
 import CareerPathFlow from "./pages/CareerPathFlow";
 import InstitutionDashboard from "./pages/InstitutionDashboard";
@@ -42,7 +42,7 @@ import { Elements } from "@stripe/react-stripe-js";
 
 const STRIPE_PUBLIC_KEY = import.meta.env.VITE_STRIPE_PUBLIC_KEY;
 const stripePromise = loadStripe(STRIPE_PUBLIC_KEY);
-console.log("Stripe Public Key:", STRIPE_PUBLIC_KEY);
+// console.log("Stripe Public Key:", STRIPE_PUBLIC_KEY); //Debug
 
 function App() {
   const { user } = useAuth();
@@ -63,7 +63,7 @@ function App() {
         <Route path="dashboard/courses" element={<Courses />} />
         <Route path="dashboard/analytics" element={<UserAnalytics />} />
         <Route path="dashboard/settings" element={<Settings />} />
-        <Route path="/auth/google-success" element={<GoogleSuccess />} />
+        <Route path="/oauth-redirect" element={<OAuthRedirect />} />
         <Route path="/roadmap" element={<Roadmap />} />
         <Route path="/dashboard/career-path" element={<CareerPathFlow />} />
         <Route path="/test" element={<TestPage />} />
