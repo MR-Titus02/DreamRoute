@@ -90,3 +90,32 @@ npm install
 # Frontend
 cd client
 npm install
+
+# Start backend
+cd server
+npm run dev
+
+# Start frontend
+cd client
+npm run dev
+
+📚 Credits
+OpenAI
+Stripe
+React Flow
+Google Developers OAuth
+Vercel / Render for deployment
+
+👨‍💻 Author
+Built with ❤️ by Titus Senthilkumaran
+GitHub: @titussenthil
+LinkedIn: linkedin.com/in/titussenthil
+Email: [optional@example.com]
+
+
+---
+
+Let me know if:
+- You want me to replace placeholders with real values (email, repo link, screenshots).
+- You'd like a `LICENSE` file and `CONTRIBUTING.md` file as well.
+- You want this file created and pushed to your GitHub repo directly (I’ll guide you through it).
