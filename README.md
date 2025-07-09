@@ -98,6 +98,7 @@ npm run dev
 # Start frontend
 cd client
 npm run dev
+```
 
 📚 Credits
 OpenAI
@@ -111,7 +112,6 @@ Built with ❤️ by Titus Senthilkumaran
 GitHub: @titussenthil
 LinkedIn: linkedin.com/in/titussenthil
 Email: [optional@example.com]
-
 
 ---
 
