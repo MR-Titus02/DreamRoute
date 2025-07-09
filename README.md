@@ -109,9 +109,9 @@ Vercel / Render for deployment
 
 👨‍💻 Author
 Built with ❤️ by Titus Senthilkumaran
-GitHub: @titussenthil
-LinkedIn: linkedin.com/in/titussenthil
-Email: [optional@example.com]
+GitHub: @Mr-Titus02
+LinkedIn: [linkedin.com/in/titussenthil](https://www.linkedin.com/in/titus-senthilkumaran/)
+Email: [titusroxsan@gmail.com]
 
 ---
 
