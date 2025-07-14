@@ -2,8 +2,9 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import Logo from "../assets/logo.png";
-import HeroBgImg from "../assets/bg.png"; // Your uploaded hero bg
-
+import HeroBgImg from "../assets/bg.png";
+import { useState } from "react";
+ 
 const fadeUp = {
   hidden: { opacity: 0, y: 30 },
   visible: (i) => ({
@@ -59,7 +60,42 @@ const features = [
 ];
 
 export default function LandingPage() {
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    message: "",
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitStatus, setSubmitStatus] = useState(null);
+
   const navigate = useNavigate();
+
+  // Handle change in form fields
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prevState) => ({
+      ...prevState,
+      [name]: value,
+    }));
+  };
+
+  // Handle form submission
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    setIsSubmitting(true);
+    try {
+      // Replace this URL with your backend API
+      const response = await axios.post("http://localhost:5000/api/contact/send", formData);
+      setSubmitStatus("success");
+      setFormData({ name: "", email: "", phone: "", message: "" });
+    } catch (error) {
+      setSubmitStatus("error");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <div className="bg-gradient-to-br from-[#222831] via-[#393E46] to-[#222831] min-h-screen text-white flex flex-col font-inter relative overflow-x-hidden">
@@ -237,6 +273,81 @@ export default function LandingPage() {
           </div>
         </div>
       </section>
+
+       {/* Contact Form */}
+       <div className="max-w-4xl mx-auto">
+          <form
+            onSubmit={handleSubmit}
+            className="bg-[#393E46] bg-opacity-70 backdrop-blur-xl p-8 rounded-lg shadow-xl space-y-6"
+          >
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="flex flex-col">
+                <input
+                  type="text"
+                  placeholder="Your Name"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleChange}
+                  className="w-full p-4 rounded-lg bg-[#222831] text-white border border-transparent focus:ring-2 focus:ring-cyan-400"
+                />
+              </div>
+              <div className="flex flex-col">
+                <input
+                  type="email"
+                  placeholder="Your Email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  className="w-full p-4 rounded-lg bg-[#222831] text-white border border-transparent focus:ring-2 focus:ring-cyan-400"
+                />
+              </div>
+            </div>
+
+            <div className="flex flex-col">
+              <input
+                type="text"
+                placeholder="Phone Number"
+                name="phone"
+                value={formData.phone}
+                onChange={handleChange}
+                className="w-full p-4 rounded-lg bg-[#222831] text-white border border-transparent focus:ring-2 focus:ring-cyan-400"
+              />
+            </div>
+
+            <div className="flex flex-col">
+              <textarea
+                placeholder="Your Message"
+                name="message"
+                value={formData.message}
+                onChange={handleChange}
+                className="w-full p-4 rounded-lg bg-[#222831] text-white border border-transparent focus:ring-2 focus:ring-cyan-400 h-32"
+              ></textarea>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                className="w-5 h-5 text-cyan-400 border-none focus:ring-0"
+              />
+              <label className="text-gray-200 text-sm">
+                I agree to the <span className="text-cyan-300">privacy policy</span>.
+              </label>
+            </div>
+
+            <button
+              type="submit"
+              className="bg-gradient-to-r from-[#00ADB5] to-[#00C4CC] text-white font-bold py-3 px-8 rounded-full w-full transition-all duration-300 hover:scale-105"
+            >
+              Send Message
+            </button>
+          </form>
+          {submitStatus && (
+            <div className={`mt-4 text-center ${submitStatus === "success" ? "text-green-500" : "text-red-500"}`}>
+              {submitStatus === "success" ? "Message sent successfully!" : "There was an error, please try again."}
+            </div>
+          )}
+        </div>
+
 
       {/* Footer */}
       <footer className="text-center text-gray-400 py-6 text-sm border-t border-gray-700 bg-black/10 backdrop-blur-sm mt-auto">
