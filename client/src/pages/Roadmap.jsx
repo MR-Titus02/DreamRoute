@@ -8,6 +8,7 @@ import {
 import "react-vertical-timeline-component/style.min.css";
 import { Button } from "@/components/ui/button";
 import Navbar from "../components/Navbar";
+import { useLocation } from "react-router-dom";
 
 const STATUS_COLORS = {
   not_started: { bg: "#1E293B", border: "#475569", text: "#94a3b8" },
@@ -25,6 +26,7 @@ export default function Roadmap() {
   const [error, setError] = useState(null);
   const [statusMap, setStatusMap] = useState({});
   const [expandedSteps, setExpandedSteps] = useState({});
+  const location = useLocation();
 
   const userId = user?.id || JSON.parse(localStorage.getItem("user"))?.id;
 
@@ -50,7 +52,7 @@ export default function Roadmap() {
       const progressResponse = await fetchProgress(userId);
       const progressArray = progressResponse?.data || progressResponse;
       const progressMap = {};
-      console.log({ roadmap, courses, institutions });
+      
       progressArray.forEach(({ step_id, status }) => {
         progressMap[String(step_id)] = status;
       });
@@ -70,6 +72,35 @@ export default function Roadmap() {
   useEffect(() => {
     loadRoadmap();
   }, [userId]);
+
+useEffect(() => {
+  if (!loading && roadmap.length > 0) {
+    const params = new URLSearchParams(location.search);
+    const stepId = params.get('step');
+    
+    if (stepId) {
+      const timer = setTimeout(() => {
+        const element = document.getElementById(`step-${stepId}`);
+        if (element) {
+          element.scrollIntoView({
+            behavior: 'smooth',
+            block: 'center'
+          });
+          
+          // Add glow effect
+          element.classList.add('timeline-glow');
+          
+          // Remove after animation completes
+          setTimeout(() => {
+            element.classList.remove('timeline-glow');
+          }, 2000);
+        }
+      }, 300);
+      
+      return () => clearTimeout(timer);
+    }
+  }
+}, [loading, roadmap, location.search]);
 
   const handleStatusChange = async (stepId, newStatus) => {
     setStatusMap((prev) => ({ ...prev, [stepId]: newStatus }));
@@ -147,6 +178,7 @@ export default function Roadmap() {
               return (
                 <VerticalTimelineElement
                   key={step.id}
+                  id={`step-${step.id}`}
                   date={step.section || ""}
                   iconStyle={{
                     background: colors.border,
@@ -172,6 +204,8 @@ export default function Roadmap() {
                     color: colors.text,
                     borderTop: `3px solid ${colors.border}`,
                     transition: "all 0.3s ease",
+                    borderRadius: "0.5rem", 
+                    overflow: "hidden", 
                   }}
                   contentArrowStyle={{ borderRight: `7px solid ${colors.bg}` }}
                 >
