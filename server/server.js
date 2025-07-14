@@ -27,6 +27,7 @@ import careerRoutes from './routes/career.route.js';
 import chatRoutes from "./routes/chat.routes.js";
 import progressRoutes from './routes/progress.routes.js';
 import stripeRoutes from "./routes/stripe.js";
+import contactRoutes from './routes/contact.route.js';
 
 
 dotenv.config();
@@ -86,6 +87,7 @@ app.use('/api/career', careerRoutes);
 app.use('/api', chatRoutes);
 app.use('/api/progress', progressRoutes);
 app.use("/api/stripe", stripeRoutes);
+app.use("/api/contact", contactRoutes);
 
 app.use(notFound);
 app.use(errorHandler);
