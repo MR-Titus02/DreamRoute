@@ -5,7 +5,9 @@ import axios from "axios";
 import { useAuth } from "@/context/AuthContext";
 import Navbar from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
-import { LoaderCircle } from "lucide-react";
+import { LoaderCircle, Lock } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import PlansModal from "@/components/PlansModal"; // ✅ Imported modal
 
 const NODE_WIDTH = 280;
 const NODE_HEIGHT = 140;
@@ -69,6 +71,7 @@ const nodeTypes = { customNode: CustomNode };
 
 export default function CareerRoadmapReactFlow() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const userId = user?.id || JSON.parse(localStorage.getItem("user"))?.id;
 
   const [nodes, setNodes] = useState([]);
@@ -76,6 +79,7 @@ export default function CareerRoadmapReactFlow() {
   const [career, setCareer] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [showPlansModal, setShowPlansModal] = useState(false); // ✅ Modal control
 
   const printRef = useRef();
 
@@ -182,7 +186,6 @@ export default function CareerRoadmapReactFlow() {
               width: 100% !important;
               height: auto !important;
             }
-            /* Remove default margins to avoid cropping */
             * {
               margin: 0;
               padding: 0;
@@ -206,6 +209,8 @@ export default function CareerRoadmapReactFlow() {
   useEffect(() => {
     fetchRoadmap();
   }, [fetchRoadmap]);
+
+  const isPremium = user?.plan === "pro" || user?.plan === "premium";
 
   return (
     <>
@@ -248,12 +253,6 @@ export default function CareerRoadmapReactFlow() {
                     attributionPosition="bottom-left"
                     nodesDraggable={true}
                     nodesConnectable={false}
-                    defaultEdgeOptions={{
-                      animated: true,
-                      type: "smoothstep",
-                      style: { stroke: "#7c3aed", strokeWidth: 2 },
-                      markerEnd: { type: "arrowclosed", color: "#7c3aed" },
-                    }}
                   >
                     <Controls
                       style={{
@@ -269,22 +268,32 @@ export default function CareerRoadmapReactFlow() {
 
               <div className="flex justify-center mt-6 space-x-4">
                 <Button
-                  onClick={regenerateRoadmap}
-                  className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-6 py-3 rounded-lg font-semibold hover:brightness-110 transition shadow-lg"
+                  onClick={() => {
+                    isPremium ? regenerateRoadmap() : setShowPlansModal(true);
+                  }}
+                  className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-6 py-3 rounded-lg font-semibold hover:brightness-110 transition shadow-lg flex items-center space-x-2"
                 >
-                  🔄 Regenerate Map
+                  <span>🔄 Regenerate Map</span>
+                  {!isPremium && <Lock size={16} className="ml-2 text-yellow-400" />}
                 </Button>
+
                 <Button
-                  onClick={handlePrint}
-                  className="bg-gradient-to-r from-blue-600 to-cyan-600 text-white px-6 py-3 rounded-lg font-semibold hover:brightness-110 transition shadow-lg"
+                  onClick={() => {
+                    isPremium ? handlePrint() : setShowPlansModal(true);
+                  }}
+                  className="bg-gradient-to-r from-blue-600 to-cyan-600 text-white px-6 py-3 rounded-lg font-semibold hover:brightness-110 transition shadow-lg flex items-center space-x-2"
                 >
-                  🖨️ Print Roadmap
+                  <span>🖨️ Print Roadmap</span>
+                  {!isPremium && <Lock size={16} className="ml-2 text-yellow-400" />}
                 </Button>
               </div>
             </>
           )}
         </div>
       </div>
+
+      {/* ✅ Modal usage */}
+      <PlansModal isOpen={showPlansModal} onClose={() => setShowPlansModal(false)} />
     </>
   );
 }

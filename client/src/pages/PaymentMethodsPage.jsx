@@ -2,10 +2,12 @@ import React, { useState } from "react";
 import { CardElement, useStripe, useElements } from "@stripe/react-stripe-js";
 import axios from "axios";
 import BackButton from "../components/BackButton";
+import { useAuth } from "@/context/AuthContext";
 
 const PaymentMethodsPage = () => {
   const stripe = useStripe();
   const elements = useElements();
+  const { user } = useAuth();
 
   const selectedPlan = localStorage.getItem("selectedPlan") || "Pro";
 
@@ -37,7 +39,8 @@ const PaymentMethodsPage = () => {
 
     const validationErrors = validate();
     setErrors(validationErrors);
-    if (Object.keys(validationErrors).length > 0 || planPrices[selectedPlan] === 0) return;
+    if (Object.keys(validationErrors).length > 0 || planPrices[selectedPlan] === 0)
+      return;
     if (!stripe || !elements) return;
 
     setProcessing(true);
@@ -68,7 +71,22 @@ const PaymentMethodsPage = () => {
       } else if (result.paymentIntent.status === "succeeded") {
         setSuccess(true);
         alert("✅ Payment successful!");
-        // Optional: send result.paymentIntent.id to your backend
+
+        // Send success to backend to update plan
+        if (user?.id) {
+          try {
+            await axios.post("http://localhost:5000/api/stripe/payment/success", {
+              userId: user.id,
+              selectedPlan,
+            });
+
+            // Update localStorage plan so UI reacts accordingly
+            localStorage.setItem("userPlan", selectedPlan);
+          } catch (err) {
+            console.error("Failed to update plan on server:", err);
+            alert("⚠️ Payment succeeded, but failed to update your plan.");
+          }
+        }
       }
     } catch (err) {
       console.error("Payment failed:", err);
