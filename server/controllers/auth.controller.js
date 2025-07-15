@@ -1,4 +1,3 @@
-// controllers/authController.js
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import pool from '../config/db.js'; 
@@ -7,7 +6,6 @@ import logger from '../utils/logger.js';
 import { logUserAction } from '../utils/logger.js';
 import { sendTemplateEmail } from '../utils/sendEmail.js';
 import crypto from 'crypto';
-
 
 dotenv.config();
 
@@ -27,30 +25,31 @@ export async function register(req, res) {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
+    // Set plan = 'free' by default on signup
     const [result] = await pool.query(
-      'INSERT INTO users (email, password, role, name) VALUES (?, ?, ?, ?)',
-      [email, hashedPassword, role, name]
+      'INSERT INTO users (email, password, role, name, plan) VALUES (?, ?, ?, ?, ?)',
+      [email, hashedPassword, role, name, 'free']
     );
 
     const userId = result.insertId;
 
-    // 🔐 Generate JWT tokens (same as in login)
+    // Generate JWT tokens (same as in login)
     const accessToken = jwt.sign(
-      { userId, email, role, institution_id: null },
+      { userId, email, role, institution_id: null, plan: 'free' }, // add plan here
       JWT_SECRET,
       { expiresIn: '45m' }
     );
 
     const refreshToken = jwt.sign(
-      { userId, email, role, institution_id: null },
+      { userId, email, role, institution_id: null, plan: 'free' }, // add plan here
       REFRESH_TOKEN,
       { expiresIn: '7d' }
     );
 
-    // 💾 Store refresh token in DB
+    // Store refresh token in DB
     await pool.query('UPDATE users SET refresh_token = ? WHERE id = ?', [refreshToken, userId]);
 
-    // 🍪 Set refresh token as cookie
+    // Set refresh token cookie
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
       secure: false, // change to true in production
@@ -58,7 +57,7 @@ export async function register(req, res) {
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
-    // ✅ Send access token and user data
+    // Send access token and user data including plan
     res.status(201).json({
       message: 'User registered successfully',
       token: accessToken,
@@ -69,6 +68,7 @@ export async function register(req, res) {
         role,
         institution_id: null,
         name,
+        plan: 'free', // include plan here
       },
     });
 
@@ -81,9 +81,8 @@ export async function register(req, res) {
     await logUserAction(null, 'Registration failed', JSON.stringify(req.body));
   }
 }
-// Login user
-// Main login function
 
+// Login user
 export async function login(req, res) {
   try {
     const { email, password } = req.body;
@@ -110,7 +109,7 @@ export async function login(req, res) {
       return res.status(401).json({ message: 'Invalid password' });
     }
 
-    // ✅ Fetch institution_id if user is an institution
+    // Fetch institution_id if user is an institution
     let institution_id = null;
     if (user.role === 'institution') {
       const [institutionRows] = await pool.query(
@@ -119,29 +118,28 @@ export async function login(req, res) {
       );
       institution_id = institutionRows[0]?.id || null;
     }
-    
 
-
-
-    // Generate Access Token
+    // Generate Access Token including plan
     const accessToken = jwt.sign(
       {
         userId: user.id,
         email: user.email,
         role: user.role,
-        institution_id, // ✅ now correct
+        institution_id,
+        plan: user.plan, // include plan here
       },
       JWT_SECRET,
       { expiresIn: '45m' }
     );
 
-    // Generate Refresh Token
+    // Generate Refresh Token including plan
     const refreshToken = jwt.sign(
       {
         userId: user.id,
         email: user.email,
         role: user.role,
         institution_id,
+        plan: user.plan, // include plan here
       },
       REFRESH_TOKEN,
       { expiresIn: '7d' }
@@ -167,6 +165,7 @@ export async function login(req, res) {
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
+    // Return user with plan
     res.json({
       message: 'Login successful',
       token: accessToken,
@@ -175,8 +174,9 @@ export async function login(req, res) {
         id: user.id,
         email: user.email,
         role: user.role,
-        institution_id : institution_id,
+        institution_id,
         name: user.name,
+        plan: user.plan, // include plan here
       },
     });
 
@@ -187,9 +187,7 @@ export async function login(req, res) {
   }
 }
 
-
-
-
+// Refresh Access Token
 export const refreshAccessToken = async (req, res) => {
   try {
     const refreshToken = req.cookies.refreshToken;
@@ -216,6 +214,7 @@ export const refreshAccessToken = async (req, res) => {
         email: user.email,
         role: user.role,
         institution_id: user.institution_id,
+        plan: user.plan, // include plan here
       },
       JWT_SECRET,
       { expiresIn: '15m' }
@@ -228,12 +227,7 @@ export const refreshAccessToken = async (req, res) => {
   }
 };
 
-
-
-
-
 // Logout user
-
 export const logout = async (req, res) => {
   try {
     const refreshToken = req.cookies.refreshToken;
@@ -260,8 +254,7 @@ export const logout = async (req, res) => {
   }
 };
 
-
-//forget password
+// Forget password
 export const forgotPassword = async (req, res) => {
   const { email } = req.body;
 
@@ -275,8 +268,7 @@ export const forgotPassword = async (req, res) => {
     const resetToken = crypto.randomBytes(32).toString('hex');
     const resetTokenHash = crypto.createHash('sha256').update(resetToken).digest('hex');
     const resetTokenExpires = new Date(Date.now() + 15 * 60 * 1000); // 15 mins
-    console.log('Reset Token:', resetToken); // For debugging, remove in production
-    console.log('Reset Token Hash:', resetTokenHash); // For debugging, remove in production
+
     // Save token to DB
     await pool.query(
       'UPDATE users SET reset_token = ?, reset_token_expires = ? WHERE id = ?',
@@ -285,7 +277,6 @@ export const forgotPassword = async (req, res) => {
 
     // Build reset link
     const resetLink = `${process.env.FRONTEND_URL}/reset-password/${resetToken}`;
-
 
     await sendTemplateEmail(user.email, 'resetPassword', { name: user.name, resetLink });
 
@@ -296,9 +287,7 @@ export const forgotPassword = async (req, res) => {
   }
 };
 
-
-
-//reset password
+// Reset password
 export const resetPassword = async (req, res) => {
   const { token } = req.params;
   const { password } = req.body;
