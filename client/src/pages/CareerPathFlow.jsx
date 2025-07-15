@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, useRef } from "react";
 import ReactFlow, { Background, Controls, Handle, Position } from "reactflow";
 import "reactflow/dist/style.css";
 import axios from "axios";
@@ -77,17 +77,19 @@ export default function CareerRoadmapReactFlow() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  const printRef = useRef();
+
   const fetchRoadmap = useCallback(async () => {
     if (!userId) return;
     setLoading(true);
     setError(null);
-  
+
     try {
       const res = await axios.get(`http://localhost:5000/api/career/${userId}`);
       if (res.data.type !== "reactflow") throw new Error("Invalid roadmap format.");
-  
+
       const { nodes: rawNodes, edges: rawEdges, career: careerTitle } = res.data.content;
-  
+
       const preparedNodes = rawNodes.map((node, index) => ({
         ...node,
         id: String(node.id),
@@ -99,7 +101,7 @@ export default function CareerRoadmapReactFlow() {
         },
         style: { width: NODE_WIDTH, height: NODE_HEIGHT },
       }));
-  
+
       const preparedEdges = rawEdges.map((edge, index) => ({
         id: `e${edge.source}-${edge.target}-${index}`,
         source: String(edge.source),
@@ -111,17 +113,15 @@ export default function CareerRoadmapReactFlow() {
         style: { stroke: "#7c3aed", strokeWidth: 2 },
         markerEnd: { type: "arrowclosed", color: "#7c3aed", width: 20, height: 20 },
       }));
-  
+
       setCareer(careerTitle);
       setNodes(preparedNodes);
       setEdges(preparedEdges);
     } catch (err) {
-      // If not found, generate new roadmap
       if (err.response?.status === 404) {
         try {
-          console.warn("No saved roadmap found. Generating a new one...");
           await axios.post("http://localhost:5000/api/career/generate", { userId });
-          await fetchRoadmap(); // Try again after generating
+          await fetchRoadmap();
           return;
         } catch (generateErr) {
           console.error("Failed to generate new roadmap:", generateErr);
@@ -129,14 +129,13 @@ export default function CareerRoadmapReactFlow() {
           return;
         }
       }
-  
+
       console.error("Fetch error:", err);
       setError("Failed to load roadmap.");
     } finally {
       setLoading(false);
     }
   }, [userId]);
-  
 
   const regenerateRoadmap = async () => {
     if (!userId) return;
@@ -153,6 +152,57 @@ export default function CareerRoadmapReactFlow() {
     }
   };
 
+  const handlePrint = () => {
+    const printContent = printRef.current;
+    const printWindow = window.open("", "_blank");
+    printWindow.document.write(`
+      <html>
+        <head>
+          <title>Career Roadmap</title>
+          <style>
+            body {
+              font-family: Arial, sans-serif;
+              padding: 20px;
+              background: white;
+              color: black;
+            }
+            h1 {
+              color: #111;
+              text-align: center;
+              font-size: 24px;
+              margin-bottom: 20px;
+            }
+            .react-flow__renderer {
+              width: 100% !important;
+              height: auto !important;
+              overflow: visible !important;
+            }
+            .react-flow {
+              background: white !important;
+              width: 100% !important;
+              height: auto !important;
+            }
+            /* Remove default margins to avoid cropping */
+            * {
+              margin: 0;
+              padding: 0;
+              box-sizing: border-box;
+            }
+          </style>
+        </head>
+        <body>
+          ${printContent.innerHTML}
+        </body>
+      </html>
+    `);
+    printWindow.document.close();
+    printWindow.focus();
+    setTimeout(() => {
+      printWindow.print();
+      printWindow.close();
+    }, 500);
+  };
+
   useEffect(() => {
     fetchRoadmap();
   }, [fetchRoadmap]);
@@ -162,13 +212,6 @@ export default function CareerRoadmapReactFlow() {
       <Navbar />
       <div className="min-h-screen bg-gradient-to-b from-[#0f172a] to-[#1e293b] text-white p-6">
         <div className="max-w-6xl mx-auto">
-          <h1 className="text-4xl font-bold text-center text-green-400 mb-2">
-            🎯 Career Path: <span className="text-white">{career}</span>
-          </h1>
-          <p className="text-center text-indigo-300 text-sm mb-6">
-            Interactive visualization of your career progression
-          </p>
-
           {loading ? (
             <div className="flex flex-col items-center justify-center h-[300px] animate-pulse text-gray-300 space-y-4">
               <LoaderCircle className="animate-spin w-10 h-10 text-purple-500" />
@@ -186,33 +229,42 @@ export default function CareerRoadmapReactFlow() {
             </div>
           ) : (
             <>
-              <div className="w-full h-[750px] bg-[#0f172a] border border-[#334155] rounded-xl p-2 shadow-xl">
-                <ReactFlow
-                  nodes={nodes}
-                  edges={edges}
-                  fitView
-                  panOnDrag
-                  zoomOnScroll
-                  nodeTypes={nodeTypes}
-                  attributionPosition="bottom-left"
-                  nodesDraggable={true}
-                  nodesConnectable={false}
-                  defaultEdgeOptions={{
-                    animated: true,
-                    type: "smoothstep",
-                    style: { stroke: "#7c3aed", strokeWidth: 2 },
-                    markerEnd: { type: "arrowclosed", color: "#7c3aed" },
-                  }}
-                >
-                  <Controls
-                    style={{
-                      backgroundColor: "#1E293B",
-                      border: "1px solid #334155",
-                      borderRadius: "4px",
+              <div ref={printRef}>
+                <h1 className="text-4xl font-bold text-center text-green-400 mb-2">
+                  🎯 Career Path: <span className="text-white">{career}</span>
+                </h1>
+                <p className="text-center text-indigo-300 text-sm mb-6">
+                  Interactive visualization of your career progression
+                </p>
+
+                <div className="w-full h-[750px] bg-[#0f172a] border border-[#334155] rounded-xl p-2 shadow-xl">
+                  <ReactFlow
+                    nodes={nodes}
+                    edges={edges}
+                    fitView
+                    panOnDrag
+                    zoomOnScroll
+                    nodeTypes={nodeTypes}
+                    attributionPosition="bottom-left"
+                    nodesDraggable={true}
+                    nodesConnectable={false}
+                    defaultEdgeOptions={{
+                      animated: true,
+                      type: "smoothstep",
+                      style: { stroke: "#7c3aed", strokeWidth: 2 },
+                      markerEnd: { type: "arrowclosed", color: "#7c3aed" },
                     }}
-                  />
-                  <Background gap={24} size={1} color="#334155" variant="dots" />
-                </ReactFlow>
+                  >
+                    <Controls
+                      style={{
+                        backgroundColor: "#1E293B",
+                        border: "1px solid #334155",
+                        borderRadius: "4px",
+                      }}
+                    />
+                    <Background gap={24} size={1} color="#334155" variant="dots" />
+                  </ReactFlow>
+                </div>
               </div>
 
               <div className="flex justify-center mt-6 space-x-4">
@@ -223,7 +275,7 @@ export default function CareerRoadmapReactFlow() {
                   🔄 Regenerate Map
                 </Button>
                 <Button
-                  onClick={() => window.print()}
+                  onClick={handlePrint}
                   className="bg-gradient-to-r from-blue-600 to-cyan-600 text-white px-6 py-3 rounded-lg font-semibold hover:brightness-110 transition shadow-lg"
                 >
                   🖨️ Print Roadmap
