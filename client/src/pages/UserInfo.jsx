@@ -17,34 +17,40 @@ const UserInfo = () => {
 
   const handleNext = async (data) => {
     const combinedData = { ...formData, ...data };
-
+  
     if (step < 3) {
       setFormData(combinedData);
       setStep(step + 1);
     } else {
-      // Final submit to generate roadmap
       try {
         setLoading(true);
-
-        const payload = {
-          userId: user?.id || JSON.parse(localStorage.getItem("user"))?.id,
-          ...combinedData,
-        };
-
-        console.log("🟢 Submitting final data to AI:", payload);
-
-        await api.post("/roadmap", payload);
-
+  
+        const token = localStorage.getItem("token"); // Assuming you store JWT here
+        const userId = user?.id || JSON.parse(localStorage.getItem("user"))?.id;
+  
+        // 1. Save profile to DB using protected route
+        await api.post("/profile", { ...combinedData }, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+  
+        // 2. Generate roadmap
+        await api.post("/roadmap", { userId, ...combinedData });
+  
+        // 3. Generate secondary React Flow roadmap
+        await api.post("/career/generate", { userId });
+  
         navigate("/dashboard");
       } catch (err) {
-        console.error("❌ Roadmap generation failed:", err);
-        alert("Failed to generate roadmap. Please try again.");
+        console.error("❌ Error in final step:", err);
+        alert("Something went wrong. Please try again.");
       } finally {
         setLoading(false);
       }
     }
   };
-
+  
   const handlePrev = () => setStep(step - 1);
 
   if (loading) {

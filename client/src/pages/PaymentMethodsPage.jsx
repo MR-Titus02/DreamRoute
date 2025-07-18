@@ -7,7 +7,7 @@ import { useAuth } from "@/context/AuthContext";
 const PaymentMethodsPage = () => {
   const stripe = useStripe();
   const elements = useElements();
-  const { user } = useAuth();
+  const { user, token } = useAuth();
 
   const selectedPlan = localStorage.getItem("selectedPlan") || "Pro";
 
@@ -15,12 +15,6 @@ const PaymentMethodsPage = () => {
   const [errors, setErrors] = useState({});
   const [processing, setProcessing] = useState(false);
   const [success, setSuccess] = useState(false);
-
-  const planPrices = {
-    Basic: 0,
-    Pro: 999,
-    Premium: 1999,
-  };
 
   const validate = () => {
     const newErrors = {};
@@ -39,58 +33,73 @@ const PaymentMethodsPage = () => {
 
     const validationErrors = validate();
     setErrors(validationErrors);
-    if (Object.keys(validationErrors).length > 0 || planPrices[selectedPlan] === 0)
-      return;
+    if (Object.keys(validationErrors).length > 0) return;
     if (!stripe || !elements) return;
 
     setProcessing(true);
 
     try {
-      const amount = planPrices[selectedPlan];
-      const res = await axios.post(
-        "http://localhost:5000/api/stripe/create-payment-intent",
-        { amount }
-      );
-      const clientSecret = res.data.clientSecret;
-
-      const cardElement = elements.getElement(CardElement);
-
-      const result = await stripe.confirmCardPayment(clientSecret, {
-        payment_method: {
-          card: cardElement,
-          billing_details: {
-            name: formData.name,
-            email: formData.email,
-          },
+      const { error: pmError, paymentMethod } = await stripe.createPaymentMethod({
+        type: "card",
+        card: elements.getElement(CardElement),
+        billing_details: {
+          name: formData.name,
+          email: formData.email,
         },
       });
 
+      if (pmError) {
+        alert("❌ Payment method creation failed: " + pmError.message);
+        setProcessing(false);
+        return;
+      }
+
+      console.log("📦 Sending to backend:", {
+        selectedPlan: selectedPlan.toLowerCase(),
+        paymentMethodId: paymentMethod.id,
+      });
+
+      const res = await axios.post(
+        "http://localhost:5000/api/stripe/create-subscription",
+        {
+          selectedPlan: selectedPlan.toLowerCase(),
+          paymentMethodId: paymentMethod.id,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      const clientSecret = res.data.clientSecret;
+
+      const result = await stripe.confirmCardPayment(clientSecret);
+
       if (result.error) {
-        console.error(result.error.message);
         alert("❌ Payment failed: " + result.error.message);
       } else if (result.paymentIntent.status === "succeeded") {
         setSuccess(true);
-        alert("✅ Payment successful!");
+        alert("✅ Subscription successful!");
 
-        // Send success to backend to update plan
-        if (user?.id) {
-          try {
-            await axios.post("http://localhost:5000/api/stripe/payment/success", {
-              userId: user.id,
-              selectedPlan,
-            });
-
-            // Update localStorage plan so UI reacts accordingly
-            localStorage.setItem("userPlan", selectedPlan);
-          } catch (err) {
-            console.error("Failed to update plan on server:", err);
-            alert("⚠️ Payment succeeded, but failed to update your plan.");
+        await axios.post(
+          "http://localhost:5000/api/stripe/payment/success",
+          {
+            userId: user.id,
+            selectedPlan,
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
           }
-        }
+        );
+
+        localStorage.setItem("userPlan", selectedPlan);
       }
     } catch (err) {
-      console.error("Payment failed:", err);
-      alert("❌ Payment error occurred");
+      console.error("❌ Error during subscription:", err);
+      alert("⚠️ Subscription failed. Check console for details.");
     } finally {
       setProcessing(false);
     }
@@ -106,7 +115,7 @@ const PaymentMethodsPage = () => {
         <h2 className="text-2xl font-bold text-center text-[#00ADB5] mb-6">
           {selectedPlan === "Basic"
             ? "Basic Plan is Free"
-            : `Pay for ${selectedPlan} Plan`}
+            : `Subscribe to ${selectedPlan} Plan`}
         </h2>
 
         {selectedPlan === "Basic" ? (
@@ -114,7 +123,7 @@ const PaymentMethodsPage = () => {
             🎉 You’ve selected the free Basic Plan. No payment required.
           </p>
         ) : success ? (
-          <p className="text-green-400 text-center">✅ Payment Successful!</p>
+          <p className="text-green-400 text-center">✅ Subscription Successful!</p>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4" noValidate>
             {/* Full Name */}
@@ -170,13 +179,13 @@ const PaymentMethodsPage = () => {
               disabled={!stripe || processing}
               className="w-full mt-4 bg-[#00ADB5] py-3 text-[#0F172A] font-bold rounded-lg hover:bg-[#00C4CC] transition disabled:opacity-50"
             >
-              {processing ? "Processing..." : "Confirm Payment"}
+              {processing ? "Processing..." : "Start Subscription"}
             </button>
           </form>
         )}
 
         <p className="text-xs text-center mt-4 text-[#EEEEEEAA]">
-          🔒 Secure transaction powered by Stripe
+          🔒 Secure subscription powered by Stripe
         </p>
       </div>
     </div>

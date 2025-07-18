@@ -7,7 +7,7 @@ import Navbar from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
 import { LoaderCircle, Lock } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import PlansModal from "@/components/PlansModal"; // ✅ Imported modal
+import PlansModal from "@/components/PlansModal"; 
 
 const NODE_WIDTH = 280;
 const NODE_HEIGHT = 140;
@@ -79,7 +79,7 @@ export default function CareerRoadmapReactFlow() {
   const [career, setCareer] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [showPlansModal, setShowPlansModal] = useState(false); // ✅ Modal control
+  const [showPlansModal, setShowPlansModal] = useState(false);
 
   const printRef = useRef();
 
