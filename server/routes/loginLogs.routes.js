@@ -2,21 +2,20 @@ import express from "express";
 import {
   logLoginAttempt,
   getAllLoginLogs,
-  getUserLoginLogs,
+  getLoginLogsByUser,
 } from "../controllers/loginLogs.controller.js";
+
 import { verifyToken, checkRole } from "../middlewares/authMiddleware.js";
 
 const router = express.Router();
 
-// Log a login attempt (used inside login controller ideally)
+// Log a login attempt
 router.post("/", logLoginAttempt);
 
-// Get all logs (admin only)
+// Admin route to get all logs
 router.get("/", verifyToken, checkRole("admin"), getAllLoginLogs);
 
-// Get logs by user
-router.get("/:id", verifyToken, getUserLoginLogs);
+// Get login logs for a specific user
+router.get("/:id", verifyToken, getLoginLogsByUser);
 
 export default router;
-
-
