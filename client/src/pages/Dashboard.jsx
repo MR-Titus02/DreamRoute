@@ -147,155 +147,177 @@ export default function DashboardPage() {
     );
   }
 
-  return (
+return (
     <DashboardLayout>
-      {/* Mandatory Profile Completion Modal */}
+      {/* Profile Completion Modal - Enhanced */}
       <Dialog open={showProfileModal} onOpenChange={handleCloseAttempt}>
-        <DialogContent className="sm:max-w-[425px] bg-gray-800 text-white border-0" showCloseButton={!isNewUser}>
+        <DialogContent className="sm:max-w-[425px] bg-gray-800 border border-gray-700 rounded-lg text-white">
           <DialogHeader>
             <DialogTitle className="text-xl font-bold text-white">
-              {isNewUser ? "👋 Welcome to Career Compass!" : "Complete Your Profile"}
+              {isNewUser ? (
+                <span className="flex items-center gap-2">
+                  <span className="text-blue-400">👋</span> Welcome to Career Compass!
+                </span>
+              ) : (
+                "Complete Your Profile"
+              )}
             </DialogTitle>
-            <DialogDescription className="text-gray-300">
+            <DialogDescription className="text-gray-300 mt-2">
               {isNewUser
-                ? "To get started, we need some information about your background and goals. This will help our AI generate your personalized career roadmap."
-                : "Your profile information is required to generate personalized recommendations."}
+                ? "Let's create your personalized career roadmap in just 2 minutes."
+                : "Update your profile for better recommendations."}
             </DialogDescription>
           </DialogHeader>
           
-          <div className="py-4">
-            <p className="text-yellow-400 mb-2">
-              {isNewUser 
-                ? "This is a mandatory first step before you can access any features."
-                : "Without this information, we can't provide career recommendations."}
-            </p>
-            <ul className="list-disc pl-5 text-gray-300 space-y-1">
-              <li>It only takes 2 minutes</li>
-              <li>Your data is kept private and secure</li>
-              <li>You can update it anytime</li>
-            </ul>
+          <div className="py-4 space-y-3">
+            <div className="flex items-start gap-3 p-3 bg-gray-700/50 rounded-lg">
+              <div className="text-blue-400 mt-0.5">ℹ️</div>
+              <div>
+                <p className="text-sm font-medium text-white">
+                  {isNewUser 
+                    ? "This helps us tailor recommendations to your goals"
+                    : "Your information helps us improve suggestions"}
+                </p>
+                <ul className="list-disc pl-5 text-gray-300 text-sm mt-2 space-y-1">
+                  <li>Quick and easy setup</li>
+                  <li>Data privacy guaranteed</li>
+                  <li>Editable anytime</li>
+                </ul>
+              </div>
+            </div>
           </div>
           
-          <DialogFooter>
+          <DialogFooter className="flex flex-col gap-2">
             <Button
               onClick={handleProfileComplete}
-              className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white py-2"
+              className="w-full bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white py-2 rounded-lg"
               size="lg"
             >
-              {isNewUser ? "Get Started" : "Complete Profile"}
+              {isNewUser ? "Begin Setup" : "Update Profile"}
             </Button>
             {!isNewUser && (
               <Button
                 onClick={handleCloseAttempt}
                 variant="outline"
-                className="w-full text-white border-gray-600 hover:bg-gray-700"
+                className="w-full text-gray-300 border-gray-600 hover:bg-gray-700/50 hover:text-white rounded-lg"
               >
-                Maybe Later
+                Remind Me Later
               </Button>
             )}
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
-      {/* Confirmation Dialog for Closing */}
+      {/* Confirmation Dialog - Styled */}
       <AlertDialog open={showConfirmClose} onOpenChange={setShowConfirmClose}>
-        <AlertDialogContent className="bg-gray-800 border-0 text-white">
+        <AlertDialogContent className="bg-gray-800 border border-gray-700 rounded-lg text-white">
           <AlertDialogHeader>
-            <AlertDialogTitle className="text-white">Are you sure?</AlertDialogTitle>
-            <AlertDialogDescription className="text-gray-300">
-              You won't be able to generate any roadmaps without completing your profile.
+            <AlertDialogTitle className="text-white flex items-center gap-2">
+              <span className="text-yellow-400">⚠️</span> Required Step
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-gray-300 mt-2">
+              You need to complete your profile to unlock all features.
               <br />
-              <span className="text-yellow-400 font-medium">This step is required to continue.</span>
+              <span className="text-blue-300 font-medium mt-1 inline-block">
+                This ensures you get the best recommendations.
+              </span>
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter>
+          <AlertDialogFooter className="mt-4">
             <AlertDialogCancel 
               onClick={handleCancelClose}
-              className="text-white border-gray-600 hover:bg-gray-700"
+              className="text-white border-gray-600 hover:bg-gray-700/50 rounded-lg"
             >
-              No, I'll complete it
+              Continue Setup
             </AlertDialogCancel>
             <AlertDialogAction 
               onClick={handleConfirmClose}
-              className="bg-red-600 hover:bg-red-700"
+              className="bg-red-500 hover:bg-red-600 rounded-lg"
             >
-              Yes, close anyway
+              Exit Anyway
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
 
       {!career ? (
-        <Card className="bg-yellow-100 text-black border-0 shadow-lg mb-6">
+        <Card className="bg-gradient-to-br from-yellow-50 to-amber-50 text-gray-900 border border-amber-200 shadow-md mb-6">
           <CardHeader>
-            <CardTitle className="text-lg font-semibold">🎯 Complete Your Career Profile</CardTitle>
+            <CardTitle className="text-lg font-semibold flex items-center gap-2">
+              <span className="text-amber-600">🎯</span> Setup Your Career Profile
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="mb-3">
-              We need a few details about your background and goals to generate your personalized roadmap.
+            <p className="mb-4 text-gray-700">
+              Complete your profile to generate a personalized career roadmap.
             </p>
             <Button
               onClick={() => navigate("/userdetails")}
-              className="bg-gradient-to-r from-yellow-400 to-yellow-600 text-white"
+              className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white rounded-lg"
             >
-              Complete Profile
+              Start Setup
             </Button>
           </CardContent>
         </Card>
       ) : (
         <>
-          <Card className="bg-[#3B4758] text-white border-0 shadow-xl mb-6">
+          {/* Career Recommendation Card - Enhanced */}
+          <Card className="bg-gradient-to-br from-slate-800 to-gray-900 text-white border border-gray-700 shadow-lg mb-6">
             <CardHeader>
-              <CardTitle className="text-white text-lg font-semibold">
-                Latest Career Recommendation
+              <CardTitle className="text-white text-lg font-semibold flex items-center gap-2">
+                <span className="text-blue-400">✨</span> Your Career Path
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-gray-300 mb-3">
-                Based on your profile and interests, your ideal path is{" "}
-                <span className="text-green-400 font-semibold">{career}</span>.
+              <p className="text-gray-300 mb-4">
+                Our AI recommends:{" "}
+                <span className="text-blue-300 font-medium">{career}</span>
               </p>
               <Button
                 onClick={() => navigate("/dashboard/roadmap")}
-                className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white"
+                className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-lg"
               >
-                View Roadmap
+                View Full Roadmap
               </Button>
             </CardContent>
           </Card>
 
-          <Card className="bg-[#1e293b] text-white border-0 shadow-xl">
+          {/* Progress Card - Enhanced */}
+          <Card className="bg-gradient-to-br from-gray-900 to-slate-800 text-white border border-gray-700 shadow-lg">
             <CardHeader>
-              <CardTitle className="text-white text-lg font-semibold">
-                Your Progress
+              <CardTitle className="text-white text-lg font-semibold flex items-center gap-2">
+                <span className="text-green-400">📊</span> Your Progress
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center justify-between mb-6">
                 <div>
-                  <p className="text-gray-300">
-                    <span className="text-green-500">{completedSteps}</span> of{" "}
-                    <span className="font-semibold">{totalSteps}</span> steps completed
+                  <p className="text-gray-300 mb-1">
+                    Completed: <span className="text-green-400 font-medium">{completedSteps}</span>/{totalSteps}
                   </p>
-                  <p className="text-yellow-400">
-                    <span className="font-semibold">{percentage}%</span> completed
+                  <p className="text-blue-300 font-medium">
+                    {percentage}% Complete
                   </p>
                 </div>
-                <div className="w-32 bg-gray-700 rounded-full h-3 overflow-hidden">
+                <div className="w-40 bg-gray-700 rounded-full h-2.5 overflow-hidden">
                   <div
-                    className="bg-green-500 h-3 transition-all duration-300"
+                    className="bg-gradient-to-r from-green-400 to-teal-400 h-2.5 transition-all duration-500"
                     style={{ width: `${percentage}%` }}
                   />
                 </div>
               </div>
 
-              <p className="text-yellow-400 mb-3">
-                🚀 {message} Just <strong>{remainingSteps}</strong> more step
-                {remainingSteps !== 1 ? "s" : ""} to become a{" "}
-                <strong>{career}</strong>!
-              </p>
+              <div className="p-3 bg-gray-800/50 rounded-lg mb-6 border border-gray-700">
+                <p className="text-center text-blue-300 font-medium">
+                  {message} {remainingSteps > 0 && (
+                    <span className="text-gray-300">
+                      - {remainingSteps} step{remainingSteps !== 1 ? "s" : ""} remaining
+                    </span>
+                  )}
+                </p>
+              </div>
 
-              <div className="space-y-3">
+              <div className="space-y-3 mb-6">
                 {flatSteps.map((step) => {
                   const isCompleted = progressData.some(
                     (progress) => progress.step_id === step.id.toString() && progress.status === "done"
@@ -304,15 +326,17 @@ export default function DashboardPage() {
                   return (
                     <div
                       key={step.id}
-                      className={`flex items-center p-3 rounded-lg ${
-                        isCompleted ? "bg-gray-700/50" : "bg-gray-800"
+                      className={`flex items-start p-3 rounded-lg border ${
+                        isCompleted 
+                          ? "bg-gray-800/30 border-green-900/50" 
+                          : "bg-gray-800/50 border-gray-700 hover:bg-gray-700/50 transition-colors"
                       }`}
                     >
                       <div
-                        className={`flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center mr-3 ${
+                        className={`flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center mr-3 mt-0.5 ${
                           isCompleted
                             ? "bg-green-500 text-white"
-                            : "bg-gray-600 text-gray-400"
+                            : "bg-gray-600 text-gray-300"
                         }`}
                       >
                         {isCompleted ? (
@@ -329,7 +353,7 @@ export default function DashboardPage() {
                             />
                           </svg>
                         ) : (
-                          <span className="text-xs">{step.id}</span>
+                          <span className="text-xs font-medium">{step.id}</span>
                         )}
                       </div>
                       <div className="flex-grow">
@@ -344,7 +368,7 @@ export default function DashboardPage() {
                         </p>
                         {step.section && (
                           <p className="text-xs text-gray-400 mt-1">
-                            Section: {step.section}
+                            {step.section}
                           </p>
                         )}
                       </div>
@@ -356,9 +380,9 @@ export default function DashboardPage() {
               {nextStep && (
                 <Button
                   onClick={() => navigate(`/dashboard/roadmap?step=${nextStep.id}`)}
-                  className="mt-4 w-full bg-gradient-to-r from-green-500 to-teal-500 text-white"
+                  className="w-full bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white rounded-lg py-2"
                 >
-                  🎯 Continue with "{nextStep.label}"
+                  Continue with "{nextStep.label.substring(0, 30)}{nextStep.label.length > 30 ? "..." : ""}"
                 </Button>
               )}
             </CardContent>

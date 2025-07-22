@@ -69,3 +69,12 @@ input:focus ~ .focus-line {
   0%, 100% { box-shadow: 0 0 5px 2px rgba(234, 179, 8, 0.5); }
   50% { box-shadow: 0 0 15px 5px rgba(234, 179, 8, 0.8); }
 }
+
+@keyframes float {
+  0% { transform: translateY(0) translateX(0); opacity: 0; }
+  50% { opacity: 0.6; }
+  100% { transform: translateY(-100vh) translateX(20px); opacity: 0; }
+}
+.animate-float {
+  animation: float linear infinite;
+}

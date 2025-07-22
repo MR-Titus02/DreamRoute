@@ -14,6 +14,7 @@ export default function Courses() {
   const [minDuration, setMinDuration] = useState("");
   const [maxDuration, setMaxDuration] = useState("");
   const [maxPrice, setMaxPrice] = useState("");
+  const [minPrice, setMinPrice] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedCourse, setSelectedCourse] = useState(null);
   const modalRef = useRef(null);
@@ -125,193 +126,285 @@ export default function Courses() {
     // Here you can redirect to an application form or payment page
     alert(`Apply Now clicked for course: ${selectedCourse.title}`);
   };
-
-  return (
-    <DashboardLayout>
-      <h1 className="text-3xl font-bold text-center mb-6 text-green-400">
-        🎓 Explore Available Courses
-      </h1>
-
-      {/* Filters */}
-      <div className="flex flex-wrap gap-4 mb-8 justify-center">
-        <Input
-          type="text"
-          placeholder="Search by title or description..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-72 bg-white text-black"
-        />
-
-        <select
-          value={selectedInstitution}
-          onChange={(e) => setSelectedInstitution(e.target.value)}
-          className="bg-white text-black p-2 rounded"
-        >
-          <option value="">All Institutions</option>
-          {institutions.map((inst) => (
-            <option key={inst.id} value={inst.id}>
-              {inst.name}
-            </option>
-          ))}
-        </select>
-
-        <Input
-          type="number"
-          placeholder="Min Duration (weeks)"
-          value={minDuration}
-          onChange={(e) => setMinDuration(e.target.value)}
-          className="w-40 bg-white text-black"
-        />
-        <Input
-          type="number"
-          placeholder="Max Duration (weeks)"
-          value={maxDuration}
-          onChange={(e) => setMaxDuration(e.target.value)}
-          className="w-40 bg-white text-black"
-        />
-        <Input
-          type="number"
-          placeholder="Max Price"
-          value={maxPrice}
-          onChange={(e) => setMaxPrice(e.target.value)}
-          className="w-40 bg-white text-black"
-        />
-      </div>
-
-      {/* Courses Grid */}
-      <div
-        id="course-grid"
-        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl mx-auto"
-      >
-        {paginatedCourses.map((course) => (
-          <Card
-            key={course.id}
-            onClick={() => setSelectedCourse(course)}
-            className="cursor-pointer bg-[#334155] p-5 min-h-[250px] flex flex-col justify-between rounded-xl text-white border border-[#475569] hover:shadow-md transition-all"
-          >
-            <div>
-              <h2 className="text-xl font-semibold mb-2">{course.title}</h2>
-              <p className="text-sm text-gray-300 line-clamp-3 mb-3">
-                {course.description}
-              </p>
+  
+    return (
+      <DashboardLayout>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h1 className="text-3xl font-bold text-center mb-6 text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-cyan-400">
+            🎓 Explore Available Courses
+          </h1>
+  
+          {/* Filters - Enhanced */}
+          <div className="flex flex-wrap gap-4 mb-8 justify-center items-end">
+            <div className="w-full sm:w-auto">
+              <label className="block text-sm font-medium text-gray-300 mb-1">Search</label>
+              <Input
+                type="text"
+                placeholder="Course title or description..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full sm:w-72 bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
+              />
             </div>
-            <div>
-              <div className="flex flex-wrap gap-2 mb-2">
-                <span className="bg-indigo-600 text-white px-2 py-1 text-xs rounded-full">
-                  {course.duration || "Flexible"} weeks
-                </span>
-                <span className="bg-green-600 text-white px-2 py-1 text-xs rounded-full">
-                  ₹{course.price || "0"}
-                </span>
-              </div>
-              <p className="text-sm text-gray-400 italic">
-                {course.institution?.name || "Institution Unknown"}
-              </p>
-            </div>
-          </Card>
-        ))}
-      </div>
-
-      {/* No Results */}
-      {filteredCourses.length === 0 && (
-        <p className="text-center text-gray-400 mt-10">
-          No courses match your filters.
-        </p>
-      )}
-
-      {/* Pagination */}
-      {filteredCourses.length > limit && (
-        <div className="flex justify-center items-center gap-6 mt-10">
-          <Button
-            className="bg-[#00ADB5] hover:bg-[#00C4CC] text-white px-4 py-2 rounded font-medium transition disabled:opacity-50 disabled:cursor-not-allowed"
-            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-            disabled={currentPage === 1}
-          >
-            ⬅️ Previous
-          </Button>
-
-          <span className="text-white font-semibold text-sm sm:text-base">
-            Page {currentPage} of {totalPages}
-          </span>
-
-          <Button
-            className="bg-[#00ADB5] hover:bg-[#00C4CC] text-white px-4 py-2 rounded font-medium transition disabled:opacity-50 disabled:cursor-not-allowed"
-            onClick={() =>
-              setCurrentPage((prev) => Math.min(prev + 1, totalPages))
-            }
-            disabled={currentPage === totalPages}
-          >
-            Next ➡️
-          </Button>
-        </div>
-      )}
-
-      {/* Course Details Modal */}
-      {selectedCourse && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-[#0F172A]/70 backdrop-blur-sm"
-          aria-modal="true"
-          role="dialog"
-          tabIndex={-1}
-        >
-          <div
-            ref={modalRef}
-            className="bg-[#1E293B] text-[#EEEEEE] rounded-2xl shadow-xl w-full max-w-2xl p-6 relative border border-[#334155] 
-              transform transition-all duration-300 ease-out
-              opacity-100 translate-y-0
-              "
-          >
-            <button
-              onClick={closeModal}
-              className="absolute top-2 right-3 text-3xl font-bold text-[#00C4CC] hover:text-[#00ADB5]"
-              aria-label="Close modal"
-            >
-              &times;
-            </button>
-
-            <h2 className="text-2xl font-bold mb-4 text-center text-[#00ADB5]">
-              {selectedCourse.title}
-            </h2>
-
-            <p className="mb-3 text-gray-300">{selectedCourse.description}</p>
-
-            <div className="mb-4 flex gap-4 text-sm">
-              <span className="bg-indigo-600 text-white px-2 py-1 rounded">
-                Duration: {selectedCourse.duration} weeks
-              </span>
-              <span className="bg-green-600 text-white px-2 py-1 rounded">
-                Price: ₹{selectedCourse.price}
-              </span>
-            </div>
-
-            {selectedCourse.institution && (
-              <div className="mt-4 border-t border-[#334155] pt-4">
-                <h3 className="text-lg font-semibold mb-2 text-[#00ADB5]">
-                  Offered By: {selectedCourse.institution.name}
-                </h3>
-                <p className="text-sm text-gray-400 mb-1">
-                  📍 Address: {selectedCourse.institution.address}
-                </p>
-                <p className="text-sm text-gray-400 mb-1">
-                  📧 Email: {selectedCourse.institution.email}
-                </p>
-                <p className="text-sm text-gray-300">
-                  📝 {selectedCourse.institution.description}
-                </p>
-              </div>
-            )}
-
-            <div className="mt-6 flex justify-center">
-              <Button
-                onClick={handleApplyNow}
-                className="bg-[#00ADB5] hover:bg-[#00C4CC] text-white px-6 py-2 rounded font-semibold transition"
+  
+            <div className="w-full sm:w-auto">
+              <label className="block text-sm font-medium text-gray-300 mb-1">Institution</label>
+              <select
+                value={selectedInstitution}
+                onChange={(e) => setSelectedInstitution(e.target.value)}
+                className="w-full sm:w-48 bg-gray-700 border-gray-600 text-white rounded-md p-2 focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
               >
-                Apply Now
-              </Button>
+                <option value="">All Institutions</option>
+                {institutions.map((inst) => (
+                  <option key={inst.id} value={inst.id}>
+                    {inst.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+  
+            <div className="w-full sm:w-auto">
+              <label className="block text-sm font-medium text-gray-300 mb-1">Duration (weeks)</label>
+              <div className="flex gap-2">
+                <Input
+                  type="number"
+                  placeholder="Min"
+                  value={minDuration}
+                  onChange={(e) => setMinDuration(e.target.value)}
+                  className="w-20 bg-gray-700 border-gray-600 text-white"
+                />
+                <Input
+                  type="number"
+                  placeholder="Max"
+                  value={maxDuration}
+                  onChange={(e) => setMaxDuration(e.target.value)}
+                  className="w-20 bg-gray-700 border-gray-600 text-white"
+                />
+              </div>
+            </div>
+  
+            <div className="w-full sm:w-auto">
+              <label className="block text-sm font-medium text-gray-300 mb-1">Max Price (₹)</label>
+              <div className="flex gap-2">
+              <Input
+                type="number"
+                placeholder="Any price"
+                value={maxPrice}
+                onChange={(e) => setMaxPrice(e.target.value)}
+                className="w-full sm:w-32 bg-gray-700 border-gray-600 text-white"
+              />
+              <Input
+                type="number"
+                placeholder="Any price"
+                value={minPrice}
+                onChange={(e) => setMinPrice(e.target.value)}
+                className="w-full sm:w-32 bg-gray-700 border-gray-600 text-white"
+              />
+              </div>
             </div>
           </div>
+  
+          {/* Courses Grid - Enhanced */}
+          <div
+            id="course-grid"
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
+          >
+            {paginatedCourses.map((course) => (
+              <Card
+                key={course.id}
+                onClick={() => setSelectedCourse(course)}
+                className="cursor-pointer bg-gray-800 p-5 min-h-[250px] flex flex-col justify-between rounded-xl border border-gray-700 hover:border-cyan-500/30 hover:shadow-lg transition-all duration-300 group"
+              >
+                <div>
+                  <h2 className="text-xl font-semibold mb-2 text-white group-hover:text-cyan-400 transition-colors">
+                    {course.title}
+                  </h2>
+                  <p className="text-sm text-gray-400 line-clamp-3 mb-3">
+                    {course.description}
+                  </p>
+                </div>
+                <div>
+                  <div className="flex flex-wrap gap-2 mb-3">
+                    <span className="bg-indigo-600/80 text-white px-3 py-1 text-xs rounded-full">
+                      {course.duration || "Flexible"} weeks
+                    </span>
+                    <span className="bg-green-600/80 text-white px-3 py-1 text-xs rounded-full">
+                      ₹{course.price || "Free"}
+                    </span>
+                  </div>
+                  <p className="text-sm text-gray-400 italic">
+                    {course.institution?.name || "Institution Unknown"}
+                  </p>
+                </div>
+              </Card>
+            ))}
+          </div>
+  
+          {/* No Results - Enhanced */}
+          {filteredCourses.length === 0 && (
+            <div className="text-center mt-12 py-8 rounded-lg bg-gray-800/50 border border-gray-700">
+              <p className="text-gray-400 text-lg mb-2">No courses match your filters</p>
+              <Button
+                onClick={() => {
+                  setSearchTerm("");
+                  setSelectedInstitution("");
+                  setMinDuration("");
+                  setMaxDuration("");
+                  setMaxPrice("");
+                }}
+                className="bg-cyan-600 hover:bg-cyan-700 text-white"
+                size="sm"
+              >
+                Clear Filters
+              </Button>
+            </div>
+          )}
+  
+          {/* Pagination - Enhanced */}
+          {filteredCourses.length > limit && (
+            <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mt-10">
+              <div className="text-sm text-gray-400">
+                Showing {(currentPage - 1) * limit + 1}-{Math.min(currentPage * limit, filteredCourses.length)} of {filteredCourses.length} courses
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  className="border-gray-600 text-gray-300 hover:bg-gray-700 hover:text-white"
+                  onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                  disabled={currentPage === 1}
+                >
+                  Previous
+                </Button>
+                <div className="flex items-center gap-1">
+                  {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                    let pageNum;
+                    if (totalPages <= 5) {
+                      pageNum = i + 1;
+                    } else if (currentPage <= 3) {
+                      pageNum = i + 1;
+                    } else if (currentPage >= totalPages - 2) {
+                      pageNum = totalPages - 4 + i;
+                    } else {
+                      pageNum = currentPage - 2 + i;
+                    }
+                    return (
+                      <Button
+                        key={pageNum}
+                        variant={currentPage === pageNum ? "default" : "outline"}
+                        className={`min-w-[40px] ${currentPage === pageNum ? 'bg-cyan-600 text-white' : 'border-gray-600 text-gray-300 hover:bg-gray-700'}`}
+                        onClick={() => setCurrentPage(pageNum)}
+                      >
+                        {pageNum}
+                      </Button>
+                    );
+                  })}
+                  {totalPages > 5 && currentPage < totalPages - 2 && (
+                    <span className="px-2 text-gray-400">...</span>
+                  )}
+                  {totalPages > 5 && currentPage < totalPages - 2 && (
+                    <Button
+                      variant="outline"
+                      className="border-gray-600 text-gray-300 hover:bg-gray-700"
+                      onClick={() => setCurrentPage(totalPages)}
+                    >
+                      {totalPages}
+                    </Button>
+                  )}
+                </div>
+                <Button
+                  variant="outline"
+                  className="border-gray-600 text-gray-300 hover:bg-gray-700 hover:text-white"
+                  onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                  disabled={currentPage === totalPages}
+                >
+                  Next
+                </Button>
+              </div>
+            </div>
+          )}
+  
+          {/* Course Details Modal - Enhanced */}
+          {selectedCourse && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm">
+              <div
+                ref={modalRef}
+                className="relative bg-gray-800 text-gray-100 rounded-xl shadow-2xl w-full max-w-2xl mx-4 border border-gray-700 overflow-hidden"
+              >
+                <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-cyan-500 to-blue-500"></div>
+                
+                <div className="p-6">
+                  <button
+                    onClick={closeModal}
+                    className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors"
+                    aria-label="Close modal"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+  
+                  <h2 className="text-2xl font-bold mb-2 text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-400">
+                    {selectedCourse.title}
+                  </h2>
+  
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    <span className="bg-indigo-600/80 text-white px-3 py-1 text-xs rounded-full">
+                      {selectedCourse.duration} weeks
+                    </span>
+                    <span className="bg-green-600/80 text-white px-3 py-1 text-xs rounded-full">
+                      ₹{selectedCourse.price}
+                    </span>
+                  </div>
+  
+                  <p className="mb-6 text-gray-300">{selectedCourse.description}</p>
+  
+                  {selectedCourse.institution && (
+                    <div className="mt-6 pt-4 border-t border-gray-700">
+                      <h3 className="text-lg font-semibold mb-3 text-cyan-400">Offered By</h3>
+                      <div className="bg-gray-700/50 p-4 rounded-lg">
+                        <h4 className="font-medium text-white">{selectedCourse.institution.name}</h4>
+                        <div className="mt-2 space-y-1 text-sm text-gray-300">
+                          <p className="flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                            {selectedCourse.institution.address}
+                          </p>
+                          <p className="flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                            </svg>
+                            {selectedCourse.institution.email}
+                          </p>
+                        </div>
+                        <p className="mt-3 text-sm text-gray-400">
+                          {selectedCourse.institution.description}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+  
+                  <div className="mt-8 flex justify-end gap-3">
+                    <Button
+                      variant="outline"
+                      onClick={closeModal}
+                      className="border-gray-600 text-gray-300 hover:bg-gray-700"
+                    >
+                      Close
+                    </Button>
+                    <Button
+                      onClick={handleApplyNow}
+                      className="bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700 text-white"
+                    >
+                      Apply Now
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
-      )}
-    </DashboardLayout>
-  );
-}
+      </DashboardLayout>
+    );
+  }

@@ -14,7 +14,6 @@ export default function Analytics() {
     const fetchAnalytics = async () => {
       try {
         const res = await api.get(`/analytics/${user.id}`);
-        console.log("Fetched Analytics:", res.data);
         setAnalytics(res.data);
       } catch (error) {
         console.error("Error loading analytics", error);
@@ -86,13 +85,13 @@ export default function Analytics() {
           📊 Your Career Analytics
         </h1>
 
-        <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 xl:grid-cols-3">
+        <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 mb-8">
           {statCards.map((card, index) => (
             <Card
               key={index}
-              className="bg-[#1E293B] border border-[#334155] shadow-xl hover:shadow-2xl transition duration-300"
+              className="bg-[#1E293B] border border-[#334155] shadow-lg hover:shadow-2xl transition duration-300 rounded-2xl"
             >
-              <CardContent className="p-6 space-y-2">
+              <CardContent className="p-6 flex flex-col justify-between h-full space-y-2">
                 <h2 className="text-lg font-semibold text-[#EEEEEE]">
                   {card.label}
                 </h2>
@@ -102,18 +101,21 @@ export default function Analytics() {
               </CardContent>
             </Card>
           ))}
+        </div>
 
-          {/* <Card className="bg-[#1E293B] border border-[#334155] shadow-xl hover:shadow-2xl transition duration-300 col-span-full">
+        {/* Highlight most engaged institution if available */}
+        {mostEngagedInstitution && (
+          <Card className="bg-[#1E293B] border border-[#334155] shadow-lg hover:shadow-2xl transition duration-300 rounded-2xl">
             <CardContent className="p-6">
               <h2 className="text-lg font-semibold text-[#EEEEEE] mb-2">
                 🏫 Most Engaged Institution
               </h2>
               <p className="text-2xl font-bold text-purple-400">
-                {mostEngagedInstitution || "Not enough data"}
+                {mostEngagedInstitution}
               </p>
             </CardContent>
-          </Card> */}
-        </div>
+          </Card>
+        )}
       </div>
     </DashboardLayout>
   );

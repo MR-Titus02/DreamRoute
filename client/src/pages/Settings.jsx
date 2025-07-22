@@ -60,7 +60,7 @@ export default function Settings() {
   return (
     <DashboardLayout>
       <div className="p-6 bg-[#1e293b] min-h-screen text-white">
-        <h1 className="text-3xl font-bold mb-6 text-green-400 text-center">⚙️ User Settings</h1>
+      <h1 className="text-3xl font-bold mb-6 text-indigo-400 text-center">⚙️ User Settings</h1>
 
         <form onSubmit={handleSubmit} className="grid gap-6 max-w-4xl mx-auto">
           {/* Account Settings */}
