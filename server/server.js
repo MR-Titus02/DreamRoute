@@ -18,14 +18,15 @@ import roadmapRoutes from "./routes/roadmap.route.js";
 import profileRoutes from './routes/profile.routes.js';
 import groqRoutes from './routes/groq.routes.js';
 import googleRoutes from './routes/google.js';
-import checkoutRoutes from './routes/checkout.routes.js';
+// import checkoutRoutes from './routes/checkout.routes.js';
 import loginLogsRoutes from './routes/loginLogs.routes.js';
 import analyticsRoutes from './routes/analytics.route.js';
 import careerRoutes from './routes/career.route.js';
 import chatRoutes from "./routes/chat.routes.js";
 import progressRoutes from './routes/progress.routes.js';
-import stripeRoutes from "./routes/stripe.route.js";
+// import stripeRoutes from "./routes/stripe.route.js";
 import contactRoutes from './routes/contact.route.js';
+import paymentRoutes from './routes/payment.route.js';
 import errorHandler from './middlewares/errorHandler.js';
 import notFound from './middlewares/notFound.js';
 
@@ -71,8 +72,7 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 // Stripe webhook raw parser BEFORE express.json
-app.use('/api/stripe/webhook', bodyParser.raw({ type: 'application/json' }));
-
+app.use('/api/payment', express.raw({ type: 'application/json' }));
 // All other routes use JSON parser
 app.use(express.json());
 
@@ -91,14 +91,15 @@ app.get("/profile", (req, res) => {
   if (!req.user) return res.status(401).send("Not authenticated");
   res.json(req.user);
 });
-app.use('/api/checkout', checkoutRoutes);
+// app.use('/api/checkout', checkoutRoutes);
 app.use("/api/login-logs", loginLogsRoutes);
 app.use("/api/analytics", analyticsRoutes);
 app.use('/api/career', careerRoutes);
 app.use('/api', chatRoutes);
 app.use('/api/progress', progressRoutes);
-app.use("/api/stripe", stripeRoutes);
+// app.use("/api/stripe", stripeRoutes);
 app.use("/api/contact", contactRoutes);
+app.use('/api/stripe', paymentRoutes);
 
 // Error handling
 app.use(notFound);
