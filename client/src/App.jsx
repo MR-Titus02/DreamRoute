@@ -36,6 +36,7 @@ import RequestInstitution from "./pages/RequestInstitution";
 import TestPage from "./pages/TestPage";
 import PlansPage from "./pages/PlansPage";
 import PaymentMethodsPage from "./pages/PaymentMethodsPage";
+import PaymentSuccessPage from "./pages/PaymentSuccess";
 import { loadStripe } from "@stripe/stripe-js";
 import { Elements } from "@stripe/react-stripe-js";
 
@@ -89,6 +90,7 @@ function App() {
         <Route path="institution/requests" element={<RequestInstitution />} />
         <Route path="/plans" element={<PlansPage />} />
         <Route path="/payment-methods" element={<PaymentMethodsPage />} />
+        <Route path="/payment-success" element={<PaymentSuccessPage />} />
         {/* Redirects */}
         
       </Routes>

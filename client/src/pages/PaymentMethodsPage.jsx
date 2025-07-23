@@ -1,195 +1,80 @@
-import React, { useState } from "react";
-import { CardElement, useStripe, useElements } from "@stripe/react-stripe-js";
-import axios from "axios";
-import BackButton from "../components/BackButton";
-import { useAuth } from "@/context/AuthContext";
+import React, { useState } from 'react';
+import { loadStripe } from '@stripe/stripe-js';
+import { Button } from '@/components/ui/button';
+import { useAuth } from '@/context/AuthContext';
+import api from '@/api/axios';
 
-const PaymentMethodsPage = () => {
-  const stripe = useStripe();
-  const elements = useElements();
-  const { user, token } = useAuth();
+const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY);
 
-  const selectedPlan = localStorage.getItem("selectedPlan") || "Pro";
-
-  const [formData, setFormData] = useState({ name: "", email: "" });
-  const [errors, setErrors] = useState({});
-  const [processing, setProcessing] = useState(false);
-  const [success, setSuccess] = useState(false);
-
-  const validate = () => {
-    const newErrors = {};
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-    if (!formData.name || formData.name.length < 3)
-      newErrors.name = "Full name is required (min 3 characters)";
-    if (!emailRegex.test(formData.email))
-      newErrors.email = "Enter a valid email address";
-
-    return newErrors;
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    const validationErrors = validate();
-    setErrors(validationErrors);
-    if (Object.keys(validationErrors).length > 0) return;
-    if (!stripe || !elements) return;
-
-    setProcessing(true);
-
-    try {
-      const { error: pmError, paymentMethod } = await stripe.createPaymentMethod({
-        type: "card",
-        card: elements.getElement(CardElement),
-        billing_details: {
-          name: formData.name,
-          email: formData.email,
-        },
-      });
-
-      if (pmError) {
-        alert("❌ Payment method creation failed: " + pmError.message);
-        setProcessing(false);
-        return;
-      }
-
-      console.log("📦 Sending to backend:", {
-        selectedPlan: selectedPlan.toLowerCase(),
-        paymentMethodId: paymentMethod.id,
-      });
-
-      const res = await axios.post(
-        "http://localhost:5000/api/stripe/create-subscription",
-        {
-          selectedPlan: selectedPlan.toLowerCase(),
-          paymentMethodId: paymentMethod.id,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      const clientSecret = res.data.clientSecret;
-
-      const result = await stripe.confirmCardPayment(clientSecret);
-
-      if (result.error) {
-        alert("❌ Payment failed: " + result.error.message);
-      } else if (result.paymentIntent.status === "succeeded") {
-        setSuccess(true);
-        alert("✅ Subscription successful!");
-
-        await axios.post(
-          "http://localhost:5000/api/stripe/payment/success",
-          {
-            userId: user.id,
-            selectedPlan,
-          },
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-
-        localStorage.setItem("userPlan", selectedPlan);
-      }
-    } catch (err) {
-      console.error("❌ Error during subscription:", err);
-      alert("⚠️ Subscription failed. Check console for details.");
-    } finally {
-      setProcessing(false);
-    }
-  };
-
-  return (
-    <div className="min-h-screen bg-[#1E293B] flex items-center justify-center px-4 py-10 relative">
-      <div className="absolute top-6 left-6 z-10">
-        <BackButton />
-      </div>
-
-      <div className="bg-[#334155] w-full max-w-md p-8 rounded-2xl shadow-2xl text-white">
-        <h2 className="text-2xl font-bold text-center text-[#00ADB5] mb-6">
-          {selectedPlan === "Basic"
-            ? "Basic Plan is Free"
-            : `Subscribe to ${selectedPlan} Plan`}
-        </h2>
-
-        {selectedPlan === "Basic" ? (
-          <p className="text-center text-[#EEEEEEAA]">
-            🎉 You’ve selected the free Basic Plan. No payment required.
-          </p>
-        ) : success ? (
-          <p className="text-green-400 text-center">✅ Subscription Successful!</p>
-        ) : (
-          <form onSubmit={handleSubmit} className="space-y-4" noValidate>
-            {/* Full Name */}
-            <div>
-              <input
-                type="text"
-                name="name"
-                placeholder="Full Name"
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                className={`w-full px-4 py-3 bg-[#475569] text-white placeholder-gray-300 rounded-lg focus:outline-none ${
-                  errors.name ? "border border-red-400" : ""
-                }`}
-              />
-              {errors.name && <p className="text-red-400 text-sm mt-1">{errors.name}</p>}
-            </div>
-
-            {/* Email */}
-            <div>
-              <input
-                type="email"
-                name="email"
-                placeholder="Email Address"
-                value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                className={`w-full px-4 py-3 bg-[#475569] text-white placeholder-gray-300 rounded-lg focus:outline-none ${
-                  errors.email ? "border border-red-400" : ""
-                }`}
-              />
-              {errors.email && <p className="text-red-400 text-sm mt-1">{errors.email}</p>}
-            </div>
-
-            {/* Card Element */}
-            <div className="p-4 bg-[#475569] rounded-lg min-h-[56px]">
-              <CardElement
-                options={{
-                  style: {
-                    base: {
-                      fontSize: "18px",
-                      color: "#fff",
-                      "::placeholder": { color: "#bbb" },
-                    },
-                    invalid: { color: "#ff6b6b" },
-                  },
-                  hidePostalCode: true,
-                }}
-              />
-            </div>
-
-            {/* Submit Button */}
-            <button
-              type="submit"
-              disabled={!stripe || processing}
-              className="w-full mt-4 bg-[#00ADB5] py-3 text-[#0F172A] font-bold rounded-lg hover:bg-[#00C4CC] transition disabled:opacity-50"
-            >
-              {processing ? "Processing..." : "Start Subscription"}
-            </button>
-          </form>
-        )}
-
-        <p className="text-xs text-center mt-4 text-[#EEEEEEAA]">
-          🔒 Secure subscription powered by Stripe
-        </p>
-      </div>
-    </div>
-  );
+const priceMap = {
+  basic: null, 
+  pro: 'price_1RlNC7B7LCNwTzAibT4mDcY9',
+  premium: 'price_1RlNCNB7LCNwTzAiIjn7LENH',
 };
 
-export default PaymentMethodsPage;
+export default function PaymentMethodsPage() {
+  const [plan, setPlan] = useState('pro');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const { user } = useAuth();
+
+const handleSubscribe = async () => {
+  const selectedPriceId = priceMap[plan];
+  if (!selectedPriceId || !user) {
+    alert('User not authenticated. Please log in first.');
+    return;
+  }
+
+  setLoading(true);
+
+  try {
+    const { data } = await api.post('/stripe/create-checkout-session', {
+      priceId: selectedPriceId,
+      userId: user.id,
+      plan,
+    });
+
+    const stripe = await stripePromise;
+    await stripe.redirectToCheckout({ sessionId: data.sessionId });
+  } catch (err) {
+    console.error('Checkout session error:', err);
+    alert('Error starting checkout session. Please try again.');
+  } finally {
+    setLoading(false);
+  }
+};
+
+  return (
+    <div className="max-w-lg mx-auto mt-10 p-6 rounded-2xl shadow-xl bg-white dark:bg-[#1E293B]">
+      <h2 className="text-2xl font-bold mb-6 text-center text-[#00ADB5]">Subscribe to a Plan</h2>
+
+      <div className="mb-4">
+        <label className="block text-sm font-semibold mb-2 text-gray-700 dark:text-gray-300">
+          Select a Plan
+        </label>
+        <select
+          className="w-full p-2 border rounded bg-white dark:bg-[#334155] dark:text-white"
+          value={plan}
+          onChange={(e) => setPlan(e.target.value)}
+        >
+          <option value="pro">Pro - LKR 990/month</option>
+          <option value="premium">Premium - LKR 1990/month</option>
+        </select>
+      </div>
+
+      {error && (
+        <div className="mb-4 text-sm text-red-500 bg-red-100 dark:bg-red-900 dark:text-red-300 p-2 rounded">
+          {error}
+        </div>
+      )}
+
+      <Button
+        disabled={loading}
+        onClick={handleSubscribe}
+        className="w-full bg-[#00ADB5] hover:bg-[#00c4cc] text-white text-lg"
+      >
+        {loading ? 'Redirecting to Stripe...' : `Subscribe to ${plan.charAt(0).toUpperCase() + plan.slice(1)}`}
+      </Button>
+    </div>
+  );
+}

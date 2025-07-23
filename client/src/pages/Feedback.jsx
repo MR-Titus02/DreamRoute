@@ -44,7 +44,7 @@ function Feedback() {
           <h1 className="text-xl font-extrabold">DreamRoute</h1>
         </div>
         <button
-          onClick={() => navigate("/")}
+          onClick={() => navigate("/dashboard")}
           className="text-white/80 hover:text-white text-sm transition"
         >
           Back to Home
