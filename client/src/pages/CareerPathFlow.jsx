@@ -156,55 +156,55 @@ export default function CareerRoadmapReactFlow() {
     }
   };
 
-  const handlePrint = () => {
-    const printContent = printRef.current;
-    const printWindow = window.open("", "_blank");
-    printWindow.document.write(`
-      <html>
-        <head>
-          <title>Career Roadmap</title>
-          <style>
-            body {
-              font-family: Arial, sans-serif;
-              padding: 20px;
-              background: white;
-              color: black;
-            }
-            h1 {
-              color: #111;
-              text-align: center;
-              font-size: 24px;
-              margin-bottom: 20px;
-            }
-            .react-flow__renderer {
-              width: 100% !important;
-              height: auto !important;
-              overflow: visible !important;
-            }
-            .react-flow {
-              background: white !important;
-              width: 100% !important;
-              height: auto !important;
-            }
-            * {
-              margin: 0;
-              padding: 0;
-              box-sizing: border-box;
-            }
-          </style>
-        </head>
-        <body>
-          ${printContent.innerHTML}
-        </body>
-      </html>
-    `);
-    printWindow.document.close();
-    printWindow.focus();
-    setTimeout(() => {
-      printWindow.print();
-      printWindow.close();
-    }, 500);
-  };
+  // const handlePrint = () => {
+  //   const printContent = printRef.current;
+  //   const printWindow = window.open("", "_blank");
+  //   printWindow.document.write(`
+  //     <html>
+  //       <head>
+  //         <title>Career Roadmap</title>
+  //         <style>
+  //           body {
+  //             font-family: Arial, sans-serif;
+  //             padding: 20px;
+  //             background: white;
+  //             color: black;
+  //           }
+  //           h1 {
+  //             color: #111;
+  //             text-align: center;
+  //             font-size: 24px;
+  //             margin-bottom: 20px;
+  //           }
+  //           .react-flow__renderer {
+  //             width: 100% !important;
+  //             height: auto !important;
+  //             overflow: visible !important;
+  //           }
+  //           .react-flow {
+  //             background: white !important;
+  //             width: 100% !important;
+  //             height: auto !important;
+  //           }
+  //           * {
+  //             margin: 0;
+  //             padding: 0;
+  //             box-sizing: border-box;
+  //           }
+  //         </style>
+  //       </head>
+  //       <body>
+  //         ${printContent.innerHTML}
+  //       </body>
+  //     </html>
+  //   `);
+  //   printWindow.document.close();
+  //   printWindow.focus();
+  //   setTimeout(() => {
+  //     printWindow.print();
+  //     printWindow.close();
+  //   }, 500);
+  // };
 
   useEffect(() => {
     fetchRoadmap();
@@ -267,25 +267,16 @@ export default function CareerRoadmapReactFlow() {
               </div>
 
               <div className="flex justify-center mt-6 space-x-4">
-                <Button
-                  onClick={() => {
-                    isPremium ? regenerateRoadmap() : setShowPlansModal(true);
-                  }}
-                  className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-6 py-3 rounded-lg font-semibold hover:brightness-110 transition shadow-lg flex items-center space-x-2"
-                >
-                  <span>🔄 Regenerate Map</span>
-                  {!isPremium && <Lock size={16} className="ml-2 text-yellow-400" />}
-                </Button>
+              <Button
+  onClick={() => {
+    isPremium ? regenerateRoadmap() : setShowPlansModal(true);
+  }}
+  className="bg-gradient-to-r from-blue-600 to-cyan-600 text-white px-6 py-3 rounded-lg font-semibold hover:brightness-110 transition shadow-lg flex items-center space-x-2"
+>
+  <span>🔄 Regenerate Map</span>
+  {!isPremium && <Lock size={16} className="ml-2 text-yellow-400" />}
+</Button>
 
-                <Button
-                  onClick={() => {
-                    isPremium ? handlePrint() : setShowPlansModal(true);
-                  }}
-                  className="bg-gradient-to-r from-blue-600 to-cyan-600 text-white px-6 py-3 rounded-lg font-semibold hover:brightness-110 transition shadow-lg flex items-center space-x-2"
-                >
-                  <span>🖨️ Print Roadmap</span>
-                  {!isPremium && <Lock size={16} className="ml-2 text-yellow-400" />}
-                </Button>
               </div>
             </>
           )}

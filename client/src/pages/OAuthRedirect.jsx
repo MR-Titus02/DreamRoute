@@ -23,7 +23,7 @@ function OAuthRedirect() {
       if (role === "admin") {
         navigate("/admin");
       } else if (role === "institution") {
-        navigate("/institution-dashboard");
+        navigate("/institution");
       } else {
         navigate("/dashboard");
       }

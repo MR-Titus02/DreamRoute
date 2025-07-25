@@ -9,6 +9,8 @@ import "react-vertical-timeline-component/style.min.css";
 import { Button } from "@/components/ui/button";
 import Navbar from "../components/Navbar";
 import { useLocation } from "react-router-dom";
+import PlansModal from "@/components/PlansModal"; // <- Make sure this path is correct
+import { Lock } from "lucide-react";
 
 const STATUS_COLORS = {
   not_started: { bg: "#1E293B", border: "#475569", text: "#94a3b8" },
@@ -18,6 +20,7 @@ const STATUS_COLORS = {
 
 export default function Roadmap() {
   const { user } = useAuth();
+  const isPremium = user?.is_premium;
   const [roadmap, setRoadmap] = useState([]);
   const [courses, setCourses] = useState([]);
   const [institutions, setInstitutions] = useState([]);
@@ -26,6 +29,7 @@ export default function Roadmap() {
   const [error, setError] = useState(null);
   const [statusMap, setStatusMap] = useState({});
   const [expandedSteps, setExpandedSteps] = useState({});
+  const [showPlansModal, setShowPlansModal] = useState(false);
   const location = useLocation();
 
   const userId = user?.id || JSON.parse(localStorage.getItem("user"))?.id;
@@ -42,7 +46,6 @@ export default function Roadmap() {
     try {
       const { career, roadmap, courses, institutions } = await fetchRoadmap(userId);
 
-      // Flatten steps if roadmap has sections
       const flatSteps = Array.isArray(roadmap[0]?.steps)
         ? roadmap.flatMap((section) =>
             section.steps.map((step) => ({ ...step, section: section.section }))
@@ -52,7 +55,6 @@ export default function Roadmap() {
       const progressResponse = await fetchProgress(userId);
       const progressArray = progressResponse?.data || progressResponse;
       const progressMap = {};
-      
       progressArray.forEach(({ step_id, status }) => {
         progressMap[String(step_id)] = status;
       });
@@ -73,34 +75,32 @@ export default function Roadmap() {
     loadRoadmap();
   }, [userId]);
 
-useEffect(() => {
-  if (!loading && roadmap.length > 0) {
-    const params = new URLSearchParams(location.search);
-    const stepId = params.get('step');
-    
-    if (stepId) {
-      const timer = setTimeout(() => {
-        const element = document.getElementById(`step-${stepId}`);
-        if (element) {
-          element.scrollIntoView({
-            behavior: 'smooth',
-            block: 'center'
-          });
-          
-          // Add glow effect
-          element.classList.add('timeline-glow');
-          
-          // Remove after animation completes
-          setTimeout(() => {
-            element.classList.remove('timeline-glow');
-          }, 2000);
-        }
-      }, 300);
-      
-      return () => clearTimeout(timer);
+  useEffect(() => {
+    if (!loading && roadmap.length > 0) {
+      const params = new URLSearchParams(location.search);
+      const stepId = params.get("step");
+
+      if (stepId) {
+        const timer = setTimeout(() => {
+          const element = document.getElementById(`step-${stepId}`);
+          if (element) {
+            element.scrollIntoView({
+              behavior: "smooth",
+              block: "center",
+            });
+
+            element.classList.add("timeline-glow");
+
+            setTimeout(() => {
+              element.classList.remove("timeline-glow");
+            }, 2000);
+          }
+        }, 300);
+
+        return () => clearTimeout(timer);
+      }
     }
-  }
-}, [loading, roadmap, location.search]);
+  }, [loading, roadmap, location.search]);
 
   const handleStatusChange = async (stepId, newStatus) => {
     setStatusMap((prev) => ({ ...prev, [stepId]: newStatus }));
@@ -119,10 +119,24 @@ useEffect(() => {
   return (
     <>
       <Navbar />
+
       <div className="min-h-screen bg-gradient-to-b from-[#0f172a] to-[#1e293b] p-6 text-white max-w-full">
-        <h1 className="text-4xl font-bold text-green-400 mb-6 text-center">
+        <h1 className="text-4xl font-bold text-green-400 mb-4 text-center">
           🎯 Career Recommendation: <span className="text-white">{career || "Not available"}</span>
         </h1>
+
+        {/* Regenerate Button */}
+        <div className="flex justify-center mb-6">
+          <Button
+            onClick={() => {
+              isPremium ? loadRoadmap() : setShowPlansModal(true);
+            }}
+            className="bg-gradient-to-r from-blue-600 to-cyan-600 text-white px-6 py-3 rounded-lg font-semibold hover:brightness-110 transition shadow-lg flex items-center space-x-2"
+          >
+            <span>🔄 Regenerate Roadmap</span>
+            {!isPremium && <Lock size={16} className="ml-2 text-yellow-400" />}
+          </Button>
+        </div>
 
         {loading && (
           <div className="flex flex-col items-center justify-center h-[300px] text-center text-gray-300 animate-pulse space-y-4">
@@ -165,12 +179,9 @@ useEffect(() => {
               const expanded = !!expandedSteps[step.id];
               const colors = STATUS_COLORS[status] || STATUS_COLORS["not_started"];
 
-              // Find the linked course for this step
               const course = courses.find(
                 (c) => c.id === step.courseId || c.id === step.course_id
               );
-
-              // Find the institution for the linked course
               const institution = course
                 ? institutions.find((i) => i.id === course.institution_id)
                 : null;
@@ -192,9 +203,7 @@ useEffect(() => {
                   }}
                   icon={
                     step.milestone ? (
-                      <span role="img" aria-label="milestone">
-                        🏁
-                      </span>
+                      <span role="img" aria-label="milestone">🏁</span>
                     ) : (
                       index + 1
                     )
@@ -204,18 +213,16 @@ useEffect(() => {
                     color: colors.text,
                     borderTop: `3px solid ${colors.border}`,
                     transition: "all 0.3s ease",
-                    borderRadius: "0.5rem", 
-                    overflow: "hidden", 
+                    borderRadius: "0.5rem",
+                    overflow: "hidden",
                   }}
                   contentArrowStyle={{ borderRight: `7px solid ${colors.bg}` }}
                 >
                   <div className="flex justify-between items-center">
-                    <h3 className="vertical-timeline-element-title text-xl font-semibold">
-                      {step.label}
-                    </h3>
+                    <h3 className="text-xl font-semibold">{step.label}</h3>
                     <button
                       onClick={(e) => toggleExpand(step.id, e)}
-                      className="text-indigo-300 font-bold text-xl select-text focus:outline-none"
+                      className="text-indigo-300 font-bold text-xl focus:outline-none"
                       aria-label={expanded ? "Collapse details" : "Expand details"}
                       title={expanded ? "Collapse details" : "Expand details"}
                     >
@@ -223,7 +230,7 @@ useEffect(() => {
                     </button>
                   </div>
 
-                  <h4 className="vertical-timeline-element-subtitle text-indigo-300 mb-2">
+                  <h4 className="text-indigo-300 mb-2">
                     Estimated Time: {step.estimatedTime || "N/A"}
                   </h4>
                   <p className="text-gray-300 whitespace-pre-line">{step.description}</p>
@@ -233,7 +240,7 @@ useEffect(() => {
                       {step.details.map((sub) => (
                         <li
                           key={sub.id}
-                          className="bg-[#222c3c] p-2 rounded hover:bg-[#3b4758] transition cursor-default select-text"
+                          className="bg-[#222c3c] p-2 rounded hover:bg-[#3b4758] transition"
                           title={sub.description}
                         >
                           <strong className="text-indigo-300">{sub.label}</strong>: {sub.description}
@@ -248,12 +255,10 @@ useEffect(() => {
                     </div>
                   )}
 
-                  {/* --- Course & Institution display --- */}
                   {course && (
                     <div className="mt-4 p-3 bg-[#222c3c] rounded text-sm border border-indigo-600">
                       <strong className="text-indigo-300">Course:</strong> {course.title} <br />
                       <span className="text-gray-400">{course.description}</span>
-
                       {institution && (
                         <div className="mt-2 text-xs text-gray-500">
                           <strong>Provided by:</strong> {institution.name} <br />
@@ -286,6 +291,8 @@ useEffect(() => {
             })}
           </VerticalTimeline>
         )}
+
+        <PlansModal isOpen={showPlansModal} onClose={() => setShowPlansModal(false)} />
       </div>
     </>
   );

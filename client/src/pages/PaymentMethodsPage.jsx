@@ -28,7 +28,7 @@ const handleSubscribe = async () => {
   setLoading(true);
 
   try {
-    const { data } = await api.post('/stripe/create-checkout-session', {
+    const { data } = await api.post('/payment/create-checkout-session', {
       priceId: selectedPriceId,
       userId: user.id,
       plan,

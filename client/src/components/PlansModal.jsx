@@ -1,38 +1,57 @@
-import React from "react";
+import React, { useState } from "react";
 import { X } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { loadStripe } from "@stripe/stripe-js";
+import { useAuth } from "@/context/AuthContext";
+import api from "@/api/axios";
+
+const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY);
 
 const plans = [
   {
-    name: "Basic",
+    name: "Free",
     price: "Free",
-    description: "Access basic roadmap features",
+    description: "Start your career journey with limited access.",
     features: ["Basic Roadmaps", "Limited Courses"],
+    isPaid: false,
   },
   {
     name: "Pro",
-    price: "$9.99/month",
-    description: "Premium roadmap & suggestions",
+    price: "USD 9.99/month",
+    description: "Unlock full roadmap guidance and smart suggestions.",
     features: ["Advanced Roadmaps", "Smart Suggestions", "Priority Support"],
-  },
-  {
-    name: "Premium",
-    price: "$19.99/month",
-    description: "Full access with mentoring",
-    features: ["AI Career Coach", "Unlimited Courses", "1-on-1 Mentoring"],
+    isPaid: true,
+    priceId: "price_1RlNC7B7LCNwTzAibT4mDcY9",
   },
 ];
 
 const PlansModal = ({ isOpen, onClose }) => {
-  const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+  const { user } = useAuth();
 
   if (!isOpen) return null;
 
-  const handleSelect = (planName) => {
-    if (planName === "Basic") return; // No payment for Free plan
-    localStorage.setItem("selectedPlan", planName);
-    onClose();
-    navigate("/payment-methods");
+  const handleSubscribe = async (priceId) => {
+    if (!user) {
+      alert("Please log in to continue.");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const { data } = await api.post("/payment/create-checkout-session", {
+        priceId,
+        userId: user.id,
+        plan: "pro",
+      });
+
+      const stripe = await stripePromise;
+      await stripe.redirectToCheckout({ sessionId: data.sessionId });
+    } catch (error) {
+      console.error("Stripe checkout error:", error);
+      alert("Something went wrong. Try again later.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -57,7 +76,7 @@ const PlansModal = ({ isOpen, onClose }) => {
           Choose Your Plan
         </h2>
 
-        <div className="grid md:grid-cols-3 gap-6">
+        <div className="grid md:grid-cols-2 gap-6">
           {plans.map((plan, index) => (
             <div
               key={index}
@@ -77,17 +96,18 @@ const PlansModal = ({ isOpen, onClose }) => {
               </div>
 
               <div className="mt-6">
-                {plan.name === "Basic" ? (
+                {plan.isPaid ? (
+                  <button
+                    onClick={() => handleSubscribe(plan.priceId)}
+                    disabled={loading}
+                    className="w-full bg-[#00ADB5] text-[#0F172A] font-semibold py-2 rounded-xl hover:bg-[#00C4CC] transition"
+                  >
+                    {loading ? "Redirecting..." : "Subscribe to Pro"}
+                  </button>
+                ) : (
                   <span className="block text-center bg-gray-300 text-gray-700 font-semibold py-2 rounded-xl cursor-default">
                     ✅ Current Plan
                   </span>
-                ) : (
-                  <button
-                    onClick={() => handleSelect(plan.name)}
-                    className="w-full bg-[#00ADB5] text-[#0F172A] font-semibold py-2 rounded-xl hover:bg-[#00C4CC] transition"
-                  >
-                    Continue to Payment
-                  </button>
                 )}
               </div>
             </div>

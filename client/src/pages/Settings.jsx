@@ -60,7 +60,7 @@ export default function Settings() {
   return (
     <DashboardLayout>
       <div className="p-6 bg-[#1e293b] min-h-screen text-white">
-      <h1 className="text-3xl font-bold mb-6 text-indigo-400 text-center">⚙️ User Settings</h1>
+      <h1 className="text-3xl font-bold mb-6 text-cyan-600 text-center">⚙️ User Settings</h1>
 
         <form onSubmit={handleSubmit} className="grid gap-6 max-w-4xl mx-auto">
           {/* Account Settings */}
@@ -83,10 +83,14 @@ export default function Settings() {
                 placeholder="Email"
                 className="bg-white text-black"
               />
-              <Button variant="secondary" className="bg-blue-600 hover:bg-blue-700 text-white">
+              <div className="flex items-center space-x-4">
+              <Button variant="secondary" 
+              className="bg-gradient-to-r from-blue-600 to-cyan-600 text-white px-6 py-3 rounded-lg font-semibold hover:brightness-110 transition shadow-lg flex items-center space-x-2"
+              >
                 Change Password
               </Button>
               <Button variant="destructive">Delete Account</Button>
+              </div>
             </CardContent>
           </Card>
 
@@ -119,7 +123,9 @@ export default function Settings() {
             </CardContent>
           </Card>
 
-          <Button type="submit" className="bg-green-600 hover:bg-green-700 text-white w-full">
+          <Button type="submit" 
+          className="bg-gradient-to-r from-blue-600 to-cyan-600 text-white px-6 py-3 rounded-lg font-semibold hover:brightness-110 transition shadow-lg flex items-center space-x-2"
+          >
             Save Changes
           </Button>
         </form>

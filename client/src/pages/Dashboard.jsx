@@ -156,7 +156,7 @@ return (
             <DialogTitle className="text-xl font-bold text-white">
               {isNewUser ? (
                 <span className="flex items-center gap-2">
-                  <span className="text-blue-400">👋</span> Welcome to Career Compass!
+                  <span className="text-blue-400">👋</span> Welcome to DreamRoute!
                 </span>
               ) : (
                 "Complete Your Profile"
@@ -190,7 +190,7 @@ return (
           <DialogFooter className="flex flex-col gap-2">
             <Button
               onClick={handleProfileComplete}
-              className="w-full bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white py-2 rounded-lg"
+              className="bg-gradient-to-r from-blue-600 to-cyan-600 text-white px-6 py-3 rounded-lg font-semibold hover:brightness-110 transition shadow-lg flex items-center space-x-2"
               size="lg"
             >
               {isNewUser ? "Begin Setup" : "Update Profile"}
@@ -241,19 +241,19 @@ return (
       </AlertDialog>
 
       {!career ? (
-        <Card className="bg-gradient-to-br from-yellow-50 to-amber-50 text-gray-900 border border-amber-200 shadow-md mb-6">
+        <Card className="bg-gradient-to-br from-slate-800 to-gray-900 text-gray-900 border border-gray-700 shadow-md mb-6">
           <CardHeader>
-            <CardTitle className="text-lg font-semibold flex items-center gap-2">
+            <CardTitle className="text-lg font-semibold flex items-center gap-2 text-white">
               <span className="text-amber-600">🎯</span> Setup Your Career Profile
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="mb-4 text-gray-700">
+            <p className="mb-4 text-white">
               Complete your profile to generate a personalized career roadmap.
             </p>
             <Button
               onClick={() => navigate("/userdetails")}
-              className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white rounded-lg"
+              className="bg-gradient-to-r from-blue-600 to-cyan-600 hover:brightness-110 text-white rounded-lg"
             >
               Start Setup
             </Button>
@@ -275,7 +275,7 @@ return (
               </p>
               <Button
                 onClick={() => navigate("/dashboard/roadmap")}
-                className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-lg"
+                className="bg-gradient-to-r from-blue-600 to-cyan-600 text-white px-6 py-3 rounded-lg font-semibold hover:brightness-110 transition shadow-lg flex items-center space-x-2"
               >
                 View Full Roadmap
               </Button>
@@ -301,7 +301,7 @@ return (
                 </div>
                 <div className="w-40 bg-gray-700 rounded-full h-2.5 overflow-hidden">
                   <div
-                    className="bg-gradient-to-r from-green-400 to-teal-400 h-2.5 transition-all duration-500"
+                    className="bg-gradient-to-r from-blue-600 to-cyan-600 h-2.5 transition-all duration-500"
                     style={{ width: `${percentage}%` }}
                   />
                 </div>
@@ -380,7 +380,7 @@ return (
               {nextStep && (
                 <Button
                   onClick={() => navigate(`/dashboard/roadmap?step=${nextStep.id}`)}
-                  className="w-full bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white rounded-lg py-2"
+                  className="bg-gradient-to-r from-blue-600 to-cyan-600 text-white px-6 py-3 rounded-lg font-semibold hover:brightness-110 transition shadow-lg flex items-center space-x-2"
                 >
                   Continue with "{nextStep.label.substring(0, 30)}{nextStep.label.length > 30 ? "..." : ""}"
                 </Button>

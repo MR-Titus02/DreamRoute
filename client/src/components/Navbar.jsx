@@ -35,8 +35,8 @@ export default function Navbar() {
           <button
             key={item.title}
             onClick={() => navigate(item.path)}
-            className={`text-sm font-medium hover:text-green-400 transition ${
-              location.pathname === item.path ? "text-green-400" : "text-white"
+            className={`text-sm font-medium hover:text-cyan-400 transition ${
+              location.pathname === item.path ? "text-cyan-400" : "text-white"
             }`}
           >
             {item.title}

@@ -291,7 +291,7 @@ export default function Courses() {
                       <Button
                         key={pageNum}
                         variant={currentPage === pageNum ? "default" : "outline"}
-                        className={`min-w-[40px] ${currentPage === pageNum ? 'bg-cyan-600 text-white' : 'border-gray-600 text-gray-300 hover:bg-gray-700'}`}
+                        className={`min-w-[40px] ${currentPage === pageNum ? 'bg-cyan-500 text-white' : 'border-gray-600 text-gray-300 hover:bg-gray-700'}`}
                         onClick={() => setCurrentPage(pageNum)}
                       >
                         {pageNum}

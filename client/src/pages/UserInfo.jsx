@@ -67,7 +67,7 @@ const UserInfo = () => {
     <div className="min-h-screen bg-gradient-to-br from-[#101C2B] via-[#1F2D3D] to-[#101C2B] text-white p-6 flex items-center justify-center">
       {/* Top-left back button */}
       <div className="absolute top-4 left-4 z-10">
-        <BackButton to="/" label="Back" />
+        <BackButton to={-1} label="Back" />
       </div>
       <div className="w-full max-w-2xl bg-white/5 backdrop-blur-xl border border-white/10 p-8 rounded-2xl shadow-2xl">
         <div className="mb-4 text-center text-white/60 text-sm">Step {step} of 3</div>
