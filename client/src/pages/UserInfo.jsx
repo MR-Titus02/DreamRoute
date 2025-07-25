@@ -77,9 +77,10 @@ const UserInfo = () => {
             style={{ width: `${(step / 3) * 100}%` }}
           />
         </div>
-        {step === 1 && <Step1PersonalDetails onNext={handleNext} />}
-        {step === 2 && <Step2CareerGoals onNext={handleNext} onBack={handlePrev} />}
-        {step === 3 && <Step3SkillsExperience onNext={handleNext} onBack={handlePrev} />}
+        {step === 1 && <Step1PersonalDetails onNext={handleNext} initialValues={formData} />}
+        {step === 2 && <Step2CareerGoals onNext={handleNext} onBack={handlePrev} initialValues={formData} />}
+        {step === 3 && <Step3SkillsExperience onNext={handleNext} onBack={handlePrev} initialValues={formData} />}
+
       </div>
     </div>
   );

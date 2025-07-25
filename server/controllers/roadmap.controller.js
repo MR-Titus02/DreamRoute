@@ -9,6 +9,7 @@ export const generateRoadmap = async (req, res) => {
   const { userId } = req.body;
 
   try {
+    // Fetch user, courses, institutions
     const [[user]] = await db.query("SELECT * FROM users WHERE id = ?", [userId]);
     const [courses] = await db.query("SELECT id, title, description, price, duration, institution_id FROM courses");
     const [institutions] = await db.query("SELECT id, name, address FROM institutions");
@@ -23,13 +24,11 @@ export const generateRoadmap = async (req, res) => {
       });
     }
 
-    // 🟡 STEP 1: Check if a roadmap already exists
+    // Check if roadmap already exists
     const [existingRoadmaps] = await db.query("SELECT * FROM roadmaps WHERE user_id = ?", [userId]);
 
     if (existingRoadmaps.length > 0) {
       const roadmapId = existingRoadmaps[0].id;
-
-      // 🟡 STEP 2: Fetch the roadmap, steps, details, and related course/institution info
       const [steps] = await db.query("SELECT * FROM roadmap_steps WHERE roadmap_id = ?", [roadmapId]);
 
       for (const step of steps) {
@@ -50,7 +49,7 @@ export const generateRoadmap = async (req, res) => {
       });
     }
 
-    // 🟡 STEP 3: No roadmap exists — generate with OpenAI
+    // No roadmap exists — generate via OpenAI
     const courseList = courses
       .map(c => `(${c.id}) ${c.title} - ${c.description} [institution_id: ${c.institution_id}]`)
       .join(",\n");
@@ -86,7 +85,10 @@ INSTRUCTIONS:
   - "label": short step title
   - "description": 1–2 line explanation
   - "estimatedTime": how long this step might take (e.g., "2 weeks", "1 month")
-  - "details": an array of 3–5 technical subtasks (e.g., "Learn JSX syntax", "Use React Hooks")
+  - "details": an array of 3–5 technical subtasks, each with:
+      - "id": unique string
+      - "label": short subtask title
+      - "description": what the user will study in that subtask
 
 FORMAT:
 {
@@ -102,6 +104,7 @@ ${courseList}
 
 Institutions:
 ${institutionList}
+
 If the user’s profile clearly aligns with another field (e.g. cybersecurity, data science, mobile development), prefer suggesting that over Full Stack Development.
         `.trim()
       }
@@ -122,28 +125,59 @@ If the user’s profile clearly aligns with another field (e.g. cybersecurity, d
       return res.status(500).json({ error: "OpenAI returned invalid JSON." });
     }
 
+    // Map courses for quick lookup
     const fullCourseMap = {};
     courses.forEach(course => {
       fullCourseMap[course.id] = course;
     });
 
+    // Filter AI courses to full course objects from DB
     if (Array.isArray(data.courses)) {
       data.courses = data.courses
         .map(aiCourse => fullCourseMap[aiCourse.id])
         .filter(Boolean);
     }
 
-    data.roadmap = data.roadmap.map(node => {
+    // Process roadmap steps and their details
+    data.roadmap = data.roadmap.map((node, idx) => {
+      // Validate and clean step.details
+      if (!Array.isArray(node.details)) node.details = [];
+
+      node.details = node.details.filter(
+        d => d && typeof d === "object" && (d.label || d.id) && d.description
+      );
+
+      // If no valid subtasks, create a default one based on step description
+      if (node.details.length === 0) {
+        node.details = [
+          {
+            id: `note-${node.id}`,
+            label: "Overview",
+            description: node.description || "No breakdown available."
+          }
+        ];
+      } else {
+        // Ensure each subtask has unique id and label
+        node.details = node.details.map((d, i) => ({
+          id: d.id || `sub-${node.id}-${i}`,
+          label: d.label || `Subtask ${i + 1}`,
+          description: d.description
+        }));
+      }
+
+      // Rename label if courseId exists for clarity
       if (node.courseId && fullCourseMap[node.courseId]) {
         node.label = `${fullCourseMap[node.courseId].title} - ${node.estimatedTime || "flexible"}`;
       }
+
       return node;
     });
 
+    // Filter institutions based on courses used
     const usedInstitutionIds = new Set(data.courses.map(c => c.institution_id));
     data.institutions = institutions.filter(inst => usedInstitutionIds.has(inst.id));
 
-    // 🟡 STEP 4: Save new roadmap
+    // Save new roadmap in DB
     const [roadmapInsert] = await db.query(
       "INSERT INTO roadmaps (user_id, career) VALUES (?, ?)",
       [userId, data.career || "Unknown"]
@@ -174,8 +208,7 @@ If the user’s profile clearly aligns with another field (e.g. cybersecurity, d
       }
     }
 
-    // 🟡 STEP 5: Return the newly created roadmap
-    res.json({
+    return res.json({
       career: data.career || "Unknown",
       roadmap: data.roadmap,
       courses: data.courses,
@@ -187,6 +220,8 @@ If the user’s profile clearly aligns with another field (e.g. cybersecurity, d
     res.status(500).json({ error: "Failed to generate roadmap" });
   }
 };
+
+
 
 
 export const getAllRoadmaps = async (req, res) => {
