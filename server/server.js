@@ -72,7 +72,7 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 // Stripe webhook raw parser BEFORE express.json
-app.use('/api/payment', express.raw({ type: 'application/json' }));
+// app.use('/api/payment', express.raw({ type: 'application/json' }));
 // All other routes use JSON parser
 app.use(express.json());
 
@@ -99,7 +99,7 @@ app.use('/api', chatRoutes);
 app.use('/api/progress', progressRoutes);
 // app.use("/api/stripe", stripeRoutes);
 app.use("/api/contact", contactRoutes);
-app.use('/api/stripe', paymentRoutes);
+app.use('/api/payment', paymentRoutes);
 
 // Error handling
 app.use(notFound);

@@ -3,7 +3,12 @@ import pool from '../config/db.js';
 
 export const verifyToken = async (req, res, next) => {
   const authHeader = req.headers['authorization'];
-  const token = authHeader && authHeader.split(' ')[1]; // Format: "Bearer <token>"
+  // const token = authHeader && authHeader.split(' ')[1]
+  //       :req.cookies.token;
+        const token =
+        authHeader?.startsWith('Bearer ')
+          ? authHeader.split(' ')[1]
+          : req.cookies.token; // fallback to cookie
 
   if (!token) {
     return res.status(401).json({ message: 'Missing token' });

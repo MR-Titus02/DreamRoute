@@ -68,7 +68,7 @@ export async function register(req, res) {
         role,
         institution_id: null,
         name,
-        plan: 'free', // include plan here
+        plan: 'free',
       },
     });
 
