@@ -111,7 +111,7 @@ If the user’s profile clearly aligns with another field (e.g. cybersecurity, d
     ];
 
     const completion = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo-0125",
+      model: "gpt-4o",
       messages,
       temperature: 0.7,
     });
@@ -159,7 +159,7 @@ If the user’s profile clearly aligns with another field (e.g. cybersecurity, d
       } else {
         // Ensure each subtask has unique id and label
         node.details = node.details.map((d, i) => ({
-          id: d.id || `sub-${node.id}-${i}`,
+          id: (d.id || `sub-${node.id}-${i}`).slice(0, 50), 
           label: d.label || `Subtask ${i + 1}`,
           description: d.description
         }));
