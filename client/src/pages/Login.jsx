@@ -65,7 +65,7 @@ function Login() {
       <div className="w-full max-w-md bg-white/10 backdrop-blur-xl rounded-2xl p-6 shadow-2xl border border-white/20">
         {/* Logo + Heading */}
         <div className="flex flex-col items-center mb-6">
-          <img src={Logo} alt="DreamRoute" className="w-16 h-16 mb-2 rounded-lg" />
+          <img src={Logo} alt="DreamRoute" className="w-20 h-20 mb-2 rounded-lg" />
           <h2 className="text-2xl font-bold text-white text-center mb-1 font-inter">
             Welcome Back to <span className="text-[#00ADB5]">DreamRoute</span>
           </h2>

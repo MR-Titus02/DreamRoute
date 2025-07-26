@@ -67,18 +67,22 @@ export default function UserManagement() {
   const totalPages = Math.ceil(filteredUsers.length / usersPerPage);
 
   const RoleBadge = ({ role }) => {
-    const color =
+    const { color, label } =
       role === "admin"
-        ? "bg-red-600"
+        ? { color: "bg-purple-600", label: "Admin" }
         : role === "institution"
-        ? "bg-blue-600"
-        : "bg-green-600";
+        ? { color: "bg-indigo-600", label: "Institution" }
+        : { color: "bg-green-600", label: "Student" };
+  
     return (
-      <span className={`text-xs px-2 py-1 rounded ${color} text-white`}>
-        {role}
+      <span
+        className={`inline-block w-[90px] text-center text-xs font-semibold px-2 py-1 rounded ${color} text-white`}
+      >
+        {label}
       </span>
     );
   };
+  
 
   return (
     <AdminLayout>
@@ -105,75 +109,77 @@ export default function UserManagement() {
         </Select>
       </div>
 
-      <Card className="bg-secondary text-primary-text">
-        <CardHeader>
-          <CardTitle className="text-primary-text">All Users</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <ul>
-            {paginatedUsers.map((user) => (
-              <li
-                key={user.id}
-                className="flex justify-between items-center py-2 border-b border-gray-600"
-              >
-                <div>
-                  <p className="font-medium text-white">{user.name}</p>
-                  <p className="text-sm text-gray-200">{user.email}</p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <RoleBadge role={user.role} />
-                  <Select
-                    value={user.role}
-                    onValueChange={(val) => handleRoleChange(user.id, val)}
-                  >
-                    <SelectTrigger className="w-36 bg-[#1E293B] text-white">
-                      <SelectValue placeholder="Select Role" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-[#3B4758] text-white">
-                      <SelectItem value="student">Student</SelectItem>
-                      <SelectItem value="admin">Admin</SelectItem>
-                      <SelectItem value="institution">Institution</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <Button
-                    variant="destructive"
-                    onClick={() => setDeleteTarget(user.id)}
-                  >
-                    Delete
-                  </Button>
-                </div>
-              </li>
-            ))}
-          </ul>
-
-          {/* Pagination Controls */}
-          <div className="flex justify-between items-center mt-4">
-            <p className="text-sm text-gray-200">
-              Page {currentPage} of {totalPages}
-            </p>
-            <div className="flex gap-2">
-              <Button
-                size="sm"
-                variant="outline"
-                className="text-white border-gray-400"
-                disabled={currentPage === 1}
-                onClick={() => setCurrentPage((prev) => prev - 1)}
-              >
-                Prev
-              </Button>
-              <Button
-                size="sm"
-                variant="outline"
-                className="text-white border-gray-400"
-                disabled={currentPage === totalPages}
-                onClick={() => setCurrentPage((prev) => prev + 1)}
-              >
-                Next
-              </Button>
-            </div>
+      <Card className="bg-secondary text-primary-text border border-gray-700">
+  <CardHeader>
+    <CardTitle className="text-primary-text text-white">All Users</CardTitle>
+  </CardHeader>
+  <CardContent>
+    <ul>
+      {paginatedUsers.map((user) => (
+        <li
+          key={user.id}
+          className="flex justify-between items-center py-2 border-b border-gray-600"
+        >
+          <div>
+            <p className="font-medium text-white">{user.name}</p>
+            <p className="text-sm text-gray-200">{user.email}</p>
           </div>
-        </CardContent>
-      </Card>
+          <div className="flex items-center gap-2">
+            <RoleBadge role={user.role} />
+            <Select
+              value={user.role}
+              onValueChange={(val) => handleRoleChange(user.id, val)}
+            >
+              <SelectTrigger className="w-36 bg-[#1E293B] text-white">
+                <SelectValue placeholder="Select Role" />
+              </SelectTrigger>
+              <SelectContent className="bg-[#3B4758] text-white">
+                <SelectItem value="student">Student</SelectItem>
+                <SelectItem value="admin">Admin</SelectItem>
+                <SelectItem value="institution">Institution</SelectItem>
+              </SelectContent>
+            </Select>
+            <Button
+              variant="destructive"
+              onClick={() => setDeleteTarget(user.id)}
+              className="bg-gradient-to-r from-red-600 to-red-800 text-white px-4 py-2 rounded-lg shadow-md hover:from-red-700 hover:to-red-900 transition duration-200"
+            >
+              Delete
+            </Button>
+          </div>
+        </li>
+      ))}
+    </ul>
+
+    {/* Pagination Controls */}
+    <div className="flex justify-between items-center mt-4">
+      <p className="text-sm text-gray-200">
+        Page {currentPage} of {totalPages}
+      </p>
+      <div className="flex gap-2">
+        <Button
+          size="sm"
+          variant="outline"
+          className="text-white border-gray-400"
+          disabled={currentPage === 1}
+          onClick={() => setCurrentPage((prev) => prev - 1)}
+        >
+          Prev
+        </Button>
+        <Button
+          size="sm"
+          variant="outline"
+          className="text-white border-gray-400"
+          disabled={currentPage === totalPages}
+          onClick={() => setCurrentPage((prev) => prev + 1)}
+        >
+          Next
+        </Button>
+      </div>
+    </div>
+  </CardContent>
+</Card>
+
 
       {/* Delete Confirmation Modal */}
       <Dialog open={!!deleteTarget} onOpenChange={() => setDeleteTarget(null)}>

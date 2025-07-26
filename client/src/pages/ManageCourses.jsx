@@ -202,14 +202,14 @@ export default function ManageCourses() {
       <div className="flex space-x-2 mt-2">
         <Button
           onClick={() => openEdit(course)}
-          className="bg-yellow-400 hover:bg-yellow-500 text-black flex-1"
+          className="bg-gradient-to-r from-blue-600 to-cyan-600 text-white px-6 py-3 rounded-lg font-semibold hover:brightness-110 transition shadow-lg flex-1"
           type="button"
         >
           Edit
         </Button>
         <Button
           onClick={() => handleDelete(course.id)}
-          className="bg-red-500 hover:bg-red-600 text-white flex-1"
+            className="bg-gradient-to-r from-red-600 to-red-800 text-white px-4 py-2 rounded-lg shadow-md hover:from-red-700 hover:to-red-900 transition duration-200 flex-1"
           type="button"
         >
           Delete

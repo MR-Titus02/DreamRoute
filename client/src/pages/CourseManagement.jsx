@@ -304,7 +304,9 @@ export default function CourseManagement() {
                     )}
                     <Dialog open={confirmDeleteId === course.id} onOpenChange={() => setConfirmDeleteId(null)}>
                       <DialogTrigger asChild>
-                        <Button className="bg-red-600 text-white" onClick={() => setConfirmDeleteId(course.id)}>
+                        <Button
+                         className="bg-gradient-to-r from-red-600 to-red-800 text-white px-4 py-2 rounded-lg shadow-md hover:from-red-700 hover:to-red-900 transition duration-200"
+                         onClick={() => setConfirmDeleteId(course.id)}>
                           Delete
                         </Button>
                       </DialogTrigger>

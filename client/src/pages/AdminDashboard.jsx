@@ -192,7 +192,7 @@ export default function AdminDashboard() {
           {filteredLogs.length > limit && (
             <div className="flex justify-between items-center mt-4">
               <Button
-                className="bg-blue-500 hover:bg-blue-600 text-white"
+                className="bg-gradient-to-r from-blue-600 to-cyan-600 text-white px-6 py-3 rounded-lg font-semibold hover:brightness-110 transition shadow-lg"
                 disabled={currentPage === 1}
                 onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
               >
@@ -202,7 +202,7 @@ export default function AdminDashboard() {
                 Page {currentPage} of {totalPages}
               </span>
               <Button
-                className="bg-blue-500 hover:bg-blue-600 text-white"
+                className="bg-gradient-to-r from-blue-600 to-cyan-600 text-white px-6 py-3 rounded-lg font-semibold hover:brightness-110 transition shadow-lg"
                 disabled={currentPage === totalPages}
                 onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
               >

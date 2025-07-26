@@ -55,9 +55,9 @@ export default function AdminLayout({ children }) {
         >
           <div className="flex h-full flex-col bg-[#393E46] border-r border-gray-700 shadow-2xl">
           <SidebarHeader className="border-b border-black/20 p-5 text-gray-300">
-              <div className="flex items-center space-x-3">
+              <div className="flex items-center">
                 <div className="w-20 h-20 rounded-xl flex items-center justify-center">
-                  <img src={Logo} alt="DreamRoute Logo" className="w-16 h-16" />
+                  <img src={Logo} alt="DreamRoute Logo" className="w-20 h-20" />
                 </div>
                 <h1 className="text-xl font-bold">DreamRoute Admin</h1>
               </div>

@@ -188,6 +188,7 @@ export default function InstitutionManagement() {
                   <Button
                     variant="destructive"
                     onClick={() => handleDeleteInstitution(institution.id)}
+                    className="bg-gradient-to-r from-red-600 to-red-800 text-white px-4 py-2 rounded-lg shadow-md hover:from-red-700 hover:to-red-900 transition duration-200"
                   >
                     Delete
                   </Button>

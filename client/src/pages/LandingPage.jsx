@@ -208,9 +208,9 @@ export default function LandingPage() {
       </div>
 
       {/* Navbar */}
-      <nav className="flex justify-between items-center p-4 border-b border-gray-700 bg-black/10 backdrop-blur-lg z-20 sticky top-0">
-        <div className="text-xl font-bold flex items-center gap-2">
-          <img src={Logo} alt="Logo" className="w-12 h-12" />
+      <nav className="flex justify-between items-center px-4 border-b border-gray-700 bg-black/10 backdrop-blur-lg z-20 sticky top-0">
+        <div className="text-xl font-bold flex items-center">
+          <img src={Logo} alt="Logo" className="w-20 h-20" />
           <span className="text-cyan-300 tracking-wide">DreamRoute</span>
         </div>
         <button
