@@ -46,9 +46,7 @@ export default function Navbar() {
 
       {/* Right: Welcome + Logout */}
       <div className="flex items-center gap-4">
-        <span className="text-sm text-gray-300">
-          👋 {user?.name || "User"}
-        </span>
+        <span className="text-sm text-gray-300">👋 {user?.name || "User"}</span>
         <Button
           onClick={handleLogout}
           className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded text-sm"

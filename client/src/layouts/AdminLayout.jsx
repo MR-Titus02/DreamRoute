@@ -39,7 +39,11 @@ export default function AdminLayout({ children }) {
     { title: "Dashboard", href: "/admin", icon: Home },
     { title: "User Management", href: "/admin/users", icon: Users },
     { title: "Course Management", href: "/admin/courses", icon: BookOpen },
-    { title: "Institution Management", href: "/admin/institutions", icon: ShieldCheck }
+    {
+      title: "Institution Management",
+      href: "/admin/institutions",
+      icon: ShieldCheck,
+    },
   ];
 
   return (
@@ -54,7 +58,7 @@ export default function AdminLayout({ children }) {
           style={{ width: "280px" }}
         >
           <div className="flex h-full flex-col bg-[#393E46] border-r border-gray-700 shadow-2xl">
-          <SidebarHeader className="border-b border-black/20 p-5 text-gray-300">
+            <SidebarHeader className="border-b border-black/20 p-5 text-gray-300">
               <div className="flex items-center">
                 <div className="w-20 h-20 rounded-xl flex items-center justify-center">
                   <img src={Logo} alt="DreamRoute Logo" className="w-20 h-20" />
@@ -70,26 +74,29 @@ export default function AdminLayout({ children }) {
                   const isActive = location.pathname === item.href;
                   return (
                     <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton
-                      asChild
-                      className={`w-full justify-start text-left p-3 rounded-xl transition-all duration-300 transform ${
-                        isActive
-                          ? "bg-[#00ADB5] text-white shadow-lg scale-105"
-                          : "text-gray-300 hover:bg-gray-600/50 hover:scale-105 hover:shadow-md"
-                      }`}
-                    >
-                      <a href={item.href} className="flex items-center space-x-3">
-                        <Icon className="w-5 h-5 text-gray-300" />
-                        <span className="font-medium">{item.title}</span>
-                        {isActive && <ChevronRight className="w-4 h-4 ml-auto text-gray-300" />}
-                      </a>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
+                      <SidebarMenuButton
+                        asChild
+                        className={`w-full justify-start text-left p-3 rounded-xl transition-all duration-300 transform ${
+                          isActive
+                            ? "bg-[#00ADB5] text-white shadow-lg scale-105"
+                            : "text-gray-300 hover:bg-gray-600/50 hover:scale-105 hover:shadow-md"
+                        }`}
+                      >
+                        <a
+                          href={item.href}
+                          className="flex items-center space-x-3"
+                        >
+                          <Icon className="w-5 h-5 text-gray-300" />
+                          <span className="font-medium">{item.title}</span>
+                          {isActive && (
+                            <ChevronRight className="w-4 h-4 ml-auto text-gray-300" />
+                          )}
+                        </a>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
                   );
                 })}
               </SidebarMenu>
-
-              
             </SidebarContent>
           </div>
         </Sidebar>
@@ -101,10 +108,12 @@ export default function AdminLayout({ children }) {
             <div className="flex items-center space-x-4">
               <SidebarTrigger className="md:hidden text-white hover:bg-white/10" />
               <div>
-              <h1 className="text-2xl font-bold">
-    Welcome back, {user?.name || "Admin"}! 👋
-  </h1>
-  <p className="text-gray-400">Manage your platform effectively.</p>
+                <h1 className="text-2xl font-bold">
+                  Welcome back, {user?.name || "Admin"}! 👋
+                </h1>
+                <p className="text-gray-400">
+                  Manage your platform effectively.
+                </p>
               </div>
             </div>
 
@@ -142,8 +151,8 @@ export default function AdminLayout({ children }) {
 
           {/* Footer */}
           <footer className="bg-[#222831] border-t border-[#7F7F7F] py-4 text-center text-gray-400">
-  <p>© 2025 DreamRoute Admin. All rights reserved.</p>
-</footer>
+            <p>© 2025 DreamRoute Admin. All rights reserved.</p>
+          </footer>
         </div>
 
         <SidebarRail />

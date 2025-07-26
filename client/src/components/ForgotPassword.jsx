@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import api from "../api/axios";
-import BackButton from "./BackButton"; 
+import BackButton from "./BackButton";
 
 function ForgotPassword() {
   const [email, setEmail] = useState("");
@@ -23,7 +23,6 @@ function ForgotPassword() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#222831] text-white px-4 relative">
-      
       {/* ✅ Back Button Top-Left */}
       <div className="absolute top-4 left-4 z-10">
         <BackButton to="/login" label="Back" />

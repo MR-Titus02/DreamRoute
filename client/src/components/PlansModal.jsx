@@ -57,10 +57,7 @@ const PlansModal = ({ isOpen, onClose }) => {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       {/* Dim background */}
-      <div
-        className="absolute inset-0 bg-black/40 z-40"
-        onClick={onClose}
-      />
+      <div className="absolute inset-0 bg-black/40 z-40" onClick={onClose} />
 
       {/* Modal content */}
       <div className="z-50 bg-[#1E293B] text-white rounded-2xl shadow-2xl p-6 w-full max-w-5xl relative border border-[#00ADB5]/20">
@@ -83,9 +80,13 @@ const PlansModal = ({ isOpen, onClose }) => {
               className="bg-[#334155] rounded-xl p-6 flex flex-col justify-between border border-[#00C4CC]/20 shadow-lg hover:scale-105 transition-transform"
             >
               <div>
-                <h3 className="text-xl font-semibold text-[#00C4CC]">{plan.name}</h3>
+                <h3 className="text-xl font-semibold text-[#00C4CC]">
+                  {plan.name}
+                </h3>
                 <p className="text-2xl font-bold mt-2">{plan.price}</p>
-                <p className="text-sm mt-2 text-[#EEEEEE99]">{plan.description}</p>
+                <p className="text-sm mt-2 text-[#EEEEEE99]">
+                  {plan.description}
+                </p>
                 <ul className="mt-4 space-y-1 text-sm">
                   {plan.features.map((feature, i) => (
                     <li key={i} className="flex items-center gap-2">

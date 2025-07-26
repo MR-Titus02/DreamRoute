@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import api from "../api/axios";
-import BackButton from "./BackButton"; 
+import BackButton from "./BackButton";
 
 function ResetPassword() {
   const { token } = useParams();
@@ -28,7 +28,6 @@ function ResetPassword() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#222831] text-white px-4 relative">
-
       {/* Back Button top-left */}
       <div className="absolute top-4 left-4 z-10">
         <BackButton to="/login" label="Back" />
@@ -56,7 +55,9 @@ function ResetPassword() {
           Reset Password
         </button>
 
-        {message && <p className="text-green-400 mt-3 text-center">{message}</p>}
+        {message && (
+          <p className="text-green-400 mt-3 text-center">{message}</p>
+        )}
         {error && <p className="text-red-400 mt-3 text-center">{error}</p>}
       </form>
     </div>

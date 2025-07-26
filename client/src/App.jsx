@@ -39,6 +39,7 @@ import PaymentMethodsPage from "./pages/PaymentMethodsPage";
 import PaymentSuccessPage from "./pages/PaymentSuccess";
 import { loadStripe } from "@stripe/stripe-js";
 import { Elements } from "@stripe/react-stripe-js";
+import NotFound from "./pages/NotFound";
 
 
 const STRIPE_PUBLIC_KEY = import.meta.env.VITE_STRIPE_PUBLIC_KEY;
@@ -83,7 +84,7 @@ function App() {
         <Route path="/admin/institutions" element={ <ProtectedRoute role="admin"> <InstitutionManagement /> </ProtectedRoute> } />
         <Route path="/institution/" element={ <ProtectedRoute role="institution"> <InstitutionDashboard /> </ProtectedRoute>} />
         <Route path="/institution/courses" element={ <ProtectedRoute role="institution"><ManageCourses /> </ProtectedRoute>  } />
-        {/* <Route path="/home" element={ <Homepage />   } /> */}
+        
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password/:token" element={<ResetPassword />} />
         <Route path="/institution/settings" element={<ProtectedRoute role="institution"><InstitutionSettings /></ProtectedRoute>} />
@@ -92,6 +93,10 @@ function App() {
         <Route path="/payment-methods" element={<PaymentMethodsPage />} />
         <Route path="/payment-success" element={<PaymentSuccessPage />} />
         {/* Redirects */}
+        
+        {/* Catch-all route for 404 */}
+        <Route path="*" element={<NotFound />} />
+        
         
       </Routes>
       </Elements>

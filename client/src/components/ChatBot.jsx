@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import axios from "../api/axios"; 
+import axios from "../api/axios";
 import { X, Send, MessageSquare } from "lucide-react";
 
 const MAX_LENGTH = 300;
@@ -113,7 +113,10 @@ const ChatBot = ({ userId }) => {
           </div>
 
           {/* Messages */}
-          <div className="flex-1 overflow-y-auto p-3 space-y-2 bg-gray-50" style={{ height: "20rem" }}>
+          <div
+            className="flex-1 overflow-y-auto p-3 space-y-2 bg-gray-50"
+            style={{ height: "20rem" }}
+          >
             {messages.map((msg, idx) => renderMessage(msg, idx))}
 
             {isTyping && (
