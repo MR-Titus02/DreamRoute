@@ -105,7 +105,7 @@ OpenAI
 Stripe
 React Flow
 Google Developers OAuth
-Vercel / Render for deployment
+AWS for deployment
 
 👨‍💻 Author
 Built with ❤️ by Titus Senthilkumaran
